@@ -9,7 +9,7 @@ import Foundation
 
 struct Shelter: Codable, Identifiable {
     let id: String
-    let number: Int64
+    let number: Int64?
     let commonId: String
     let name: String
     let address: String
