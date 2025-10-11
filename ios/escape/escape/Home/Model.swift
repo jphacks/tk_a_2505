@@ -123,4 +123,5 @@ struct Badge: Identifiable {
     let icon: String
     let color: Color
     let isUnlocked: Bool
+    let imageName: String?
 }
