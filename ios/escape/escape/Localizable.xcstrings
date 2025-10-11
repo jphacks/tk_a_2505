@@ -1,6 +1,23 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "auth.back" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "戻る"
+          }
+        }
+      }
+    },
     "auth.check_inbox" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -18,6 +35,57 @@
         }
       }
     },
+    "auth.check_inbox_description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We've sent a magic link to your email. Click the link to sign in."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マジックリンクをメールに送信しました。リンクをクリックしてサインインしてください。"
+          }
+        }
+      }
+    },
+    "auth.error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エラーが発生しました"
+          }
+        }
+      }
+    },
+    "auth.open_mail" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Mail App"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メールアプリを開く"
+          }
+        }
+      }
+    },
     "auth.email" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -25,6 +93,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Email"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メールアドレス"
+          }
+        }
+      }
+    },
+    "auth.email_header" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email Address"
           }
         },
         "ja" : {
@@ -53,12 +138,14 @@
       }
     },
     "dev.badge_generator" : {
+    "auth.sign_in_description" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Badge Generator"
+            "value" : "Enter your email to sign in with a magic link"
           }
         },
         "ja" : {
@@ -70,12 +157,19 @@
       }
     },
     "dev.badge_generator_header" : {
+            "value" : "マジックリンクでサインインするにはメールアドレスを入力してください"
+          }
+        }
+      }
+    },
+    "auth.welcome" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Generate collectible badges for locations"
+            "value" : "Welcome"
           }
         },
         "ja" : {
@@ -87,12 +181,175 @@
       }
     },
     "dev.clear_fields" : {
+            "value" : "ようこそ"
+          }
+        }
+      }
+    },
+    "HiNan!" : {
+
+    },
+    "home.stats.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This Week's Stats"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今週の統計"
+          }
+        }
+      }
+    },
+    "home.stats.completed_missions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completed Missions"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完了したミッション"
+          }
+        }
+      }
+    },
+    "home.stats.distance_walked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distance Walked"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歩いた距離"
+          }
+        }
+      }
+    },
+    "home.stats.badges_earned" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Badges Earned"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "獲得バッジ"
+          }
+        }
+      }
+    },
+    "home.badge_collection.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Badge Collection"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バッジコレクション"
+          }
+        }
+      }
+    },
+    "home.badge_collection.view_all" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View All"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて見る"
+          }
+        }
+      }
+    },
+    "home.mission.todays_mission" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today's Mission"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日のミッション"
+          }
+        }
+      }
+    },
+    "home.mission.all_complete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All missions completed!"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべてのミッションが完了しました！"
+          }
+        }
+      }
+    },
+    "home.mission.next_update" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New missions will be updated in 24 hours"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新しいミッションは24時間後に更新されます"
+          }
+        }
+      }
+    },
+    "home.mission.overview" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Clear Fields"
+            "value" : "Mission Overview"
           }
         },
         "ja" : {
@@ -104,6 +361,46 @@
       }
     },
     "dev.close" : {
+            "value" : "ミッション概要"
+          }
+        }
+      }
+    },
+    "home.mission.info" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mission Information"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミッション情報"
+          }
+        }
+      }
+    },
+    "home.mission.start" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Mission"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミッション開始"
+          }
+        }
+      }
+    },
+    "home.mission.close" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -121,12 +418,14 @@
       }
     },
     "dev.color_theme" : {
+    "home.mission.date_format" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Color Theme (Optional)"
+            "value" : "Event Date: %@"
           }
         },
         "ja" : {
@@ -138,12 +437,19 @@
       }
     },
     "dev.copy_url" : {
+            "value" : "開催日時: %@"
+          }
+        }
+      }
+    },
+    "home.disaster.earthquake" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Copy URL"
+            "value" : "Earthquake"
           }
         },
         "ja" : {
@@ -155,12 +461,19 @@
       }
     },
     "dev.generate_badge" : {
+            "value" : "地震"
+          }
+        }
+      }
+    },
+    "home.disaster.flood" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Generate Badge"
+            "value" : "Flood"
           }
         },
         "ja" : {
@@ -172,12 +485,19 @@
       }
     },
     "dev.generated_badge" : {
+            "value" : "洪水"
+          }
+        }
+      }
+    },
+    "home.disaster.fire" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Generated Badge"
+            "value" : "Fire"
           }
         },
         "ja" : {
@@ -189,12 +509,19 @@
       }
     },
     "dev.location_description" : {
+            "value" : "火災"
+          }
+        }
+      }
+    },
+    "home.disaster.typhoon" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Location Description"
+            "value" : "Typhoon"
           }
         },
         "ja" : {
@@ -206,12 +533,19 @@
       }
     },
     "dev.location_name" : {
+            "value" : "台風"
+          }
+        }
+      }
+    },
+    "home.disaster.tsunami" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Location Name"
+            "value" : "Tsunami"
           }
         },
         "ja" : {
@@ -223,12 +557,19 @@
       }
     },
     "dev.presets" : {
+            "value" : "津波"
+          }
+        }
+      }
+    },
+    "home.disaster.landslide" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Presets"
+            "value" : "Landslide"
           }
         },
         "ja" : {
@@ -240,12 +581,19 @@
       }
     },
     "dev.test_korakuen" : {
+            "value" : "土砂崩れ"
+          }
+        }
+      }
+    },
+    "home.severity.low" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Test with Kōrakuen"
+            "value" : "Low"
           }
         },
         "ja" : {
@@ -257,12 +605,19 @@
       }
     },
     "dev.title" : {
+            "value" : "低"
+          }
+        }
+      }
+    },
+    "home.severity.medium" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dev Tools"
+            "value" : "Medium"
           }
         },
         "ja" : {
@@ -276,6 +631,44 @@
     "Home View" : {
       "comment" : "The title of the home view.",
       "isCommentAutoGenerated" : true
+            "value" : "中"
+          }
+        }
+      }
+    },
+    "home.severity.high" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高"
+          }
+        }
+      }
+    },
+    "home.severity.critical" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Critical"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "緊急"
+          }
+        }
+      }
     },
     "Map View" : {
       "comment" : "The title of the map view screen.",
