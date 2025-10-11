@@ -77,9 +77,9 @@ struct HomeView: View {
     private func loadUserBadges() {
         // TODO: Supabaseからユーザーのバッジを取得
         userBadges = [
-            Badge(id: "1", name: "避難所A", icon: "star.fill", color: Color("brandOrange"), isUnlocked: true, imageName: nil),
-            Badge(id: "2", name: "避難所B", icon: "house.fill", color: Color("brandDarkBlue"), isUnlocked: true, imageName: nil),
-            Badge(id: "3", name: "避難所C", icon: "timer", color: Color("brandMediumBlue"), isUnlocked: true, imageName: nil),
+            Badge(id: "1", name: "後楽園", icon: "star.fill", color: Color("brandOrange"), isUnlocked: true, imageName: "korakuen"),
+            Badge(id: "2", name: "東大前", icon: "house.fill", color: Color("brandDarkBlue"), isUnlocked: true, imageName: "todaimae"),
+            Badge(id: "3", name: "ロゴ", icon: "timer", color: Color("brandMediumBlue"), isUnlocked: true, imageName: "logo"),
             Badge(id: "4", name: "避難所D", icon: "checkmark.circle.fill", color: Color("brandRed"), isUnlocked: true, imageName: nil),
         ]
     }

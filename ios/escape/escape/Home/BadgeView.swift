@@ -30,7 +30,7 @@ struct BadgeCollectionView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
                     ForEach(badges.prefix(8)) { badge in
-                        BadgeHomeItemView(badge: badge)
+                        Simple3DBadgeView(badge: badge)
                     }
                 }
                 .padding(.horizontal)
@@ -114,9 +114,9 @@ struct BadgeCollectionDetailView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 24) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 30) {
                     ForEach(badges) { badge in
-                        BadgeItemView(badge: badge)
+                        Interactive3DBadgeView(badge: badge)
                     }
                 }
                 .padding()
@@ -127,11 +127,28 @@ struct BadgeCollectionDetailView: View {
     }
 }
 
-#Preview {
+#Preview("ホーム画面") {
     BadgeCollectionView(badges: [
-        Badge(id: "1", name: "避難所A", icon: "star.fill", color: Color("brandOrange"), isUnlocked: true, imageName: nil),
-        Badge(id: "2", name: "避難所B", icon: "house.fill", color: Color("brandDarkBlue"), isUnlocked: true, imageName: nil),
-        Badge(id: "3", name: "避難所C", icon: "timer", color: Color("brandMediumBlue"), isUnlocked: true, imageName: nil),
+        Badge(id: "1", name: "後楽園", icon: "building.2.fill", color: Color("brandOrange"), isUnlocked: true, imageName: "korakuen"),
+        Badge(id: "2", name: "東大前", icon: "house.fill", color: Color("brandDarkBlue"), isUnlocked: true, imageName: "todaimae"),
+        Badge(id: "3", name: "ロゴ", icon: "exclamationmark.triangle.fill", color: Color("brandMediumBlue"), isUnlocked: true, imageName: "logo"),
         Badge(id: "4", name: "避難所D", icon: "checkmark.circle.fill", color: Color("brandRed"), isUnlocked: true, imageName: nil),
+        Badge(id: "5", name: "避難所E", icon: "heart.fill", color: Color("brandPeach"), isUnlocked: true, imageName: nil),
+        Badge(id: "6", name: "避難所F", icon: "leaf.fill", color: Color.green, isUnlocked: true, imageName: nil),
+    ])
+}
+
+#Preview("すべて表示画面") {
+    BadgeCollectionDetailView(badges: [
+        Badge(id: "1", name: "後楽園", icon: "star.fill", color: Color("brandOrange"), isUnlocked: true, imageName: "korakuen"),
+        Badge(id: "2", name: "東大前", icon: "house.fill", color: Color("brandDarkBlue"), isUnlocked: true, imageName: "todaimae"),
+        Badge(id: "3", name: "ロゴ", icon: "timer", color: Color("brandMediumBlue"), isUnlocked: true, imageName: "logo"),
+        Badge(id: "4", name: "避難所D", icon: "checkmark.circle.fill", color: Color("brandRed"), isUnlocked: true, imageName: nil),
+        Badge(id: "5", name: "避難所E", icon: "heart.fill", color: Color("brandPeach"), isUnlocked: true, imageName: nil),
+        Badge(id: "6", name: "避難所F", icon: "leaf.fill", color: Color.green, isUnlocked: true, imageName: nil),
+        Badge(id: "7", name: "避難所G", icon: "building.2.fill", color: Color.purple, isUnlocked: true, imageName: nil),
+        Badge(id: "8", name: "避難所H", icon: "tree.fill", color: Color.brown, isUnlocked: true, imageName: nil),
+        Badge(id: "9", name: "避難所I", icon: "mountain.2.fill", color: Color.gray, isUnlocked: true, imageName: nil),
+        Badge(id: "10", name: "避難所J", icon: "water.waves", color: Color.blue, isUnlocked: true, imageName: nil),
     ])
 }
