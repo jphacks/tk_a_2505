@@ -13,54 +13,12 @@ class BadgeService {
     // MARK: - Fetch Badges
 
     /// Fetches all shelter badges with unlock status for the current user
-    /// - Returns: Array of Badge objects for UI display with full shelter details
+    /// - Returns: Array of Badge objects for UI display (simplified - doesn't include full shelter details)
+    /// - Note: For badges with full shelter details, use getUserCollectedBadgesWithDetails()
     func getUserBadges() async throws -> [Badge] {
-        let currentUser = try await supabase.auth.session.user
-
-        // Fetch all shelter badges with their shelter information
-        let allShelterBadges: [ShelterBadge] = try await supabase
-            .from("shelter_badges")
-            .select()
-            .order("created_at")
-            .execute()
-            .value
-
-        // Fetch user's unlocked badges
-        let unlockedBadges: [UserShelterBadge] = try await supabase
-            .from("user_shelter_badges")
-            .select()
-            .eq("user_id", value: currentUser.id)
-            .execute()
-            .value
-
-        let unlockedBadgeIds = Set(unlockedBadges.map { $0.badgeId })
-
-        // Build Badge objects with full shelter details
-        var badges: [Badge] = []
-
-        for shelterBadge in allShelterBadges {
-            // Fetch the shelter information for each badge
-            let shelter: Shelter = try await supabase
-                .from("shelters")
-                .select()
-                .eq("id", value: shelterBadge.shelterId.uuidString)
-                .single()
-                .execute()
-                .value
-
-            let isUnlocked = unlockedBadgeIds.contains(shelterBadge.id)
-
-            // Create comprehensive Badge with shelter details
-            let badge = createBadge(
-                from: shelterBadge,
-                shelter: shelter,
-                isUnlocked: isUnlocked
-            )
-
-            badges.append(badge)
-        }
-
-        return badges
+        // For now, delegate to the more comprehensive method and convert
+        let collectedBadges = try await getUserCollectedBadgesWithDetails()
+        return collectedBadges.map { $0.toBadge() }
     }
 
     /// Fetches user's collected badges with full shelter and badge details

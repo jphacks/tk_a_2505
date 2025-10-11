@@ -252,6 +252,8 @@ struct UserBadgeWithShelter: Codable, Identifiable {
             return "korakuen"
         } else if shelterName.contains("東大") || shelterName.contains("todai") {
             return "todaimae"
+        } else if shelterName.contains("ロゴ") || shelterName.contains("logo") {
+            return "logo"
         }
         // Add more mappings as needed
 
