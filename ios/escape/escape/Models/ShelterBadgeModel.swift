@@ -38,7 +38,22 @@ extension ShelterBadge {
             name: badgeName,
             icon: determineIcon(),
             color: determineColor(),
-            isUnlocked: isUnlocked
+            isUnlocked: isUnlocked,
+            imageName: nil,
+            badgeNumber: nil,
+            address: nil,
+            municipality: nil,
+            isShelter: false,
+            isFlood: false,
+            isLandslide: false,
+            isStormSurge: false,
+            isEarthquake: false,
+            isTsunami: false,
+            isFire: false,
+            isInlandFlood: false,
+            isVolcano: false,
+            latitude: nil,
+            longitude: nil
         )
     }
 
@@ -79,7 +94,8 @@ extension ShelterBadge {
         } else if lowerName.contains("earthquake") || lowerName.contains("地震") {
             return Color("brandOrange")
         } else if lowerName.contains("flood") || lowerName.contains("tsunami") ||
-                   lowerName.contains("洪水") || lowerName.contains("津波") {
+            lowerName.contains("洪水") || lowerName.contains("津波")
+        {
             return Color("brandDarkBlue")
         } else if lowerName.contains("fire") || lowerName.contains("火災") {
             return Color("brandRed")
@@ -231,7 +247,8 @@ struct UserBadgeWithShelter: Codable, Identifiable {
         } else if lowerName.contains("earthquake") || lowerName.contains("地震") {
             return Color("brandOrange")
         } else if lowerName.contains("flood") || lowerName.contains("tsunami") ||
-                   lowerName.contains("洪水") || lowerName.contains("津波") {
+            lowerName.contains("洪水") || lowerName.contains("津波")
+        {
             return Color("brandDarkBlue")
         } else if lowerName.contains("fire") || lowerName.contains("火災") {
             return Color("brandRed")
