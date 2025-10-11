@@ -11,6 +11,7 @@ import SwiftUI
 
 struct MapView: View {
     @StateObject private var locationManager = LocationManager()
+    @State private var mapController = MapController()
     @State private var position: MapCameraPosition = .userLocation(
         followsHeading: true,
         fallback: .automatic
@@ -34,11 +35,47 @@ struct MapView: View {
                 locationManager.requestLocationAuthorization()
             }
         }
+        .task {
+            // Fetch shelters near user's location if available
+            if let userLocation = locationManager.location {
+                await mapController.fetchNearbyShelters(
+                    latitude: userLocation.coordinate.latitude,
+                    longitude: userLocation.coordinate.longitude,
+                    radiusKm: 1.5
+                )
+            } else {
+                // Fallback to fetching all shelters if location not available
+                // await mapController.fetchShelters()
+            }
+        }
+        .onChange(of: locationManager.location) { _, newValue in
+            // Refresh shelters when location updates
+            if let location = newValue {
+                Task {
+                    await mapController.fetchNearbyShelters(
+                        latitude: location.coordinate.latitude,
+                        longitude: location.coordinate.longitude,
+                        radiusKm: 1.5
+                    )
+                }
+            }
+        }
     }
 
     private var mapView: some View {
         Map(position: $position, interactionModes: .all) {
             UserAnnotation(anchor: .center)
+
+            // Display shelter annotations
+            ForEach(mapController.filteredShelters) { shelter in
+                Marker(
+                    shelter.name,
+                    systemImage: shelter.isShelter == true ? "building.2.fill" : "mappin.circle.fill",
+                    coordinate: CLLocationCoordinate2D(latitude: shelter.latitude, longitude: shelter.longitude)
+                )
+                .tint(shelter.isShelter == true ? Color("brandRed") : Color("brandOrange"))
+                .tag(shelter)
+            }
         }
         .mapStyle(.standard(elevation: .realistic))
         .safeAreaPadding(.top)
@@ -47,6 +84,14 @@ struct MapView: View {
             MapUserLocationButton()
             MapCompass()
             MapScaleView()
+
+            if mapController.isLoading {
+                ProgressView()
+                    .padding(8)
+                    .background(Color(.systemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .shadow(radius: 2)
+            }
         }
     }
 

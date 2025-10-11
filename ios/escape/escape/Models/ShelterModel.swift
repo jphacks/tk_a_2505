@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Shelter: Codable, Identifiable {
+struct Shelter: Codable, Identifiable, Hashable {
     let id: String
     let number: Int64?
     let commonId: String

@@ -19,6 +19,7 @@ enum LocationAuthorizationStatus {
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     let locationManager = CLLocationManager()
     @Published var authorizationStatus: LocationAuthorizationStatus = .notDetermined
+    @Published var location: CLLocation?
 
     override init() {
         super.init()
@@ -89,6 +90,12 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         @unknown default:
             break
         }
+    }
+
+    func locationManager(_: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let newLocation = locations.last else { return }
+        location = newLocation
+        print("Location updated: \(newLocation.coordinate.latitude), \(newLocation.coordinate.longitude)")
     }
 
     func locationManager(_: CLLocationManager, didFailWithError error: Error) {
