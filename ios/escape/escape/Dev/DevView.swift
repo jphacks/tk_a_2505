@@ -150,6 +150,143 @@ struct DevView: View {
                 } header: {
                     Text("Mission Generator (Mock)")
                 }
+
+                // Current Mission Details
+                if let mission = missionStateManager.currentMission {
+                    Section {
+                        VStack(alignment: .leading, spacing: 12) {
+                            // Title
+                            if let title = mission.title {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Title:")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Text(title)
+                                        .font(.body)
+                                        .fontWeight(.semibold)
+                                }
+                            }
+
+                            // Overview
+                            if let overview = mission.overview {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Overview:")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Text(overview)
+                                        .font(.subheadline)
+                                        .foregroundColor(.primary)
+                                }
+                            }
+
+                            Divider()
+
+                            // Disaster Type
+                            HStack {
+                                Text("Disaster Type:")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                if let disasterType = mission.disasterType {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: disasterType.iconName)
+                                            .font(.caption)
+                                        Text(disasterType.rawValue)
+                                            .font(.caption)
+                                            .fontWeight(.medium)
+                                    }
+                                    .foregroundColor(.orange)
+                                } else {
+                                    Text("None")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                }
+                            }
+
+                            // Status
+                            HStack {
+                                Text("Status:")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(mission.status.rawValue)
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(stateColor(for: mission.status))
+                                    .cornerRadius(4)
+                            }
+
+                            // Region
+                            if let region = mission.evacuationRegion {
+                                HStack {
+                                    Text("Region:")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                    Text(region)
+                                        .font(.caption)
+                                }
+                            }
+
+                            Divider()
+
+                            // Stats
+                            HStack(spacing: 20) {
+                                if let steps = mission.steps {
+                                    VStack(spacing: 2) {
+                                        Text("\(steps)")
+                                            .font(.body)
+                                            .fontWeight(.semibold)
+                                        Text("Steps")
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+
+                                if let distances = mission.distances {
+                                    VStack(spacing: 2) {
+                                        Text(String(format: "%.1f km", distances / 1000))
+                                            .font(.body)
+                                            .fontWeight(.semibold)
+                                        Text("Distance")
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+
+                            Divider()
+
+                            // Metadata
+                            VStack(spacing: 4) {
+                                HStack {
+                                    Text("ID:")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                    Text(mission.id.uuidString)
+                                        .font(.system(size: 9, design: .monospaced))
+                                        .foregroundColor(.secondary)
+                                }
+
+                                HStack {
+                                    Text("Created:")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                    Text(mission.createdAt, style: .date)
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                    } header: {
+                        Text("Current Mission Details")
+                    }
+                }
             }
             .navigationTitle("dev.title")
             .sheet(isPresented: $showImagePreview) {

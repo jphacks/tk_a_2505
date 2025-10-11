@@ -14,3 +14,30 @@ enum MissionState: String, Codable {
     case active = "have"
     case completed = "done"
 }
+
+/// Represents a mission record from the database
+struct Mission: Codable, Identifiable {
+    let id: UUID
+    let userId: UUID?
+    let title: String?
+    let overview: String?
+    let disasterType: DisasterType?
+    let evacuationRegion: String?
+    let status: MissionState
+    let steps: Int64?
+    let distances: Double?
+    let createdAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId = "user_id"
+        case title
+        case overview
+        case disasterType = "disaster_type"
+        case evacuationRegion = "evacuation_region"
+        case status
+        case steps
+        case distances
+        case createdAt = "created_at"
+    }
+}
