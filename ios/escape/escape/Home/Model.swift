@@ -114,13 +114,3 @@ enum SeverityLevel: Int, CaseIterable {
         return self == .critical || self == .high
     }
 }
-
-// MARK: - Badge Model
-
-struct Badge: Identifiable {
-    let id: String
-    let name: String
-    let icon: String
-    let color: Color
-    let isUnlocked: Bool
-}

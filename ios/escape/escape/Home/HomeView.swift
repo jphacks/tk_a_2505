@@ -75,13 +75,16 @@ struct HomeView: View {
     }
 
     private func loadUserBadges() {
-        // TODO: Supabaseからユーザーのバッジを取得
-        userBadges = [
-            Badge(id: "1", name: "sample1", icon: "star.fill", color: Color("brandOrange"), isUnlocked: true),
-            Badge(id: "2", name: "sample2", icon: "house.fill", color: Color("brandDarkBlue"), isUnlocked: true),
-            Badge(id: "3", name: "sample3", icon: "timer", color: Color("brandMediumBlue"), isUnlocked: false),
-            Badge(id: "4", name: "sample4", icon: "checkmark.circle.fill", color: Color("brandRed"), isUnlocked: false),
-        ]
+        Task {
+            do {
+                let badgeService = BadgeService()
+                let collectedBadges = try await badgeService.getUserCollectedBadgesWithDetails()
+                userBadges = collectedBadges.map { $0.toBadge() }
+            } catch {
+                debugPrint("❌ Failed to load badges: \(error)")
+                userBadges = [] // Fallback to empty array on error
+            }
+        }
     }
 }
 
