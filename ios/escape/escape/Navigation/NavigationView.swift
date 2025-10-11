@@ -16,13 +16,9 @@ struct NavigationView: View {
                 }
 
             MapView()
+                .ignoresSafeArea()
                 .tabItem {
                     Label("nav.map", systemImage: "map.fill")
-                }
-
-            DevView()
-                .tabItem {
-                    Label("nav.dev", systemImage: "hammer.fill")
                 }
 
             SettingView()

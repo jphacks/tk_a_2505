@@ -8,7 +8,8 @@
 import Foundation
 
 struct Shelter: Codable, Identifiable {
-    let id: Int64
+    let id: String
+    let number: Int64?
     let commonId: String
     let name: String
     let address: String
@@ -32,6 +33,7 @@ struct Shelter: Codable, Identifiable {
 
     enum CodingKeys: String, CodingKey {
         case id
+        case number
         case commonId = "common_id"
         case name
         case address
