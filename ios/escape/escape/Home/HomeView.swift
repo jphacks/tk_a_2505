@@ -13,6 +13,10 @@ struct HomeView: View {
     }
 }
 
-#Preview {
-    HomeView()
+#Preview("HomeView - English") {
+    HomeView().environment(\.locale, .init(identifier: "en"))
+}
+
+#Preview("HomeView - Japanese") {
+    HomeView().environment(\.locale, .init(identifier: "ja"))
 }

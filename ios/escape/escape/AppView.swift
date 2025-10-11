@@ -29,6 +29,10 @@ struct AppView: View {
     }
 }
 
-#Preview {
-    AppView()
+#Preview("AppView - English") {
+    AppView().environment(\.locale, .init(identifier: "en"))
+}
+
+#Preview("AppView - Japanese") {
+    AppView().environment(\.locale, .init(identifier: "ja"))
 }

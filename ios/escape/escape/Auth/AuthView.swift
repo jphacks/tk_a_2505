@@ -16,14 +16,14 @@ struct AuthView: View {
     var body: some View {
         Form {
             Section {
-                TextField("Email", text: $email)
+                TextField("auth.email", text: $email)
                     .textContentType(.emailAddress)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
             }
 
             Section {
-                Button("Sign in") {
+                Button("auth.sign_in") {
                     signInButtonTapped()
                 }
 
@@ -36,7 +36,7 @@ struct AuthView: View {
                 Section {
                     switch result {
                     case .success:
-                        Text("Check your inbox.")
+                        Text("auth.check_inbox")
                     case let .failure(error):
                         Text(error.localizedDescription).foregroundStyle(.red)
                     }
@@ -72,6 +72,10 @@ struct AuthView: View {
     }
 }
 
-#Preview {
-    AuthView()
+#Preview("AuthView - English") {
+    AuthView().environment(\.locale, .init(identifier: "en"))
+}
+
+#Preview("AuthView - Japanese") {
+    AuthView().environment(\.locale, .init(identifier: "ja"))
 }

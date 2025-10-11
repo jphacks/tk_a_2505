@@ -12,22 +12,26 @@ struct NavigationView: View {
         TabView {
             HomeView()
                 .tabItem {
-                    Label("Home", systemImage: "house.fill")
+                    Label("nav.home", systemImage: "house.fill")
                 }
 
             MapView()
                 .tabItem {
-                    Label("Map", systemImage: "map.fill")
+                    Label("nav.map", systemImage: "map.fill")
                 }
 
             SettingView()
                 .tabItem {
-                    Label("Setting", systemImage: "gearshape.fill")
+                    Label("nav.setting", systemImage: "gearshape.fill")
                 }
         }
     }
 }
 
-#Preview {
-    NavigationView()
+#Preview("NavigationView - English") {
+    NavigationView().environment(\.locale, .init(identifier: "en"))
+}
+
+#Preview("NavigationView - Japanese") {
+    NavigationView().environment(\.locale, .init(identifier: "ja"))
 }
