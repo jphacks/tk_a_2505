@@ -13,12 +13,12 @@ class BadgeService {
     // MARK: - Fetch Badges
 
     /// Fetches all shelter badges with unlock status for the current user
-    /// - Returns: Array of Badge objects for UI display
+    /// - Returns: Array of Badge objects for UI display with full shelter details
     func getUserBadges() async throws -> [Badge] {
         let currentUser = try await supabase.auth.session.user
 
-        // Fetch all shelter badges
-        let allBadges: [ShelterBadge] = try await supabase
+        // Fetch all shelter badges with their shelter information
+        let allShelterBadges: [ShelterBadge] = try await supabase
             .from("shelter_badges")
             .select()
             .order("created_at")
@@ -35,11 +35,32 @@ class BadgeService {
 
         let unlockedBadgeIds = Set(unlockedBadges.map { $0.badgeId })
 
-        // Convert to UI model
-        return allBadges.map { shelterBadge in
+        // Build Badge objects with full shelter details
+        var badges: [Badge] = []
+
+        for shelterBadge in allShelterBadges {
+            // Fetch the shelter information for each badge
+            let shelter: Shelter = try await supabase
+                .from("shelters")
+                .select()
+                .eq("id", value: shelterBadge.shelterId.uuidString)
+                .single()
+                .execute()
+                .value
+
             let isUnlocked = unlockedBadgeIds.contains(shelterBadge.id)
-            return shelterBadge.toBadge(isUnlocked: isUnlocked)
+
+            // Create comprehensive Badge with shelter details
+            let badge = createBadge(
+                from: shelterBadge,
+                shelter: shelter,
+                isUnlocked: isUnlocked
+            )
+
+            badges.append(badge)
         }
+
+        return badges
     }
 
     /// Fetches user's collected badges with full shelter and badge details
