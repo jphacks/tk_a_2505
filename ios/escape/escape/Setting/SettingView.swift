@@ -13,6 +13,10 @@ struct SettingView: View {
     }
 }
 
-#Preview {
-    SettingView()
+#Preview("SettingView - English") {
+    SettingView().environment(\.locale, .init(identifier: "en"))
+}
+
+#Preview("SettingView - Japanese") {
+    SettingView().environment(\.locale, .init(identifier: "ja"))
 }
