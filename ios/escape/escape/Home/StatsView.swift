@@ -14,6 +14,24 @@ struct StatsView: View {
     @State private var recentMissions: [Mission] = []
     @State private var showingStatsDetail = false
 
+    // 統計データの計算
+    private var completedMissionsCount: Int {
+        recentMissions.filter { $0.status == .completed }.count
+    }
+
+    private var totalDistance: Double {
+        recentMissions.compactMap { $0.distances }.reduce(0, +)
+    }
+
+    private var totalSteps: Int {
+        recentMissions.compactMap { mission in
+            if let steps = mission.steps {
+                return Int(steps)
+            }
+            return nil
+        }.reduce(0, +)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("home.stats.title", tableName: "Localizable")
@@ -26,20 +44,20 @@ struct StatsView: View {
                     // 左側1/4: 統計要素をアイコンと数値のみで縦に配置
                     VStack(spacing: 16) {
                         IconOnlyStatView(
-                            value: "5",
+                            value: "\(completedMissionsCount)",
                             icon: "checkmark.circle.fill",
                             color: Color("brandMediumBlue")
                         )
 
                         IconOnlyStatView(
-                            value: "3.2km",
+                            value: String(format: "%.1f", totalDistance) + "km",
                             icon: "figure.walk",
                             color: Color("brandDarkBlue")
                         )
 
                         IconOnlyStatView(
-                            value: "2",
-                            icon: "star.fill",
+                            value: "\(totalSteps)",
+                            icon: "figure.walk.circle",
                             color: Color("brandOrange")
                         )
                     }
@@ -203,7 +221,7 @@ struct MissionChartView: View {
                 Image(systemName: "chart.line.uptrend.xyaxis")
                     .font(.title2)
                     .foregroundColor(.gray)
-                Text("データなし")
+                Text("home.stats.no_data", tableName: "Localizable")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -215,22 +233,22 @@ struct MissionChartView: View {
 
                     // 歩数の棒グラフ
                     BarMark(
-                        x: .value("日付", date),
-                        y: .value("歩数", mission.steps ?? 0)
+                        x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
+                        y: .value(String(localized: "chart.steps_label", table: "Localizable"), mission.steps ?? 0)
                     )
                     .foregroundStyle(Color("brandMediumBlue").opacity(0.7))
 
                     // 距離の折れ線グラフ（スケール調整のため1000倍）
                     LineMark(
-                        x: .value("日付", date),
-                        y: .value("距離", (mission.distances ?? 0) * 1000)
+                        x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
+                        y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
                     )
                     .foregroundStyle(Color("brandOrange"))
                     .lineStyle(StrokeStyle(lineWidth: 2))
 
                     PointMark(
-                        x: .value("日付", date),
-                        y: .value("距離", (mission.distances ?? 0) * 1000)
+                        x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
+                        y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
                     )
                     .foregroundStyle(Color("brandOrange"))
                 }
@@ -277,7 +295,7 @@ struct StatsDetailView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // 詳細チャート
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("最近のミッション統計")
+                        Text("home.stats.recent_missions", tableName: "Localizable")
                             .font(.headline)
 
                         Chart {
@@ -285,22 +303,22 @@ struct StatsDetailView: View {
                                 let date = mission.createdAt
 
                                 BarMark(
-                                    x: .value("日付", date),
-                                    y: .value("歩数", mission.steps ?? 0),
+                                    x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
+                                    y: .value(String(localized: "chart.steps_label", table: "Localizable"), mission.steps ?? 0),
                                     width: .fixed(30)
                                 )
                                 .foregroundStyle(Color("brandMediumBlue").opacity(0.7))
 
                                 LineMark(
-                                    x: .value("日付", date),
-                                    y: .value("距離", (mission.distances ?? 0) * 1000)
+                                    x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
+                                    y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
                                 )
                                 .foregroundStyle(Color("brandOrange"))
                                 .lineStyle(StrokeStyle(lineWidth: 3))
 
                                 PointMark(
-                                    x: .value("日付", date),
-                                    y: .value("距離", (mission.distances ?? 0) * 1000)
+                                    x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
+                                    y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
                                 )
                                 .foregroundStyle(Color("brandOrange"))
                                 .symbolSize(50)
@@ -311,7 +329,7 @@ struct StatsDetailView: View {
                             AxisMarks(position: .leading) { value in
                                 AxisValueLabel {
                                     if let intValue = value.as(Int.self) {
-                                        Text("\(intValue) 歩")
+                                        Text("\(intValue)" + String(localized: "home.stats.steps_unit", table: "Localizable"))
                                             .font(.caption)
                                             .foregroundColor(Color("brandMediumBlue"))
                                     }
@@ -320,7 +338,7 @@ struct StatsDetailView: View {
                             AxisMarks(position: .trailing) { value in
                                 AxisValueLabel {
                                     if let intValue = value.as(Int.self) {
-                                        Text(String(format: "%.1fkm", Double(intValue) / 1000))
+                                        Text(String(format: "%.1f", Double(intValue) / 1000) + String(localized: "home.stats.distance_unit", table: "Localizable"))
                                             .font(.caption)
                                             .foregroundColor(Color("brandOrange"))
                                     }
@@ -334,7 +352,7 @@ struct StatsDetailView: View {
 
                     // ミッション履歴
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("ミッション履歴")
+                        Text("home.stats.mission_history", tableName: "Localizable")
                             .font(.headline)
 
                         ForEach(missions) { mission in
@@ -356,11 +374,11 @@ struct StatsDetailView: View {
                                 Spacer()
 
                                 VStack(alignment: .trailing, spacing: 4) {
-                                    Text("\(mission.steps ?? 0) 歩")
+                                    Text("\(mission.steps ?? 0)" + String(localized: "home.stats.steps_unit", table: "Localizable"))
                                         .font(.caption)
                                         .foregroundColor(Color("brandMediumBlue"))
 
-                                    Text(String(format: "%.1fkm", mission.distances ?? 0))
+                                    Text(String(format: "%.1f", mission.distances ?? 0) + String(localized: "home.stats.distance_unit", table: "Localizable"))
                                         .font(.caption)
                                         .foregroundColor(Color("brandOrange"))
                                 }
@@ -373,11 +391,11 @@ struct StatsDetailView: View {
                 }
                 .padding()
             }
-            .navigationTitle("統計詳細")
+            .navigationTitle(String(localized: "home.stats.detail_title", table: "Localizable"))
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("閉じる") {
+                    Button(String(localized: "home.stats.close", table: "Localizable")) {
                         dismiss()
                     }
                 }
