@@ -17,7 +17,7 @@ struct MissionCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("今日のミッション")
+                Text("home.mission.todays_mission", tableName: "Localizable")
                     .font(.headline)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
@@ -99,13 +99,13 @@ struct MissionCardView: View {
                             .font(.system(size: 50))
                             .foregroundColor(.white)
 
-                        Text("すべてのミッションが完了しました！")
+                        Text("home.mission.all_complete", tableName: "Localizable")
                             .font(.title3)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
                             .multilineTextAlignment(.center)
 
-                        Text("新しいミッションは24時間後に更新されます")
+                        Text("home.mission.next_update", tableName: "Localizable")
                             .font(.body)
                             .foregroundColor(.white.opacity(0.9))
                             .multilineTextAlignment(.center)
@@ -118,6 +118,70 @@ struct MissionCardView: View {
         .onAppear {
             isAnimating = true
         }
+    }
+}
+
+// MARK: - ミッションカードコンテンツ
+
+struct MissionCardContent: View {
+    let mission: Mission
+
+    var body: some View {
+        ZStack {
+            // グラデーション背景
+            LinearGradient(
+                gradient: Gradient(colors: mission.disasterType.gradientColors + [.black.opacity(0.3)]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .cornerRadius(20)
+
+            // コンテンツ
+            VStack(alignment: .leading, spacing: 16) {
+                // ヘッダー部分
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Image(systemName: mission.disasterType.emergencyIcon)
+                                .font(.title)
+                                .foregroundColor(.white)
+
+                            Text(mission.disasterType.localizedName)
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white.opacity(0.9))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.white.opacity(0.25))
+                                .cornerRadius(8)
+                        }
+
+                        Text(mission.title)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.leading)
+                    }
+
+                    Spacer()
+
+                    VStack(spacing: 4) {
+                        Image(systemName: "chevron.right.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.white.opacity(0.8))
+                    }
+                }
+
+                // 説明文
+                Text(mission.description)
+                    .font(.body)
+                    .foregroundColor(.white.opacity(0.9))
+                    .lineLimit(3)
+                    .multilineTextAlignment(.leading)
+            }
+            .padding(20)
+        }
+        .shadow(color: mission.disasterType.color.opacity(0.3), radius: 15, x: 0, y: 8)
     }
 }
 
@@ -134,7 +198,7 @@ struct MissionDetailView: View {
                 if let mission = mission {
                     // 背景グラデーション
                     LinearGradient(
-                        gradient: Gradient(colors: mission.disasterType.gradientColors + [.black.opacity(0.3)]),
+                        gradient: Gradient(colors: mission.disasterType.gradientColors),
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -181,7 +245,7 @@ struct MissionDetailView: View {
                             VStack(spacing: 20) {
                                 // 説明文
                                 VStack(alignment: .leading, spacing: 12) {
-                                    Text("ミッション概要")
+                                    Text("home.mission.overview", tableName: "Localizable")
                                         .font(.headline)
                                         .foregroundColor(.white)
 
@@ -197,7 +261,7 @@ struct MissionDetailView: View {
 
                                 // ミッション情報
                                 VStack(alignment: .leading, spacing: 8) {
-                                    Text("ミッション情報")
+                                    Text("home.mission.info", tableName: "Localizable")
                                         .font(.headline)
                                         .foregroundColor(.white)
 
@@ -205,7 +269,7 @@ struct MissionDetailView: View {
                                         Image(systemName: "calendar")
                                             .foregroundColor(.white.opacity(0.8))
 
-                                        Text("開催日時: \(mission.aiGeneratedAt, formatter: dateFormatter)")
+                                        Text(String(localized: "home.mission.date_format", table: "Localizable").replacingOccurrences(of: "%@", with: dateFormatter.string(from: mission.aiGeneratedAt)))
                                             .font(.body)
                                             .foregroundColor(.white.opacity(0.9))
                                     }
@@ -226,7 +290,7 @@ struct MissionDetailView: View {
                                         Image(systemName: "play.circle.fill")
                                             .font(.title2)
 
-                                        Text("ミッション開始")
+                                        Text("home.mission.start", tableName: "Localizable")
                                             .font(.headline)
                                             .fontWeight(.bold)
                                     }
@@ -248,7 +312,7 @@ struct MissionDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("閉じる") {
+                    Button(String(localized: "home.mission.close", table: "Localizable")) {
                         dismiss()
                     }
                     .foregroundColor(.white)
