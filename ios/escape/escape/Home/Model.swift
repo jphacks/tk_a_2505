@@ -1,5 +1,5 @@
 //
-//  Models.swift
+//  Model.swift
 //  escape
 //
 //  Created by Claude on 11/10/2568 BE.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-// MARK: - Mission Models
+// MARK: - Mission Model
 
 struct Mission: Identifiable {
     let id: String
@@ -115,7 +115,7 @@ enum SeverityLevel: Int, CaseIterable {
     }
 }
 
-// MARK: - Badge Models
+// MARK: - Badge Model
 
 struct Badge: Identifiable {
     let id: String
