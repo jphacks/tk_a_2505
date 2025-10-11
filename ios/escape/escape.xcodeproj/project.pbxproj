@@ -38,7 +38,7 @@
 		779936032E969D7200339B51 /* Exceptions for "escape" folder in "escape" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				"/Localized: Info.plist",
 			);
 			target = 773D0A5F2E96912A0095C969 /* escape */;
 		};
