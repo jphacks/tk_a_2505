@@ -11,23 +11,23 @@ import SwiftUI
 @MainActor
 @Observable
 class ProfileController {
-    var username = ""
+    var name = ""
     var isLoading = false
 
     func getInitialProfile() async {
         do {
             let currentUser = try await supabase.auth.session.user
 
-            let profile: Profile =
+            let user: User =
                 try await supabase
-                    .from("profiles")
+                    .from("users")
                     .select()
                     .eq("id", value: currentUser.id)
                     .single()
                     .execute()
                     .value
 
-            username = profile.username ?? ""
+            name = user.name ?? ""
 
         } catch {
             debugPrint(error)
@@ -42,12 +42,8 @@ class ProfileController {
             let currentUser = try await supabase.auth.session.user
 
             try await supabase
-                .from("profiles")
-                .update(
-                    UpdateProfileParams(
-                        username: username
-                    )
-                )
+                .from("users")
+                .update(["name": name])
                 .eq("id", value: currentUser.id)
                 .execute()
         } catch {
