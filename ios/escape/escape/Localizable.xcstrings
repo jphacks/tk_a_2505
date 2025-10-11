@@ -137,18 +137,26 @@
         }
       }
     },
+    "dev.badge_generator" : {
     "auth.sign_in_description" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Badge Generator"
             "value" : "Enter your email to sign in with a magic link"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "バッジジェネレーター"
+          }
+        }
+      }
+    },
+    "dev.badge_generator_header" : {
             "value" : "マジックリンクでサインインするにはメールアドレスを入力してください"
           }
         }
@@ -160,12 +168,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Generate collectible badges for locations"
             "value" : "Welcome"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "場所のコレクティブルバッジを生成"
+          }
+        }
+      }
+    },
+    "dev.clear_fields" : {
             "value" : "ようこそ"
           }
         }
@@ -333,12 +348,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Clear Fields"
             "value" : "Mission Overview"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "フィールドをクリア"
+          }
+        }
+      }
+    },
+    "dev.close" : {
             "value" : "ミッション概要"
           }
         }
@@ -395,18 +417,26 @@
         }
       }
     },
+    "dev.color_theme" : {
     "home.mission.date_format" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Color Theme (Optional)"
             "value" : "Event Date: %@"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "カラーテーマ（オプション）"
+          }
+        }
+      }
+    },
+    "dev.copy_url" : {
             "value" : "開催日時: %@"
           }
         }
@@ -418,12 +448,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Copy URL"
             "value" : "Earthquake"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "URLをコピー"
+          }
+        }
+      }
+    },
+    "dev.generate_badge" : {
             "value" : "地震"
           }
         }
@@ -435,12 +472,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Generate Badge"
             "value" : "Flood"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "バッジを生成"
+          }
+        }
+      }
+    },
+    "dev.generated_badge" : {
             "value" : "洪水"
           }
         }
@@ -452,12 +496,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Generated Badge"
             "value" : "Fire"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "生成されたバッジ"
+          }
+        }
+      }
+    },
+    "dev.location_description" : {
             "value" : "火災"
           }
         }
@@ -469,12 +520,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Location Description"
             "value" : "Typhoon"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "場所の説明"
+          }
+        }
+      }
+    },
+    "dev.location_name" : {
             "value" : "台風"
           }
         }
@@ -486,12 +544,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Location Name"
             "value" : "Tsunami"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "場所の名前"
+          }
+        }
+      }
+    },
+    "dev.presets" : {
             "value" : "津波"
           }
         }
@@ -503,12 +568,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Presets"
             "value" : "Landslide"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "プリセット"
+          }
+        }
+      }
+    },
+    "dev.test_korakuen" : {
             "value" : "土砂崩れ"
           }
         }
@@ -520,12 +592,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Test with Kōrakuen"
             "value" : "Low"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "後楽園でテスト"
+          }
+        }
+      }
+    },
+    "dev.title" : {
             "value" : "低"
           }
         }
@@ -537,12 +616,21 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Dev Tools"
             "value" : "Medium"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "開発ツール"
+          }
+        }
+      }
+    },
+    "Home View" : {
+      "comment" : "The title of the home view.",
+      "isCommentAutoGenerated" : true
             "value" : "中"
           }
         }
@@ -585,6 +673,23 @@
     "Map View" : {
       "comment" : "The title of the map view screen.",
       "isCommentAutoGenerated" : true
+    },
+    "nav.dev" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dev"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開発"
+          }
+        }
+      }
     },
     "nav.home" : {
       "extractionState" : "manual",

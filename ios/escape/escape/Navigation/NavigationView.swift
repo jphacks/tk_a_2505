@@ -21,6 +21,11 @@ struct NavigationView: View {
                     Label("nav.map", systemImage: "map.fill")
                 }
 
+            DevView()
+                .tabItem {
+                    Label("nav.dev", systemImage: "hammer.fill")
+                }
+
             SettingView()
                 .tabItem {
                     Label("nav.setting", systemImage: "gearshape.fill")
