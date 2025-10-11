@@ -85,6 +85,22 @@ class BadgeService {
         return badges
     }
 
+    /// Fetches the badge for a specific shelter
+    /// Note: Each shelter has exactly one badge (1:1 relationship)
+    /// - Parameter shelterId: The shelter UUID
+    /// - Returns: The shelter badge, or nil if not found
+    func getBadgeForShelter(shelterId: UUID) async throws -> ShelterBadge? {
+        let badges: [ShelterBadge] = try await supabase
+            .from("shelter_badges")
+            .select()
+            .eq("shelter_id", value: shelterId)
+            .limit(1)
+            .execute()
+            .value
+
+        return badges.first
+    }
+
     // MARK: - Create Badges
 
     /// Creates a new shelter badge (typically when first user visits a shelter)
@@ -264,13 +280,10 @@ class BadgeService {
         var wasFirstVisitor = false
 
         // Check if badge already exists for this shelter
-        if try await badgeExists(forShelter: shelterId) {
+        if let existingBadge = try await getBadgeForShelter(shelterId: shelterId) {
             // Badge exists, just unlock it for the user
-            let existingBadges = try await getBadgesForShelter(shelterId: shelterId)
-            if let badge = existingBadges.first {
-                // Try to unlock (will skip if already unlocked)
-                try? await unlockBadge(badgeId: badge.id)
-            }
+            // Try to unlock (will skip if already unlocked)
+            try? await unlockBadge(badgeId: existingBadge.id)
             debugPrint("ℹ️ Badge already exists for shelter: \(shelterId)")
         } else {
             // User is the first visitor! Create a badge
