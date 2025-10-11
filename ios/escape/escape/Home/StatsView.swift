@@ -12,26 +12,26 @@ import SwiftUI
 struct StatsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("今週の統計")
+            Text("home.stats.title", tableName: "Localizable")
                 .font(.headline)
 
             HStack(spacing: 20) {
                 StatItemView(
-                    title: "完了したミッション",
+                    title: String(localized: "home.stats.completed_missions", table: "Localizable"),
                     value: "5",
                     icon: "checkmark.circle.fill",
                     color: Color("brandMediumBlue")
                 )
 
                 StatItemView(
-                    title: "歩いた距離",
+                    title: String(localized: "home.stats.distance_walked", table: "Localizable"),
                     value: "3.2km",
                     icon: "figure.walk",
                     color: Color("brandDarkBlue")
                 )
 
                 StatItemView(
-                    title: "獲得バッジ",
+                    title: String(localized: "home.stats.badges_earned", table: "Localizable"),
                     value: "2",
                     icon: "star.fill",
                     color: Color("brandOrange")

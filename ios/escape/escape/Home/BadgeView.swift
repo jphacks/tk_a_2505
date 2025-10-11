@@ -15,12 +15,12 @@ struct BadgeCollectionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("バッジコレクション")
+                Text("home.badge_collection.title", tableName: "Localizable")
                     .font(.headline)
 
                 Spacer()
 
-                NavigationLink("すべて見る") {
+                NavigationLink(String(localized: "home.badge_collection.view_all", table: "Localizable")) {
                     BadgeCollectionDetailView(badges: badges)
                 }
                 .font(.caption)
@@ -77,7 +77,7 @@ struct BadgeCollectionDetailView: View {
                 }
                 .padding()
             }
-            .navigationTitle("バッジコレクション")
+            .navigationTitle(String(localized: "home.badge_collection.title", table: "Localizable"))
             .navigationBarTitleDisplayMode(.large)
         }
     }
@@ -85,9 +85,9 @@ struct BadgeCollectionDetailView: View {
 
 #Preview {
     BadgeCollectionView(badges: [
-        Badge(id: "1", name: "初回避難", icon: "star.fill", color: Color("brandOrange"), isUnlocked: true),
-        Badge(id: "2", name: "地震マスター", icon: "house.fill", color: Color("brandDarkBlue"), isUnlocked: true),
-        Badge(id: "3", name: "スピードランナー", icon: "timer", color: Color("brandMediumBlue"), isUnlocked: false),
-        Badge(id: "4", name: "完璧主義者", icon: "checkmark.circle.fill", color: Color("brandRed"), isUnlocked: false),
+        Badge(id: "1", name: "sample1", icon: "star.fill", color: Color("brandOrange"), isUnlocked: true),
+        Badge(id: "2", name: "sample2", icon: "house.fill", color: Color("brandDarkBlue"), isUnlocked: true),
+        Badge(id: "3", name: "sample3", icon: "timer", color: Color("brandMediumBlue"), isUnlocked: false),
+        Badge(id: "4", name: "sample4", icon: "checkmark.circle.fill", color: Color("brandRed"), isUnlocked: false),
     ])
 }

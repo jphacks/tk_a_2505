@@ -76,12 +76,12 @@ enum DisasterType: String, CaseIterable {
 
     var localizedName: String {
         switch self {
-        case .earthquake: return "地震"
-        case .flood: return "洪水"
-        case .fire: return "火災"
-        case .typhoon: return "台風"
-        case .tsunami: return "津波"
-        case .landslide: return "土砂崩れ"
+        case .earthquake: return String(localized: "home.disaster.earthquake", table: "Localizable")
+        case .flood: return String(localized: "home.disaster.flood", table: "Localizable")
+        case .fire: return String(localized: "home.disaster.fire", table: "Localizable")
+        case .typhoon: return String(localized: "home.disaster.typhoon", table: "Localizable")
+        case .tsunami: return String(localized: "home.disaster.tsunami", table: "Localizable")
+        case .landslide: return String(localized: "home.disaster.landslide", table: "Localizable")
         }
     }
 }
@@ -103,10 +103,10 @@ enum SeverityLevel: Int, CaseIterable {
 
     var localizedName: String {
         switch self {
-        case .low: return "低"
-        case .medium: return "中"
-        case .high: return "高"
-        case .critical: return "緊急"
+        case .low: return String(localized: "home.severity.low", table: "Localizable")
+        case .medium: return String(localized: "home.severity.medium", table: "Localizable")
+        case .high: return String(localized: "home.severity.high", table: "Localizable")
+        case .critical: return String(localized: "home.severity.critical", table: "Localizable")
         }
     }
 
