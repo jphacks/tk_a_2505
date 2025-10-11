@@ -54,23 +54,23 @@ enum DisasterType: String, CaseIterable {
 
     var color: Color {
         switch self {
-        case .earthquake: return .orange
-        case .flood: return .blue
-        case .fire: return .red
-        case .typhoon: return .purple
-        case .tsunami: return .cyan
-        case .landslide: return .brown
+        case .earthquake: return Color("brandOrange")
+        case .flood: return Color("brandDarkBlue")
+        case .fire: return Color("brandRed")
+        case .typhoon: return Color("brandMediumBlue")
+        case .tsunami: return Color("brandDarkBlue")
+        case .landslide: return Color("brandPeach")
         }
     }
 
     var gradientColors: [Color] {
         switch self {
-        case .earthquake: return [.orange, .red]
-        case .flood: return [.blue, .cyan]
-        case .fire: return [.red, .orange, .yellow]
-        case .typhoon: return [.purple, .blue]
-        case .tsunami: return [.cyan, .blue]
-        case .landslide: return [.brown, .orange]
+        case .earthquake: return [Color("brandOrange"), Color("brandRed")]
+        case .flood: return [Color("brandDarkBlue"), Color("brandMediumBlue")]
+        case .fire: return [Color("brandRed"), Color("brandOrange")]
+        case .typhoon: return [Color("brandMediumBlue"), Color("brandDarkBlue")]
+        case .tsunami: return [Color("brandDarkBlue"), Color("brandMediumBlue")]
+        case .landslide: return [Color("brandPeach"), Color("brandOrange")]
         }
     }
 

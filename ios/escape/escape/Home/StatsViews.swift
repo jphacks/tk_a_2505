@@ -20,21 +20,21 @@ struct StatsView: View {
                     title: "完了したミッション",
                     value: "5",
                     icon: "checkmark.circle.fill",
-                    color: .green
+                    color: Color("brandMediumBlue")
                 )
 
                 StatItemView(
                     title: "歩いた距離",
                     value: "3.2km",
                     icon: "figure.walk",
-                    color: .blue
+                    color: Color("brandDarkBlue")
                 )
 
                 StatItemView(
                     title: "獲得バッジ",
                     value: "2",
                     icon: "star.fill",
-                    color: .orange
+                    color: Color("brandOrange")
                 )
             }
         }

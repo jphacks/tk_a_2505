@@ -45,7 +45,7 @@ class ProfileController {
                 .from("profiles")
                 .update(
                     UpdateProfileParams(
-                        username: username,
+                        username: username
                     )
                 )
                 .eq("id", value: currentUser.id)

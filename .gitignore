@@ -1,2 +1,7 @@
 CLAUDE.md
 .DS_Store
+
+# Xcode
+*.xcworkspace/xcuserdata/
+project.xcworkspace/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/

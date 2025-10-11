@@ -24,7 +24,7 @@ struct BadgeCollectionView: View {
                     BadgeCollectionDetailView(badges: badges)
                 }
                 .font(.caption)
-                .foregroundColor(.orange)
+                .foregroundColor(Color("brandOrange"))
             }
 
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 16) {
@@ -85,9 +85,9 @@ struct BadgeCollectionDetailView: View {
 
 #Preview {
     BadgeCollectionView(badges: [
-        Badge(id: "1", name: "初回避難", icon: "star.fill", color: .yellow, isUnlocked: true),
-        Badge(id: "2", name: "地震マスター", icon: "house.fill", color: .blue, isUnlocked: true),
-        Badge(id: "3", name: "スピードランナー", icon: "timer", color: .green, isUnlocked: false),
-        Badge(id: "4", name: "完璧主義者", icon: "checkmark.circle.fill", color: .purple, isUnlocked: false),
+        Badge(id: "1", name: "初回避難", icon: "star.fill", color: Color("brandOrange"), isUnlocked: true),
+        Badge(id: "2", name: "地震マスター", icon: "house.fill", color: Color("brandDarkBlue"), isUnlocked: true),
+        Badge(id: "3", name: "スピードランナー", icon: "timer", color: Color("brandMediumBlue"), isUnlocked: false),
+        Badge(id: "4", name: "完璧主義者", icon: "checkmark.circle.fill", color: Color("brandRed"), isUnlocked: false),
     ])
 }

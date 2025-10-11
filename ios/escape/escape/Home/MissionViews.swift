@@ -88,7 +88,7 @@ struct MissionCardView: View {
                 // ミッション完了状態
                 ZStack {
                     LinearGradient(
-                        gradient: Gradient(colors: [.green, .mint]),
+                        gradient: Gradient(colors: [Color("brandMediumBlue"), Color("brandDarkBlue")]),
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -112,7 +112,7 @@ struct MissionCardView: View {
                     }
                     .padding(24)
                 }
-                .shadow(color: .green.opacity(0.3), radius: 15, x: 0, y: 8)
+                .shadow(color: Color("brandMediumBlue").opacity(0.3), radius: 15, x: 0, y: 8)
             }
         }
         .onAppear {

@@ -21,7 +21,7 @@ struct HomeView: View {
                         Text("HiNan!")
                             .font(.largeTitle)
                             .fontWeight(.bold)
-                            .foregroundColor(.orange)
+                            .foregroundColor(Color("brandOrange"))
 
                         Spacer()
 
@@ -77,10 +77,10 @@ struct HomeView: View {
     private func loadUserBadges() {
         // TODO: Supabaseからユーザーのバッジを取得
         userBadges = [
-            Badge(id: "1", name: "初回避難", icon: "star.fill", color: .yellow, isUnlocked: true),
-            Badge(id: "2", name: "地震マスター", icon: "house.fill", color: .blue, isUnlocked: true),
-            Badge(id: "3", name: "スピードランナー", icon: "timer", color: .green, isUnlocked: false),
-            Badge(id: "4", name: "完璧主義者", icon: "checkmark.circle.fill", color: .purple, isUnlocked: false),
+            Badge(id: "1", name: "初回避難", icon: "star.fill", color: Color("brandOrange"), isUnlocked: true),
+            Badge(id: "2", name: "地震マスター", icon: "house.fill", color: Color("brandDarkBlue"), isUnlocked: true),
+            Badge(id: "3", name: "スピードランナー", icon: "timer", color: Color("brandMediumBlue"), isUnlocked: false),
+            Badge(id: "4", name: "完璧主義者", icon: "checkmark.circle.fill", color: Color("brandRed"), isUnlocked: false),
         ]
     }
 }
