@@ -143,14 +143,14 @@ struct Badge: Identifiable {
 
     var supportedDisasters: [String] {
         var disasters: [String] = []
-        if isEarthquake { disasters.append("地震") }
-        if isFlood { disasters.append("洪水") }
-        if isFire { disasters.append("火災") }
-        if isTsunami { disasters.append("津波") }
-        if isLandslide { disasters.append("土砂災害") }
-        if isStormSurge { disasters.append("高潮") }
-        if isInlandFlood { disasters.append("内水氾濫") }
-        if isVolcano { disasters.append("火山") }
+        if isEarthquake { disasters.append(String(localized: "home.disaster.earthquake", table: "Localizable")) }
+        if isFlood { disasters.append(String(localized: "home.disaster.flood", table: "Localizable")) }
+        if isFire { disasters.append(String(localized: "home.disaster.fire", table: "Localizable")) }
+        if isTsunami { disasters.append(String(localized: "home.disaster.tsunami", table: "Localizable")) }
+        if isLandslide { disasters.append(String(localized: "home.disaster.landslide", table: "Localizable")) }
+        if isStormSurge { disasters.append(String(localized: "home.disaster.storm_surge", table: "Localizable")) }
+        if isInlandFlood { disasters.append(String(localized: "home.disaster.inland_flood", table: "Localizable")) }
+        if isVolcano { disasters.append(String(localized: "home.disaster.volcano", table: "Localizable")) }
         return disasters
     }
 }

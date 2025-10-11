@@ -193,7 +193,7 @@ struct DetailBadgeBackView: View {
             // 背面の情報表示
             VStack(spacing: 8) {
                 if badge.isUnlocked {
-                    Text("取得者")
+                    Text(String(localized: "badge.getter", table: "Localizable"))
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.7))
 
@@ -202,7 +202,7 @@ struct DetailBadgeBackView: View {
                         .fontWeight(.bold)
                         .foregroundColor(.white)
 
-                    Text("取得日")
+                    Text(String(localized: "badge.acquisition_date", table: "Localizable"))
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.7))
                         .padding(.top, 4)
@@ -215,7 +215,7 @@ struct DetailBadgeBackView: View {
                         .font(.title)
                         .foregroundColor(.white.opacity(0.5))
 
-                    Text("未取得")
+                    Text(String(localized: "badge.not_acquired", table: "Localizable"))
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.7))
                 }
@@ -322,7 +322,7 @@ struct BadgeDetailView: View {
                             // 住所情報
                             if let address = badge.address {
                                 VStack(alignment: .leading, spacing: 12) {
-                                    Text("住所")
+                                    Text(String(localized: "badge.address", table: "Localizable"))
                                         .font(.headline)
                                         .foregroundColor(.white)
 
@@ -347,7 +347,7 @@ struct BadgeDetailView: View {
                             // 対応災害情報
                             if !badge.supportedDisasters.isEmpty {
                                 VStack(alignment: .leading, spacing: 12) {
-                                    Text("対応する災害")
+                                    Text(String(localized: "badge.supported_disasters", table: "Localizable"))
                                         .font(.headline)
                                         .foregroundColor(.white)
 
@@ -376,7 +376,7 @@ struct BadgeDetailView: View {
                             // マップ表示
                             if let latitude = badge.latitude, let longitude = badge.longitude {
                                 VStack(alignment: .leading, spacing: 12) {
-                                    Text("所在地")
+                                    Text(String(localized: "badge.location", table: "Localizable"))
                                         .font(.headline)
                                         .foregroundColor(.white)
 
@@ -408,7 +408,7 @@ struct BadgeDetailView: View {
                                         Image(systemName: "location.circle.fill")
                                             .font(.title2)
 
-                                        Text("このバッジを探しに行く")
+                                        Text(String(localized: "badge.find_this_badge", table: "Localizable"))
                                             .font(.headline)
                                             .fontWeight(.bold)
                                     }
@@ -432,7 +432,7 @@ struct BadgeDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("閉じる") {
+                    Button(String(localized: "badge.close", table: "Localizable")) {
                         dismiss()
                     }
                     .foregroundColor(.white)
