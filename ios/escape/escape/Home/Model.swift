@@ -124,4 +124,33 @@ struct Badge: Identifiable {
     let color: Color
     let isUnlocked: Bool
     let imageName: String?
+
+    // Shelter related information
+    let badgeNumber: String?
+    let address: String?
+    let municipality: String?
+    let isShelter: Bool
+    let isFlood: Bool
+    let isLandslide: Bool
+    let isStormSurge: Bool
+    let isEarthquake: Bool
+    let isTsunami: Bool
+    let isFire: Bool
+    let isInlandFlood: Bool
+    let isVolcano: Bool
+    let latitude: Double?
+    let longitude: Double?
+
+    var supportedDisasters: [String] {
+        var disasters: [String] = []
+        if isEarthquake { disasters.append("地震") }
+        if isFlood { disasters.append("洪水") }
+        if isFire { disasters.append("火災") }
+        if isTsunami { disasters.append("津波") }
+        if isLandslide { disasters.append("土砂災害") }
+        if isStormSurge { disasters.append("高潮") }
+        if isInlandFlood { disasters.append("内水氾濫") }
+        if isVolcano { disasters.append("火山") }
+        return disasters
+    }
 }

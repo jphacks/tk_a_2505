@@ -317,6 +317,20 @@ struct InteractiveImageLoader: View {
         icon: "star.fill",
         color: Color("brandOrange"),
         isUnlocked: true,
-        imageName: "korakuen"
+        imageName: "korakuen",
+        badgeNumber: "B001",
+        address: "東京都文京区後楽1-3-61",
+        municipality: "文京区",
+        isShelter: true,
+        isFlood: true,
+        isLandslide: false,
+        isStormSurge: false,
+        isEarthquake: true,
+        isTsunami: false,
+        isFire: true,
+        isInlandFlood: true,
+        isVolcano: false,
+        latitude: 35.7056,
+        longitude: 139.7514
     ))
 }
