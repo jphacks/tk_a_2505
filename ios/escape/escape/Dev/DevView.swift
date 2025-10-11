@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct DevView: View {
+    @Environment(\.missionStateManager) var missionStateManager
     @State private var controller = BadgeController()
     @State private var locationName = ""
     @State private var locationDescription = ""
@@ -109,6 +110,46 @@ struct DevView: View {
                 } header: {
                     Text("dev.presets")
                 }
+
+                Section {
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("Current State:")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(missionStateManager.currentMissionState.rawValue)
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(stateColor(for: missionStateManager.currentMissionState))
+                                .cornerRadius(6)
+                        }
+
+                        Button(action: generateMission) {
+                            HStack {
+                                Spacer()
+                                if missionStateManager.currentMissionState == .inProgress {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle())
+                                } else {
+                                    Text("Generate Mission")
+                                        .fontWeight(.semibold)
+                                }
+                                Spacer()
+                            }
+                        }
+                        .disabled(missionStateManager.currentMissionState == .inProgress)
+
+                        Button("Reset Mission") {
+                            missionStateManager.resetMission()
+                        }
+                        .foregroundColor(.orange)
+                    }
+                } header: {
+                    Text("Mission Generator (Mock)")
+                }
             }
             .navigationTitle("dev.title")
             .sheet(isPresented: $showImagePreview) {
@@ -143,6 +184,32 @@ struct DevView: View {
         locationDescription = ""
         colorTheme = ""
         controller.reset()
+    }
+
+    private func generateMission() {
+        Task {
+            // Set to in progress
+            missionStateManager.updateMissionState(.inProgress)
+
+            // Mock: Wait 2 seconds to simulate generation
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+
+            // Set to active after "generation"
+            missionStateManager.updateMissionState(.active)
+        }
+    }
+
+    private func stateColor(for state: MissionState) -> Color {
+        switch state {
+        case .noMission:
+            return .gray.opacity(0.2)
+        case .inProgress:
+            return .blue.opacity(0.2)
+        case .active:
+            return .green.opacity(0.2)
+        case .completed:
+            return .purple.opacity(0.2)
+        }
     }
 }
 

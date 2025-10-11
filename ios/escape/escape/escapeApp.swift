@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct escapeApp: App {
+    @State private var missionStateManager = MissionStateManager()
+
     var body: some Scene {
         WindowGroup {
             AppView()
+                .environment(missionStateManager)
         }
     }
 }
