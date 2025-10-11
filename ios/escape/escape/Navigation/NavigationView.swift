@@ -16,6 +16,7 @@ struct NavigationView: View {
                 }
 
             MapView()
+                .ignoresSafeArea()
                 .tabItem {
                     Label("Map", systemImage: "map.fill")
                 }
