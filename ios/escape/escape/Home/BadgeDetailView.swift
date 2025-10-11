@@ -332,18 +332,27 @@ struct BadgeDetailView: View {
                                         .foregroundColor(.white)
 
                                     LazyVGrid(columns: [
-                                        GridItem(.flexible()),
-                                        GridItem(.flexible()),
-                                    ], spacing: 8) {
-                                        ForEach(badge.supportedDisasters, id: \.self) { disaster in
-                                            Text(disaster)
-                                                .font(.caption)
-                                                .fontWeight(.medium)
-                                                .foregroundColor(.white)
-                                                .padding(.horizontal, 8)
-                                                .padding(.vertical, 4)
-                                                .background(Color.white.opacity(0.25))
-                                                .cornerRadius(8)
+                                        GridItem(.flexible(), alignment: .leading),
+                                        GridItem(.flexible(), alignment: .leading),
+                                    ], spacing: 12) {
+                                        ForEach(badge.supportedDisasters, id: \.name) { disaster in
+                                            HStack(spacing: 6) {
+                                                Image(systemName: disaster.icon)
+                                                    .font(.caption)
+                                                    .foregroundColor(.white)
+                                                    .frame(width: 16, height: 16)
+                                                Text(disaster.name)
+                                                    .font(.caption)
+                                                    .fontWeight(.medium)
+                                                    .foregroundColor(.white)
+                                                    .lineLimit(1)
+                                                Spacer()
+                                            }
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(Color.white.opacity(0.25))
+                                            .cornerRadius(8)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
                                         }
                                     }
                                 }
