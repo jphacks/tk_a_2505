@@ -1,0 +1,10 @@
+/*
+  InfoPlist.strings
+  escape
+
+  English localization for Info.plist keys
+*/
+
+/* Location permissions */
+"NSLocationWhenInUseUsageDescription" = "This app uses your location to show your current position on the map and help you find nearby emergency shelters.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "This app uses your location to show your current position on the map and help you find nearby emergency shelters.";

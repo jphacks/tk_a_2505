@@ -36,10 +36,10 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		779936032E969D7200339B51 /* Exceptions for "escape" folder in "escape" target */ = {
+		77710EC72E9AB38E002FA9EB /* Exceptions for "escape" folder in "escape" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"/Localized: Info.plist",
+				Info.plist,
 			);
 			target = 773D0A5F2E96912A0095C969 /* escape */;
 		};
@@ -49,7 +49,7 @@
 		773D0A622E96912A0095C969 /* escape */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				779936032E969D7200339B51 /* Exceptions for "escape" folder in "escape" target */,
+				77710EC72E9AB38E002FA9EB /* Exceptions for "escape" folder in "escape" target */,
 			);
 			path = escape;
 			sourceTree = "<group>";
@@ -440,7 +440,10 @@
 				DEVELOPMENT_TEAM = 8GDQ7ADSU4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = escape/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "HiNan!";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "This app uses your location to show your current position on the map and help you find nearby emergency shelters.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This app uses your location to show your current position on the map and help you find nearby emergency shelters.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -474,7 +477,10 @@
 				DEVELOPMENT_TEAM = 8GDQ7ADSU4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = escape/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "HiNan!";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "This app uses your location to show your current position on the map and help you find nearby emergency shelters.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This app uses your location to show your current position on the map and help you find nearby emergency shelters.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
