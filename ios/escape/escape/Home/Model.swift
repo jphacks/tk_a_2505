@@ -14,7 +14,7 @@ struct Mission: Identifiable {
     let title: String
     let name: String
     let description: String
-    let disasterType: DisasterType
+    let disasterType: DisasterType2
     let estimatedDuration: Int
     let distance: Int
     let severity: SeverityLevel
@@ -22,7 +22,7 @@ struct Mission: Identifiable {
     let aiGeneratedAt: Date
 }
 
-enum DisasterType: String, CaseIterable {
+enum DisasterType2: String, CaseIterable {
     case earthquake
     case flood
     case fire
