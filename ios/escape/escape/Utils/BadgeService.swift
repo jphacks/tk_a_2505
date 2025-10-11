@@ -42,18 +42,55 @@ class BadgeService {
         }
     }
 
-    /// Fetches badges for a specific shelter
-    /// - Parameter shelterId: The shelter UUID
-    /// - Returns: Array of shelter badges
-    func getBadgesForShelter(shelterId: UUID) async throws -> [ShelterBadge] {
-        let badges: [ShelterBadge] = try await supabase
-            .from("shelter_badges")
+    /// Fetches user's collected badges with full shelter and badge details
+    /// This function queries user_shelter_badges, then joins with shelter_badges and shelters tables
+    /// - Returns: Array of UserBadgeWithShelter containing user badge info, shelter badge info, and shelter info
+    func getUserCollectedBadgesWithDetails() async throws -> [UserBadgeWithShelter] {
+        let currentUser = try await supabase.auth.session.user
+
+        // Step 1: Fetch user's collected badges from user_shelter_badges
+        let userBadges: [UserShelterBadge] = try await supabase
+            .from("user_shelter_badges")
             .select()
-            .eq("shelter_id", value: shelterId)
+            .eq("user_id", value: currentUser.id)
+            .order("created_at", ascending: false)
             .execute()
             .value
 
-        return badges
+        // Step 2: For each user badge, fetch the corresponding shelter badge and shelter info
+        var result: [UserBadgeWithShelter] = []
+
+        for userBadge in userBadges {
+            // Fetch the shelter badge
+            let shelterBadge: ShelterBadge = try await supabase
+                .from("shelter_badges")
+                .select()
+                .eq("id", value: userBadge.badgeId)
+                .single()
+                .execute()
+                .value
+
+            // Fetch the shelter information
+            // Note: Converting UUID to String for shelter ID lookup
+            let shelter: Shelter = try await supabase
+                .from("shelters")
+                .select()
+                .eq("id", value: shelterBadge.shelterId.uuidString)
+                .single()
+                .execute()
+                .value
+
+            // Combine into UserBadgeWithShelter
+            let combined = UserBadgeWithShelter(
+                userBadgeInfo: userBadge,
+                shelterBadgeInfo: shelterBadge,
+                shelterInfo: shelter
+            )
+
+            result.append(combined)
+        }
+
+        return result
     }
 
     /// Fetches badges with full details (including shelter and first user info)

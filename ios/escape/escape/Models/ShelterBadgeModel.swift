@@ -158,3 +158,21 @@ struct UnlockBadgeRequest: Codable {
         case badgeId = "badge_id"
     }
 }
+
+// MARK: - User Badge with Shelter Details
+
+/// Represents a user's collected badge with full shelter information
+struct UserBadgeWithShelter: Codable, Identifiable {
+    let userBadgeInfo: UserShelterBadge
+    let shelterBadgeInfo: ShelterBadge
+    let shelterInfo: Shelter
+
+    var id: UUID {
+        userBadgeInfo.id
+    }
+
+    /// Converts to UI Badge model for display
+    func toBadge() -> Badge {
+        return shelterBadgeInfo.toBadge(isUnlocked: true)
+    }
+}
