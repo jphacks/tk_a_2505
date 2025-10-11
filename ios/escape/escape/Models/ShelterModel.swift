@@ -131,4 +131,25 @@ enum DisasterType: String, CaseIterable {
             return "triangle.fill"
         }
     }
+
+    var emergencyIcon: String {
+        switch self {
+        case .earthquake:
+            return "house.and.flag.fill"
+        case .flood:
+            return "drop.fill"
+        case .fire:
+            return "flame.circle.fill"
+        case .stormSurge:
+            return "wind"
+        case .tsunami:
+            return "water.waves.and.arrow.up"
+        case .landslide:
+            return "arrow.down.to.line"
+        case .inlandFlood:
+            return "drop.fill"
+        case .volcano:
+            return "triangle.fill"
+        }
+    }
 }

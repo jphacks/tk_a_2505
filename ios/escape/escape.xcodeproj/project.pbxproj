@@ -10,8 +10,6 @@
 		779935F02E96964200339B51 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 779935EF2E96964200339B51 /* Auth */; };
 		779935F42E96980600339B51 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 779935F32E96980600339B51 /* Supabase */; };
 		DD55E6A82E9A3FFE00F8AB50 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = DD55E6A72E9A3FFE00F8AB50 /* Lottie */; };
-		DD55E72D2E9A45EC00F8AB50 /* korakuen.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DD55E72B2E9A45EC00F8AB50 /* korakuen.jpg */; };
-		DD55E72E2E9A45EC00F8AB50 /* todaimae.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DD55E72C2E9A45EC00F8AB50 /* todaimae.jpg */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,8 +33,6 @@
 		773D0A602E96912A0095C969 /* escape.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = escape.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		773D0A6D2E96912E0095C969 /* escapeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = escapeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		773D0A772E96912E0095C969 /* escapeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = escapeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		DD55E72B2E9A45EC00F8AB50 /* korakuen.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = korakuen.jpg; sourceTree = "<group>"; };
-		DD55E72C2E9A45EC00F8AB50 /* todaimae.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = todaimae.jpg; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -101,8 +97,6 @@
 		773D0A572E96912A0095C969 = {
 			isa = PBXGroup;
 			children = (
-				DD55E72B2E9A45EC00F8AB50 /* korakuen.jpg */,
-				DD55E72C2E9A45EC00F8AB50 /* todaimae.jpg */,
 				773D0A622E96912A0095C969 /* escape */,
 				773D0A702E96912E0095C969 /* escapeTests */,
 				773D0A7A2E96912E0095C969 /* escapeUITests */,
@@ -256,8 +250,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DD55E72D2E9A45EC00F8AB50 /* korakuen.jpg in Resources */,
-				DD55E72E2E9A45EC00F8AB50 /* todaimae.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -445,7 +437,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = W7J5NU6H5R;
+				DEVELOPMENT_TEAM = 8GDQ7ADSU4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "HiNan!";
@@ -479,7 +471,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = W7J5NU6H5R;
+				DEVELOPMENT_TEAM = 8GDQ7ADSU4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "HiNan!";
