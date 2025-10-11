@@ -3,5 +3,6 @@ CLAUDE.md
 
 # Xcode
 *.xcworkspace/xcuserdata/
-project.xcworkspace/xcuserdata/
 *.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+**/*xcuserdata*
