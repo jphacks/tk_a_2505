@@ -10,6 +10,8 @@ import SwiftUI
 // MARK: - 統計ビュー
 
 struct StatsView: View {
+    @State private var badgeCount: Int = 0
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("home.stats.title", tableName: "Localizable")
@@ -32,10 +34,26 @@ struct StatsView: View {
 
                 StatItemView(
                     title: String(localized: "home.stats.badges_earned", table: "Localizable"),
-                    value: "2",
+                    value: "\(badgeCount)",
                     icon: "star.fill",
                     color: Color("brandOrange")
                 )
+            }
+        }
+        .onAppear {
+            loadBadgeStats()
+        }
+    }
+
+    private func loadBadgeStats() {
+        Task {
+            do {
+                let badgeService = BadgeService()
+                let stats = try await badgeService.getBadgeStats()
+                badgeCount = stats.unlocked
+            } catch {
+                debugPrint("❌ Failed to load badge stats: \(error)")
+                badgeCount = 0
             }
         }
     }
