@@ -12,8 +12,6 @@ import SwiftUI
 @Observable
 class ProfileController {
     var username = ""
-    var fullName = ""
-    var website = ""
     var isLoading = false
 
     func getInitialProfile() async {
@@ -30,8 +28,6 @@ class ProfileController {
                     .value
 
             username = profile.username ?? ""
-            fullName = profile.fullName ?? ""
-            website = profile.website ?? ""
 
         } catch {
             debugPrint(error)
@@ -49,9 +45,7 @@ class ProfileController {
                 .from("profiles")
                 .update(
                     UpdateProfileParams(
-                        username: username,
-                        fullName: fullName,
-                        website: website
+                        username: username
                     )
                 )
                 .eq("id", value: currentUser.id)

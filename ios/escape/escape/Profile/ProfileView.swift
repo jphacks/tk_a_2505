@@ -15,18 +15,13 @@ struct ProfileView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Username", text: $controller.username)
+                    TextField("profile.username", text: $controller.username)
                         .textContentType(.username)
-                        .textInputAutocapitalization(.never)
-                    TextField("Full name", text: $controller.fullName)
-                        .textContentType(.name)
-                    TextField("Website", text: $controller.website)
-                        .textContentType(.URL)
                         .textInputAutocapitalization(.never)
                 }
 
                 Section {
-                    Button("Update profile") {
+                    Button("profile.update_profile") {
                         Task {
                             await controller.updateProfile()
                         }
@@ -38,10 +33,10 @@ struct ProfileView: View {
                     }
                 }
             }
-            .navigationTitle("Profile")
+            .navigationTitle("profile.profile")
             .toolbar(content: {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Sign out", role: .destructive) {
+                    Button("profile.sign_out", role: .destructive) {
                         Task {
                             try? await controller.signOut()
                         }
@@ -55,6 +50,10 @@ struct ProfileView: View {
     }
 }
 
-#Preview {
-    ProfileView()
+#Preview("ProfileView - English") {
+    ProfileView().environment(\.locale, .init(identifier: "en"))
+}
+
+#Preview("ProfileView - Japanese") {
+    ProfileView().environment(\.locale, .init(identifier: "ja"))
 }
