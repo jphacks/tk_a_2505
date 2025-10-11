@@ -22,7 +22,7 @@ class EdgeFunctions {
         
         // Call the edge function
         let response = try await supabase.functions.invoke(
-            "your-function-name",  // Replace with your actual function name
+            "flux-schnell",
             options: FunctionInvokeOptions(
                 body: requestBody
             )
@@ -51,7 +51,7 @@ class EdgeFunctions {
         ]
         
         let response = try await supabase.functions.invoke(
-            "gemini-function-name",  // Replace with your Gemini function name
+            "gemini-llm",
             options: FunctionInvokeOptions(
                 body: requestBody
             )
