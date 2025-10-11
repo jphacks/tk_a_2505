@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		779935F02E96964200339B51 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 779935EF2E96964200339B51 /* Auth */; };
 		779935F42E96980600339B51 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 779935F32E96980600339B51 /* Supabase */; };
+		DD55E6A82E9A3FFE00F8AB50 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = DD55E6A72E9A3FFE00F8AB50 /* Lottie */; };
+		DD55E72D2E9A45EC00F8AB50 /* korakuen.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DD55E72B2E9A45EC00F8AB50 /* korakuen.jpg */; };
+		DD55E72E2E9A45EC00F8AB50 /* todaimae.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DD55E72C2E9A45EC00F8AB50 /* todaimae.jpg */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,6 +35,8 @@
 		773D0A602E96912A0095C969 /* escape.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = escape.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		773D0A6D2E96912E0095C969 /* escapeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = escapeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		773D0A772E96912E0095C969 /* escapeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = escapeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD55E72B2E9A45EC00F8AB50 /* korakuen.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = korakuen.jpg; sourceTree = "<group>"; };
+		DD55E72C2E9A45EC00F8AB50 /* todaimae.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = todaimae.jpg; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -72,6 +77,7 @@
 			files = (
 				779935F42E96980600339B51 /* Supabase in Frameworks */,
 				779935F02E96964200339B51 /* Auth in Frameworks */,
+				DD55E6A82E9A3FFE00F8AB50 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,9 +101,12 @@
 		773D0A572E96912A0095C969 = {
 			isa = PBXGroup;
 			children = (
+				DD55E72B2E9A45EC00F8AB50 /* korakuen.jpg */,
+				DD55E72C2E9A45EC00F8AB50 /* todaimae.jpg */,
 				773D0A622E96912A0095C969 /* escape */,
 				773D0A702E96912E0095C969 /* escapeTests */,
 				773D0A7A2E96912E0095C969 /* escapeUITests */,
+				DD55E6A62E9A3FFE00F8AB50 /* Frameworks */,
 				773D0A612E96912A0095C969 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -110,6 +119,13 @@
 				773D0A772E96912E0095C969 /* escapeUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		DD55E6A62E9A3FFE00F8AB50 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -134,6 +150,7 @@
 			packageProductDependencies = (
 				779935EF2E96964200339B51 /* Auth */,
 				779935F32E96980600339B51 /* Supabase */,
+				DD55E6A72E9A3FFE00F8AB50 /* Lottie */,
 			);
 			productName = escape;
 			productReference = 773D0A602E96912A0095C969 /* escape.app */;
@@ -220,6 +237,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				779935EE2E96964200339B51 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				DD55E6A52E9A3EC100F8AB50 /* XCRemoteSwiftPackageReference "lottie-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 773D0A612E96912A0095C969 /* Products */;
@@ -238,6 +256,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD55E72D2E9A45EC00F8AB50 /* korakuen.jpg in Resources */,
+				DD55E72E2E9A45EC00F8AB50 /* todaimae.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -620,6 +640,14 @@
 				minimumVersion = 2.5.1;
 			};
 		};
+		DD55E6A52E9A3EC100F8AB50 /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -632,6 +660,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 779935EE2E96964200339B51 /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
+		};
+		DD55E6A72E9A3FFE00F8AB50 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DD55E6A52E9A3EC100F8AB50 /* XCRemoteSwiftPackageReference "lottie-spm" */;
+			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
