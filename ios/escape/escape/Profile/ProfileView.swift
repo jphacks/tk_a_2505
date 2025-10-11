@@ -15,7 +15,7 @@ struct ProfileView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("profile.username", text: $controller.username)
+                    TextField("profile.username", text: $controller.name)
                         .textContentType(.username)
                         .textInputAutocapitalization(.never)
                 }

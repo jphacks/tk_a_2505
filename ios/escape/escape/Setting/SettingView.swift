@@ -8,8 +8,142 @@
 import SwiftUI
 
 struct SettingView: View {
+    @State private var controller = ProfileController()
+    @State private var showLogoutConfirmation = false
+
     var body: some View {
-        ProfileView()
+        NavigationStack {
+            Form {
+                // Profile Section
+                Section {
+                    HStack(spacing: 16) {
+                        // Profile Avatar
+                        Circle()
+                            .fill(Color.accentColor.opacity(0.2))
+                            .frame(width: 60, height: 60)
+                            .overlay(
+                                Text(controller.name.prefix(1).uppercased())
+                                    .font(.title2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.accentColor)
+                            )
+
+                        // Profile Info
+                        VStack(alignment: .leading, spacing: 4) {
+                            if controller.name.isEmpty {
+                                Text("setting.loading")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                            } else {
+                                Text(controller.name)
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                            }
+
+                            Text("setting.profile_description")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 8)
+
+                    // Edit Profile Navigation
+                    NavigationLink {
+                        ProfileEditView(controller: controller)
+                    } label: {
+                        HStack {
+                            Image(systemName: "pencil")
+                            Text("setting.edit_profile")
+                        }
+                    }
+                } header: {
+                    Text("setting.profile_section")
+                }
+
+                // Developer Section
+                Section {
+                    NavigationLink {
+                        DevView()
+                    } label: {
+                        HStack {
+                            Image(systemName: "hammer.fill")
+                            Text("dev.title")
+                        }
+                    }
+                } header: {
+                    Text("setting.developer_section")
+                }
+
+                // Account Section
+                Section {
+                    Button(role: .destructive) {
+                        showLogoutConfirmation = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                            Text("profile.sign_out")
+                        }
+                    }
+                } header: {
+                    Text("setting.account_section")
+                }
+                .confirmationDialog("setting.logout_confirmation", isPresented: $showLogoutConfirmation) {
+                    Button("profile.sign_out", role: .destructive) {
+                        Task {
+                            try? await controller.signOut()
+                        }
+                    }
+                    Button("setting.cancel", role: .cancel) {}
+                } message: {
+                    Text("setting.logout_message")
+                }
+            }
+            .navigationTitle("nav.setting")
+        }
+        .task {
+            await controller.getInitialProfile()
+        }
+    }
+}
+
+// Separate Edit Profile View
+struct ProfileEditView: View {
+    @Bindable var controller: ProfileController
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        Form {
+            Section {
+                TextField("profile.username", text: $controller.name)
+                    .textContentType(.username)
+                    .textInputAutocapitalization(.never)
+            } header: {
+                Text("setting.profile_info")
+            }
+
+            Section {
+                Button {
+                    Task {
+                        await controller.updateProfile()
+                        dismiss()
+                    }
+                } label: {
+                    HStack {
+                        Spacer()
+                        if controller.isLoading {
+                            ProgressView()
+                        } else {
+                            Text("profile.update_profile")
+                                .fontWeight(.semibold)
+                        }
+                        Spacer()
+                    }
+                }
+                .disabled(controller.isLoading || controller.name.isEmpty)
+            }
+        }
+        .navigationTitle("setting.edit_profile")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
