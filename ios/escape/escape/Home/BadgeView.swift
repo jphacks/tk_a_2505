@@ -318,32 +318,12 @@ struct SimpleImageLoader: View {
     let imageName: String
 
     var body: some View {
-        Group {
-            if let uiImage = UIImage(named: imageName) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 50, height: 50)
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
-            } else if let bundlePath = Bundle.main.path(forResource: imageName, ofType: "png"),
-                      let uiImage = UIImage(contentsOfFile: bundlePath)
-            {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 50, height: 50)
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
-            } else {
-                Image(imageName)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 50, height: 50)
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
-            }
-        }
+        Image(imageName)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 50, height: 50)
+            .clipShape(Circle())
+            .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
     }
 }
 

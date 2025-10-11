@@ -238,32 +238,12 @@ struct DetailImageLoader: View {
     let imageName: String
 
     var body: some View {
-        Group {
-            if let uiImage = UIImage(named: imageName) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 120, height: 120)
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 4)
-            } else if let bundlePath = Bundle.main.path(forResource: imageName, ofType: "png"),
-                      let uiImage = UIImage(contentsOfFile: bundlePath)
-            {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 120, height: 120)
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 4)
-            } else {
-                Image(imageName)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 120, height: 120)
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 4)
-            }
-        }
+        Image(imageName)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 120, height: 120)
+            .clipShape(Circle())
+            .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 4)
     }
 }
 
