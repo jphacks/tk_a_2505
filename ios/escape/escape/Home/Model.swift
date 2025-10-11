@@ -9,18 +9,11 @@ import SwiftUI
 
 // MARK: - Mission Model
 
-struct Mission: Identifiable {
-    let id: String
-    let title: String
-    let name: String
-    let description: String
-    let disasterType: DisasterType2
-    let estimatedDuration: Int
-    let distance: Int
-    let severity: SeverityLevel
-    let isUrgent: Bool
-    let aiGeneratedAt: Date
-}
+// Mission model is now in MissionModel.swift
+
+// MARK: - Disaster Type (Deprecated - keeping for backward compatibility)
+
+// DisasterType is now in ShelterModel.swift with UI extensions below
 
 enum DisasterType2: String, CaseIterable {
     case earthquake
