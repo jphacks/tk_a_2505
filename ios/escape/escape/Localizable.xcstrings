@@ -1051,6 +1051,40 @@
         }
       }
     },
+    "home.stats.average_distance" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avg Distance (km)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "平均距離 (km)"
+          }
+        }
+      }
+    },
+    "home.stats.average_steps" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Average Steps"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "平均歩数"
+          }
+        }
+      }
+    },
     "home.stats.badges_earned" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1204,6 +1238,23 @@
         }
       }
     },
+    "home.stats.no_missions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No missions in this period"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この期間のミッションはありません"
+          }
+        }
+      }
+    },
     "home.stats.recent_missions" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1268,6 +1319,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "今週の統計"
+          }
+        }
+      }
+    },
+    "home.stats.total_missions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Missions"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミッション数"
           }
         }
       }
@@ -1625,6 +1693,9 @@
     "Overview:" : {
 
     },
+    "Period" : {
+
+    },
     "profile.profile" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1869,6 +1940,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "プロフィール"
+          }
+        }
+      }
+    },
+    "stats.period.day" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日"
+          }
+        }
+      }
+    },
+    "stats.period.month" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Month"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月"
+          }
+        }
+      }
+    },
+    "stats.period.week" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "週"
           }
         }
       }

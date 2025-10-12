@@ -6,76 +6,90 @@
 //
 
 import Charts
+import Supabase
 import SwiftUI
 
 // MARK: - 統計ビュー
 
 struct StatsView: View {
-    @State private var recentMissions: [Mission] = []
+    @State private var statsController = StatsController()
     @State private var showingStatsDetail = false
-
-    // 統計データの計算
-    private var completedMissionsCount: Int {
-        recentMissions.filter { $0.status == .completed }.count
-    }
-
-    private var totalDistance: Double {
-        recentMissions.compactMap { $0.distances }.reduce(0, +)
-    }
-
-    private var totalSteps: Int {
-        recentMissions.compactMap { mission in
-            if let steps = mission.steps {
-                return Int(steps)
-            }
-            return nil
-        }.reduce(0, +)
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("home.stats.title", tableName: "Localizable")
                 .font(.headline)
 
-            Button(action: {
-                showingStatsDetail = true
-            }) {
-                HStack(spacing: 12) {
-                    // 左側1/4: 統計要素をアイコンと数値のみで縦に配置
-                    VStack(spacing: 16) {
-                        IconOnlyStatView(
-                            value: "\(completedMissionsCount)",
-                            icon: "checkmark.circle.fill",
-                            color: Color("brandMediumBlue")
-                        )
-
-                        IconOnlyStatView(
-                            value: String(format: "%.1f", totalDistance) + "km",
-                            icon: "figure.walk",
-                            color: Color("brandDarkBlue")
-                        )
-
-                        IconOnlyStatView(
-                            value: "\(totalSteps)",
-                            icon: "figure.walk.circle",
-                            color: Color("brandOrange")
-                        )
+            if statsController.isLoading {
+                // Loading state
+                HStack {
+                    Spacer()
+                    ProgressView()
+                        .padding()
+                    Spacer()
+                }
+                .frame(height: 120)
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+            } else if let errorMessage = statsController.errorMessage {
+                // Error state
+                VStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.title2)
+                        .foregroundColor(.red)
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                    Button("Retry") {
+                        loadRecentMissions()
                     }
-                    .frame(width: 80)
-
-                    // 右側3/4: チャート表示
-                    MissionChartView(missions: recentMissions)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 120)
+                    .buttonStyle(.bordered)
                 }
                 .padding()
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
+            } else {
+                Button(action: {
+                    showingStatsDetail = true
+                }) {
+                    HStack(spacing: 12) {
+                        // 左側1/4: 統計要素をアイコンと数値のみで縦に配置
+                        VStack(spacing: 16) {
+                            IconOnlyStatView(
+                                value: "\(statsController.completedMissionsCount)",
+                                icon: "checkmark.circle.fill",
+                                color: Color("brandMediumBlue")
+                            )
+
+                            IconOnlyStatView(
+                                value: String(format: "%.1f", statsController.totalDistance) + "km",
+                                icon: "figure.walk",
+                                color: Color("brandDarkBlue")
+                            )
+
+                            IconOnlyStatView(
+                                value: "\(statsController.totalSteps)",
+                                icon: "figure.walk.circle",
+                                color: Color("brandOrange")
+                            )
+                        }
+                        .frame(width: 80)
+
+                        // 右側3/4: チャート表示
+                        MissionChartView(missions: statsController.recentMissions)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 120)
+                    }
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(12)
+                }
+                .buttonStyle(PlainButtonStyle())
             }
-            .buttonStyle(PlainButtonStyle())
         }
         .sheet(isPresented: $showingStatsDetail) {
-            StatsDetailView(missions: recentMissions)
+            StatsDetailView(missions: statsController.recentMissions)
         }
         .onAppear {
             loadRecentMissions()
@@ -83,81 +97,20 @@ struct StatsView: View {
     }
 
     private func loadRecentMissions() {
-        // サンプルデータ - 実際にはSupabaseから取得
-        recentMissions = [
-            Mission(
-                id: UUID(),
-                userId: UUID(),
-                title: "地震避難訓練",
-                overview: "震度6強の地震",
-                disasterType: .earthquake,
-                evacuationRegion: "文京区",
-                status: .completed,
-                steps: 2500,
-                distances: 1.2,
-                createdAt: Calendar.current.date(byAdding: .day, value: -6, to: Date()) ?? Date()
-            ),
-            Mission(
-                id: UUID(),
-                userId: UUID(),
-                title: "台風避難訓練",
-                overview: "大型台風接近",
-                disasterType: .stormSurge,
-                evacuationRegion: "文京区",
-                status: .completed,
-                steps: 3200,
-                distances: 1.8,
-                createdAt: Calendar.current.date(byAdding: .day, value: -5, to: Date()) ?? Date()
-            ),
-            Mission(
-                id: UUID(),
-                userId: UUID(),
-                title: "火災避難訓練",
-                overview: "建物火災発生",
-                disasterType: .fire,
-                evacuationRegion: "文京区",
-                status: .completed,
-                steps: 1800,
-                distances: 0.9,
-                createdAt: Calendar.current.date(byAdding: .day, value: -4, to: Date()) ?? Date()
-            ),
-            Mission(
-                id: UUID(),
-                userId: UUID(),
-                title: "津波避難訓練",
-                overview: "津波警報発令",
-                disasterType: .tsunami,
-                evacuationRegion: "文京区",
-                status: .completed,
-                steps: 4100,
-                distances: 2.1,
-                createdAt: Calendar.current.date(byAdding: .day, value: -3, to: Date()) ?? Date()
-            ),
-            Mission(
-                id: UUID(),
-                userId: UUID(),
-                title: "土砂災害避難訓練",
-                overview: "土砂災害警戒",
-                disasterType: .landslide,
-                evacuationRegion: "文京区",
-                status: .completed,
-                steps: 2800,
-                distances: 1.5,
-                createdAt: Calendar.current.date(byAdding: .day, value: -2, to: Date()) ?? Date()
-            ),
-            Mission(
-                id: UUID(),
-                userId: UUID(),
-                title: "洪水避難訓練",
-                overview: "河川氾濫危険",
-                disasterType: .flood,
-                evacuationRegion: "文京区",
-                status: .completed,
-                steps: 3500,
-                distances: 1.9,
-                createdAt: Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
-            ),
-        ]
+        Task {
+            // Get current user ID from Supabase auth
+            guard let currentUser = supabase.auth.currentUser else {
+                statsController.errorMessage = "Not authenticated"
+                print("⚠️ User not authenticated for stats")
+                return
+            }
+
+            let userId = currentUser.id
+            print("📊 Loading stats for user: \(userId)")
+
+            // Fetch recent missions from Supabase
+            await statsController.fetchRecentMissions(userId: userId, limit: 30)
+        }
     }
 }
 
@@ -251,6 +204,7 @@ struct MissionChartView: View {
                 )
                 .foregroundStyle(Color("brandOrange"))
             }
+            .chartXScale(range: .plotDimension(padding: 10))
             .chartYAxis {
                 AxisMarks(position: .leading) { value in
                     AxisValueLabel {
@@ -283,112 +237,85 @@ struct MissionChartView: View {
 
 // MARK: - 統計詳細ビュー
 
+enum StatsPeriod: String, CaseIterable {
+    case day = "D"
+    case week = "W"
+    case month = "M"
+
+    var days: Int {
+        switch self {
+        case .day: return 1
+        case .week: return 7
+        case .month: return 30
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .day: return String(localized: "stats.period.day", defaultValue: "Day", table: "Localizable")
+        case .week: return String(localized: "stats.period.week", defaultValue: "Week", table: "Localizable")
+        case .month: return String(localized: "stats.period.month", defaultValue: "Month", table: "Localizable")
+        }
+    }
+}
+
 struct StatsDetailView: View {
     let missions: [Mission]
     @Environment(\.dismiss) private var dismiss
+    @State private var selectedPeriod: StatsPeriod = .week
+    @State private var detailStatsController = StatsController()
+    @State private var userId: UUID?
+
+    // Filter missions based on selected period
+    private var filteredMissions: [Mission] {
+        let calendar = Calendar.current
+        let now = Date()
+        let startDate = calendar.date(byAdding: .day, value: -selectedPeriod.days, to: now) ?? now
+
+        return missions.filter { mission in
+            mission.createdAt >= startDate && mission.createdAt <= now
+        }
+    }
+
+    // Calculate average steps for filtered missions
+    private var averageSteps: Int {
+        guard !filteredMissions.isEmpty else { return 0 }
+        let total = filteredMissions.compactMap { $0.steps }.reduce(0, +)
+        return Int(Double(total) / Double(filteredMissions.count))
+    }
+
+    // Calculate average distance for filtered missions
+    private var averageDistance: Double {
+        guard !filteredMissions.isEmpty else { return 0 }
+        let total = filteredMissions.compactMap { $0.distances }.reduce(0, +)
+        return total / Double(filteredMissions.count)
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    // 詳細チャート
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("home.stats.recent_missions", tableName: "Localizable")
-                            .font(.headline)
+                    // Period Picker and Stats
+                    PeriodPickerSection(
+                        selectedPeriod: $selectedPeriod,
+                        averageSteps: averageSteps,
+                        averageDistance: averageDistance,
+                        missionCount: filteredMissions.count
+                    )
 
-                        Chart(missions, id: \.id) { mission in
-                            let date = mission.createdAt
+                    // Detail Chart Section
+                    DetailChartSection(
+                        filteredMissions: filteredMissions,
+                        selectedPeriod: selectedPeriod
+                    )
 
-                            BarMark(
-                                x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
-                                y: .value(String(localized: "chart.steps_label", table: "Localizable"), mission.steps ?? 0),
-                                width: .fixed(30)
-                            )
-                            .foregroundStyle(Color("brandMediumBlue").opacity(0.7))
-
-                            LineMark(
-                                x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
-                                y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
-                            )
-                            .foregroundStyle(Color("brandOrange"))
-                            .lineStyle(StrokeStyle(lineWidth: 3))
-
-                            PointMark(
-                                x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
-                                y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
-                            )
-                            .foregroundStyle(Color("brandOrange"))
-                            .symbolSize(50)
-                        }
-                        .frame(height: 200)
-                        .chartYAxis {
-                            AxisMarks(position: .leading) { value in
-                                AxisValueLabel {
-                                    if let intValue = value.as(Int.self) {
-                                        Text("\(intValue)" + String(localized: "home.stats.steps_unit", table: "Localizable"))
-                                            .font(.caption)
-                                            .foregroundColor(Color("brandMediumBlue"))
-                                    }
-                                }
-                            }
-                            AxisMarks(position: .trailing) { value in
-                                AxisValueLabel {
-                                    if let intValue = value.as(Int.self) {
-                                        Text(String(format: "%.1f", Double(intValue) / 1000) + String(localized: "home.stats.distance_unit", table: "Localizable"))
-                                            .font(.caption)
-                                            .foregroundColor(Color("brandOrange"))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-
-                    // ミッション履歴
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("home.stats.mission_history", tableName: "Localizable")
-                            .font(.headline)
-
-                        ForEach(missions) { mission in
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(mission.title ?? "")
-                                        .font(.subheadline)
-                                        .fontWeight(.medium)
-
-                                    Text(mission.overview ?? "")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-
-                                    Text(mission.createdAt.formatted(date: .abbreviated, time: .omitted))
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                }
-
-                                Spacer()
-
-                                VStack(alignment: .trailing, spacing: 4) {
-                                    Text("\(mission.steps ?? 0)" + String(localized: "home.stats.steps_unit", table: "Localizable"))
-                                        .font(.caption)
-                                        .foregroundColor(Color("brandMediumBlue"))
-
-                                    Text(String(format: "%.1f", mission.distances ?? 0) + String(localized: "home.stats.distance_unit", table: "Localizable"))
-                                        .font(.caption)
-                                        .foregroundColor(Color("brandOrange"))
-                                }
-                            }
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-                        }
-                    }
+                    // Mission History Section
+                    MissionHistorySection(filteredMissions: filteredMissions)
                 }
                 .padding()
             }
             .navigationTitle(String(localized: "home.stats.detail_title", table: "Localizable"))
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(String(localized: "home.stats.close", table: "Localizable")) {
@@ -397,6 +324,237 @@ struct StatsDetailView: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Period Picker Section Component
+
+struct PeriodPickerSection: View {
+    @Binding var selectedPeriod: StatsPeriod
+    let averageSteps: Int
+    let averageDistance: Double
+    let missionCount: Int
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Picker("Period", selection: $selectedPeriod) {
+                ForEach(StatsPeriod.allCases, id: \.self) { period in
+                    Text(period.label).tag(period)
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding(.horizontal)
+
+            // Average Stats Display
+            VStack(spacing: 8) {
+                Text("home.stats.average_steps", tableName: "Localizable")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+
+                Text("\(averageSteps)")
+                    .font(.system(size: 48, weight: .bold, design: .rounded))
+                    .foregroundColor(Color("brandMediumBlue"))
+
+                HStack(spacing: 20) {
+                    VStack(spacing: 4) {
+                        Text(String(format: "%.2f", averageDistance))
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color("brandOrange"))
+                        Text("home.stats.average_distance", tableName: "Localizable")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Divider()
+                        .frame(height: 40)
+
+                    VStack(spacing: 4) {
+                        Text("\(missionCount)")
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color("brandDarkBlue"))
+                        Text("home.stats.total_missions", tableName: "Localizable")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
+        }
+    }
+}
+
+// MARK: - Detail Chart Section Component
+
+struct DetailChartSection: View {
+    let filteredMissions: [Mission]
+    let selectedPeriod: StatsPeriod
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("home.stats.recent_missions", tableName: "Localizable")
+                .font(.headline)
+                .padding(.horizontal)
+
+            if filteredMissions.isEmpty {
+                emptyChartView
+            } else {
+                missionChart
+            }
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+    }
+
+    private var emptyChartView: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "chart.bar")
+                .font(.largeTitle)
+                .foregroundColor(.gray)
+            Text("home.stats.no_data", tableName: "Localizable")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 200)
+    }
+
+    private var missionChart: some View {
+        Chart(filteredMissions, id: \.id) { mission in
+            let date = mission.createdAt
+            let barWidth: CGFloat = selectedPeriod == .day ? 60 : selectedPeriod == .week ? 30 : 15
+
+            BarMark(
+                x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
+                y: .value(String(localized: "chart.steps_label", table: "Localizable"), mission.steps ?? 0),
+                width: .fixed(barWidth)
+            )
+            .foregroundStyle(Color("brandMediumBlue").opacity(0.7))
+
+            LineMark(
+                x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
+                y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
+            )
+            .foregroundStyle(Color("brandOrange"))
+            .lineStyle(StrokeStyle(lineWidth: 3))
+
+            PointMark(
+                x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
+                y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
+            )
+            .foregroundStyle(Color("brandOrange"))
+            .symbolSize(50)
+        }
+        .frame(height: 250)
+        .chartXScale(range: .plotDimension(padding: 15))
+        .chartYAxis {
+            AxisMarks(position: .leading) { value in
+                AxisValueLabel {
+                    if let intValue = value.as(Int.self) {
+                        Text("\(intValue)" + String(localized: "home.stats.steps_unit", table: "Localizable"))
+                            .font(.caption)
+                            .foregroundColor(Color("brandMediumBlue"))
+                    }
+                }
+            }
+            AxisMarks(position: .trailing) { value in
+                AxisValueLabel {
+                    if let intValue = value.as(Int.self) {
+                        Text(String(format: "%.1f", Double(intValue) / 1000) + String(localized: "home.stats.distance_unit", table: "Localizable"))
+                            .font(.caption)
+                            .foregroundColor(Color("brandOrange"))
+                    }
+                }
+            }
+        }
+        .chartXAxis {
+            AxisMarks { _ in
+                AxisValueLabel(format: selectedPeriod == .month ? .dateTime.month().day() : .dateTime.day())
+                    .font(.caption2)
+            }
+        }
+    }
+}
+
+// MARK: - Mission History Section Component
+
+struct MissionHistorySection: View {
+    let filteredMissions: [Mission]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("home.stats.mission_history", tableName: "Localizable")
+                .font(.headline)
+                .padding(.horizontal)
+
+            if filteredMissions.isEmpty {
+                emptyHistoryView
+            } else {
+                missionList
+            }
+        }
+        .padding(.horizontal)
+    }
+
+    private var emptyHistoryView: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "list.bullet")
+                .font(.largeTitle)
+                .foregroundColor(.gray)
+            Text("home.stats.no_missions", tableName: "Localizable")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
+    }
+
+    private var missionList: some View {
+        ForEach(filteredMissions) { mission in
+            MissionHistoryRow(mission: mission)
+        }
+    }
+}
+
+// MARK: - Mission History Row Component
+
+struct MissionHistoryRow: View {
+    let mission: Mission
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(mission.title ?? "")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+
+                Text(mission.overview ?? "")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Text(mission.createdAt.formatted(date: .abbreviated, time: .omitted))
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 4) {
+                Text("\(mission.steps ?? 0)" + String(localized: "home.stats.steps_unit", table: "Localizable"))
+                    .font(.caption)
+                    .foregroundColor(Color("brandMediumBlue"))
+
+                Text(String(format: "%.1f", mission.distances ?? 0) + String(localized: "home.stats.distance_unit", table: "Localizable"))
+                    .font(.caption)
+                    .foregroundColor(Color("brandOrange"))
+            }
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(8)
     }
 }
 
