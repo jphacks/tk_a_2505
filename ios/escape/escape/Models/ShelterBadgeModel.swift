@@ -29,6 +29,16 @@ struct ShelterBadge: Codable, Identifiable {
 // MARK: - Helper Extensions
 
 extension ShelterBadge {
+    /// Constructs the public URL for the badge image from Supabase storage
+    /// - Returns: The public URL string for the badge image, or nil if badgeName is empty
+    func getImageUrl() -> String? {
+        guard !badgeName.isEmpty else { return nil }
+
+        // Construct the public URL for the image in the shelter_badges bucket
+        let baseUrl = "https://wmmddehrriniwxsgnwqy.supabase.co/storage/v1/object/public/shelter_badges"
+        return "\(baseUrl)/\(badgeName)"
+    }
+
     /// Converts the database model to a UI Badge model
     /// - Parameter isUnlocked: Whether the current user has unlocked this badge
     /// - Returns: A Badge object for display in the UI
@@ -40,6 +50,7 @@ extension ShelterBadge {
             color: determineColor(),
             isUnlocked: isUnlocked,
             imageName: nil,
+            imageUrl: getImageUrl(),
             badgeNumber: nil,
             address: nil,
             municipality: nil,
@@ -196,6 +207,7 @@ struct UserBadgeWithShelter: Codable, Identifiable {
             color: determineColor(),
             isUnlocked: true,
             imageName: determineImageName(),
+            imageUrl: shelterBadgeInfo.getImageUrl(),
             badgeNumber: shelterInfo.commonId,
             address: shelterInfo.address,
             municipality: shelterInfo.municipality,
@@ -288,6 +300,7 @@ struct Badge: Identifiable {
     let color: Color
     let isUnlocked: Bool
     let imageName: String?
+    let imageUrl: String?
 
     // Shelter related information
     let badgeNumber: String?
