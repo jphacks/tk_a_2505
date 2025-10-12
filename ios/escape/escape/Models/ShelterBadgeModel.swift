@@ -64,7 +64,8 @@ extension ShelterBadge {
             isInlandFlood: false,
             isVolcano: false,
             latitude: nil,
-            longitude: nil
+            longitude: nil,
+            firstUserName: nil
         )
     }
 
@@ -193,6 +194,7 @@ struct UserBadgeWithShelter: Codable, Identifiable {
     let userBadgeInfo: UserShelterBadge
     let shelterBadgeInfo: ShelterBadge
     let shelterInfo: Shelter
+    let firstUser: User?
 
     var id: UUID {
         userBadgeInfo.id
@@ -202,7 +204,7 @@ struct UserBadgeWithShelter: Codable, Identifiable {
     func toBadge() -> Badge {
         Badge(
             id: shelterBadgeInfo.id.uuidString,
-            name: shelterBadgeInfo.badgeName,
+            name: shelterInfo.name,
             icon: determineIcon(),
             color: determineColor(),
             isUnlocked: true,
@@ -221,7 +223,8 @@ struct UserBadgeWithShelter: Codable, Identifiable {
             isInlandFlood: shelterInfo.isInlandFlood ?? false,
             isVolcano: shelterInfo.isVolcano ?? false,
             latitude: shelterInfo.latitude,
-            longitude: shelterInfo.longitude
+            longitude: shelterInfo.longitude,
+            firstUserName: firstUser?.name
         )
     }
 
@@ -317,6 +320,9 @@ struct Badge: Identifiable {
     let isVolcano: Bool
     let latitude: Double?
     let longitude: Double?
+
+    // First user information
+    let firstUserName: String?
 
     /// Returns list of supported disasters with icons and localized names
     var supportedDisasters: [(icon: String, name: String)] {

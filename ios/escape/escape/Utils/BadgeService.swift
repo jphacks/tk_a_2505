@@ -59,11 +59,21 @@ class BadgeService {
                 .execute()
                 .value
 
+            // Fetch the first user information
+            let firstUser: User? = try? await supabase
+                .from("users")
+                .select()
+                .eq("id", value: shelterBadge.firstUserId.uuidString)
+                .single()
+                .execute()
+                .value
+
             // Combine into UserBadgeWithShelter
             let combined = UserBadgeWithShelter(
                 userBadgeInfo: userBadge,
                 shelterBadgeInfo: shelterBadge,
-                shelterInfo: shelter
+                shelterInfo: shelter,
+                firstUser: firstUser
             )
 
             result.append(combined)

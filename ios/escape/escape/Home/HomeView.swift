@@ -10,6 +10,7 @@ import SwiftUI
 struct HomeView: View {
     @State private var currentMission: Mission? = nil
     @State private var userBadges: [Badge] = []
+    @State private var badgeStats: (total: Int, unlocked: Int) = (0, 0)
     @State private var showingMissionDetail = false
 
     var body: some View {
@@ -38,7 +39,7 @@ struct HomeView: View {
                     .padding(.horizontal)
 
                     // バッジコレクション セクション
-                    BadgeCollectionView(badges: userBadges)
+                    BadgeCollectionView(badges: userBadges, stats: badgeStats)
                         .padding(.horizontal)
 
                     // 統計情報
@@ -80,9 +81,13 @@ struct HomeView: View {
                 let badgeService = BadgeService()
                 let collectedBadges = try await badgeService.getUserCollectedBadgesWithDetails()
                 userBadges = collectedBadges.map { $0.toBadge() }
+
+                // Fetch badge statistics
+                badgeStats = try await badgeService.getBadgeStats()
             } catch {
                 debugPrint("❌ Failed to load badges: \(error)")
                 userBadges = [] // Fallback to empty array on error
+                badgeStats = (0, 0)
             }
         }
     }
