@@ -113,72 +113,9 @@ struct DevView: View {
                     Text("dev.presets")
                 }
 
-                Section {
-                    TextField("Mission context (optional)", text: $missionContext, axis: .vertical)
-                        .lineLimit(2...4)
-                        .autocorrectionDisabled()
+                missionParametersSection
 
-                    Picker("Disaster Type (optional)", selection: $selectedDisasterType) {
-                        Text("Random").tag(nil as DisasterType?)
-                        ForEach(DisasterType.allCases, id: \.self) { type in
-                            Text(type.rawValue).tag(type as DisasterType?)
-                        }
-                    }
-                } header: {
-                    Text("Mission Parameters")
-                    Button("dev.load_real_shelters") {
-                        Task {
-                            await loadRealShelters()
-                        }
-                    }
-
-                    Button("Load Direct Shelters") {
-                        Task {
-                            await loadDirectShelters()
-                        }
-                    }
-
-                    if !realBadges.isEmpty {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 20) {
-                                ForEach(realBadges.prefix(5)) { badge in
-                                    BadgeItemView(badge: badge)
-                                        .onTapGesture {
-                                            if let shelterId = UUID(uuidString: badge.id),
-                                               let shelter = realShelters.first(where: { $0.id == shelterId.uuidString })
-                                            {
-                                                selectedShelter = shelter
-                                                showMissionResult = true
-                                            }
-                                        }
-                                }
-                            }
-                            .padding(.horizontal)
-                        }
-                        .frame(height: 200)
-                    }
-
-                    if !realShelters.isEmpty {
-                        ForEach(realShelters.prefix(3), id: \.id) { shelter in
-                            Button("Test: \(shelter.name)") {
-                                selectedShelter = shelter
-                                showMissionResult = true
-                            }
-                            .font(.caption)
-                        }
-                    }
-
-                    Button("dev.test_mission_result") {
-                        Task {
-                            // Always load fresh shelter data from database
-                            await loadSpecificShelter()
-                            showMissionResult = true
-                        }
-                    }
-                    .fontWeight(.semibold)
-                } header: {
-                    Text("dev.ui_components")
-                }
+                realDataSection
 
                 Section {
                     VStack(spacing: 12) {
@@ -382,6 +319,91 @@ struct DevView: View {
                     shelter: selectedShelter ?? sampleShelter
                 )
             }
+        }
+    }
+
+    private var missionParametersSection: some View {
+        Section {
+            TextField("Mission context (optional)", text: $missionContext, axis: .vertical)
+                .lineLimit(2 ... 4)
+                .autocorrectionDisabled()
+
+            Picker("Disaster Type (optional)", selection: $selectedDisasterType) {
+                Text("Random").tag(nil as DisasterType?)
+                ForEach(DisasterType.allCases, id: \.self) { type in
+                    Text(type.rawValue).tag(type as DisasterType?)
+                }
+            }
+        } header: {
+            Text("Mission Parameters")
+        }
+    }
+
+    private var realDataSection: some View {
+        Section {
+            Button("dev.load_real_shelters") {
+                Task {
+                    await loadRealShelters()
+                }
+            }
+
+            Button("Load Direct Shelters") {
+                Task {
+                    await loadDirectShelters()
+                }
+            }
+
+            if !realBadges.isEmpty {
+                badgeScrollView
+            }
+
+            if !realShelters.isEmpty {
+                shelterButtonsView
+            }
+
+            Button("dev.test_mission_result") {
+                Task {
+                    await loadSpecificShelter()
+                    showMissionResult = true
+                }
+            }
+            .fontWeight(.semibold)
+        } header: {
+            Text("dev.ui_components")
+        }
+    }
+
+    private var badgeScrollView: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 20) {
+                ForEach(realBadges.prefix(5)) { badge in
+                    BadgeItemView(badge: badge)
+                        .onTapGesture {
+                            handleBadgeTap(badge)
+                        }
+                }
+            }
+            .padding(.horizontal)
+        }
+        .frame(height: 200)
+    }
+
+    private var shelterButtonsView: some View {
+        ForEach(realShelters.prefix(3), id: \.id) { shelter in
+            Button("Test: \(shelter.name)") {
+                selectedShelter = shelter
+                showMissionResult = true
+            }
+            .font(.caption)
+        }
+    }
+
+    private func handleBadgeTap(_ badge: Badge) {
+        if let shelterId = UUID(uuidString: badge.id),
+           let shelter = realShelters.first(where: { $0.id == shelterId.uuidString })
+        {
+            selectedShelter = shelter
+            showMissionResult = true
         }
     }
 
