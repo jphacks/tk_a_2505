@@ -77,25 +77,37 @@ extension Shelter {
     }
 
     /// Returns true if the shelter supports the given disaster type
+    /// If isShelter is true, it supports all disaster types
     func supports(disasterType: DisasterType) -> Bool {
+        // Full shelters (isShelter == true) support all disaster types
+        if isShelter == true {
+            print("      ✅ Shelter '\(name)' supports all (isShelter=true)")
+            return true
+        }
+
+        // Otherwise check specific disaster type support
+        let supported: Bool
         switch disasterType {
         case .flood:
-            return isFlood == true
+            supported = isFlood == true
         case .landslide:
-            return isLandslide == true
+            supported = isLandslide == true
         case .stormSurge:
-            return isStormSurge == true
+            supported = isStormSurge == true
         case .earthquake:
-            return isEarthquake == true
+            supported = isEarthquake == true
         case .tsunami:
-            return isTsunami == true
+            supported = isTsunami == true
         case .fire:
-            return isFire == true
+            supported = isFire == true
         case .inlandFlood:
-            return isInlandFlood == true
+            supported = isInlandFlood == true
         case .volcano:
-            return isVolcano == true
+            supported = isVolcano == true
         }
+
+        print("      \(supported ? "✅" : "❌") Shelter '\(name)' - \(disasterType.rawValue): \(supported)")
+        return supported
     }
 }
 

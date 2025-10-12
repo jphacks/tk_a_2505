@@ -24,14 +24,26 @@ class MapController {
 
     /// Filtered shelters based on selected disaster types
     var filteredShelters: [Shelter] {
+        print("🔍 Filtering shelters:")
+        print("   Total shelters: \(shelters.count)")
+        print("   Selected disaster types: \(selectedDisasterTypes.map { $0.rawValue })")
+
         if selectedDisasterTypes.isEmpty {
+            print("   ✅ No filters, returning all \(shelters.count) shelters")
             return shelters
         }
-        return shelters.filter { shelter in
-            selectedDisasterTypes.contains { disasterType in
+
+        let filtered = shelters.filter { shelter in
+            let supports = selectedDisasterTypes.contains { disasterType in
                 shelter.supports(disasterType: disasterType)
             }
+            return supports
         }
+
+        print("   ✅ Filtered to \(filtered.count) shelters")
+        print("   Sample shelter - Name: \(filtered.first?.name ?? "none"), isShelter: \(filtered.first?.isShelter ?? false)")
+
+        return filtered
     }
 
     /// Fetch all shelters from Supabase

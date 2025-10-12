@@ -18,27 +18,23 @@ struct EmergencyOverlay: View {
     var body: some View {
         Button(action: onTap) {
             ZStack {
-                // Pulsing background
                 Circle()
-                    .fill(severityColor.opacity(0.3))
-                    .frame(width: 44, height: 44)
-                    .scaleEffect(isPulsing ? 1.4 : 1.0)
-                    .opacity(isPulsing ? 0 : 1)
+                    .fill(.regularMaterial)
+                    .frame(width: 50, height: 50)
+                    .shadow(radius: 4)
+
+                Image(systemName: disasterType.emergencyIcon)
+                    .font(.system(size: 24))
+                    .foregroundStyle(
+                        isPulsing ?
+                            LinearGradient(colors: [.orange, severityColor], startPoint: .topLeading, endPoint: .bottomTrailing) :
+                            LinearGradient(colors: [severityColor, .orange], startPoint: .topLeading, endPoint: .bottomTrailing)
+                    )
                     .animation(
-                        .easeInOut(duration: 1.5)
-                            .repeatForever(autoreverses: false),
+                        .easeInOut(duration: 1.0)
+                            .repeatForever(autoreverses: true),
                         value: isPulsing
                     )
-
-                // Main icon
-                Image(systemName: disasterType.emergencyIcon)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(severityColor)
-                    .clipShape(Circle())
             }
         }
         .onAppear {
