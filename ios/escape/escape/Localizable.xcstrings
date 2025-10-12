@@ -813,6 +813,23 @@
         }
       }
     },
+    "home.mission.activated" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mission Activated!"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミッション開始中！"
+          }
+        }
+      }
+    },
     "home.mission.all_complete" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -826,6 +843,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "すべてのミッションが完了しました！"
+          }
+        }
+      }
+    },
+    "home.mission.cancel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel Mission"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミッションをキャンセル"
           }
         }
       }
@@ -1241,6 +1275,125 @@
     "ID:" : {
 
     },
+    "map.danger_zone.alert_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warning! You have entered a danger zone. Please evacuate immediately to a safe location."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警告！危険区域に入りました。直ちに安全な場所へ避難してください。"
+          }
+        }
+      }
+    },
+    "map.danger_zone.alert_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Danger Zone Alert"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "危険区域警報"
+          }
+        }
+      }
+    },
+    "map.emergency.active" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emergency Alert"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "緊急警報"
+          }
+        }
+      }
+    },
+    "map.emergency.active_mission" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Evacuation in progress"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "避難中"
+          }
+        }
+      }
+    },
+    "map.emergency.completed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mission completed"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミッション完了"
+          }
+        }
+      }
+    },
+    "map.emergency.in_progress" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparing evacuation route..."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "避難経路を準備中..."
+          }
+        }
+      }
+    },
+    "map.emergency.no_mission" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No active mission"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクティブなミッションなし"
+          }
+        }
+      }
+    },
     "map.permission.denied_description" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1339,6 +1492,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "位置情報アクセス"
+          }
+        }
+      }
+    },
+    "map.shelter.ok_button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "map.shelter.reached_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You have reached %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@に到着しました"
+          }
+        }
+      }
+    },
+    "map.shelter.reached_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shelter Reached"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "避難所に到着しました"
           }
         }
       }

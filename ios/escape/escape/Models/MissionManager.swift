@@ -34,7 +34,7 @@ class MissionStateManager {
 
     /// Updates only the mission state
     func updateMissionState(_ newState: MissionState) {
-        guard var mission = currentMission else {
+        guard let mission = currentMission else {
             // If no mission exists, we can't just update the state
             print("Warning: Attempting to update state without a mission")
             return
@@ -55,16 +55,14 @@ class MissionStateManager {
         )
     }
 
+    /// Updates the current mission
+    func updateCurrentMission(_ mission: Mission?) {
+        currentMission = mission
+    }
+
     /// Resets mission state to default
     func resetMission() {
         currentMission = nil
-    }
-
-    // MARK: - Mission Data Access
-
-    /// Check if a mission exists
-    var hasMission: Bool {
-        currentMission != nil
     }
 
     /// Get mission title

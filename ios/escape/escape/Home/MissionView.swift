@@ -13,14 +13,35 @@ struct MissionCardView: View {
     let mission: Mission?
     let onTap: () -> Void
     @State private var isAnimating = false
+    @Environment(\.missionStateManager) private var missionStateManager
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("home.mission.todays_mission", tableName: "Localizable")
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
+                VStack(alignment: .leading, spacing: 8) {
+                    // Active mission indicator (only shown when mission is active in global state)
+                    if let mission = mission,
+                       let currentMission = missionStateManager.currentMission,
+                       mission.id == currentMission.id
+                    {
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(Color("brandOrange"))
+                                .frame(width: 8, height: 8)
+                                .shadow(color: Color("brandOrange").opacity(0.5), radius: 4, x: 0, y: 0)
+
+                            Text("home.mission.activated", tableName: "Localizable")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(Color("brandOrange"))
+                        }
+                    }
+
+                    Text("home.mission.todays_mission", tableName: "Localizable")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                }
 
                 Spacer()
             }
@@ -320,17 +341,21 @@ struct MissionDetailView: View {
                             // アクションボタン
                             VStack(spacing: 16) {
                                 Button(action: {
-                                    startMission()
+                                    if isMissionActive {
+                                        cancelMission()
+                                    } else {
+                                        startMission()
+                                    }
                                 }) {
                                     HStack {
-                                        Image(systemName: "play.circle.fill")
+                                        Image(systemName: isMissionActive ? "xmark.circle.fill" : "play.circle.fill")
                                             .font(.title2)
 
-                                        Text("home.mission.start", tableName: "Localizable")
+                                        Text(isMissionActive ? String(localized: "home.mission.cancel", table: "Localizable") : String(localized: "home.mission.start", table: "Localizable"))
                                             .font(.headline)
                                             .fontWeight(.bold)
                                     }
-                                    .foregroundColor(mission.disasterType?.color ?? Color("brandOrange"))
+                                    .foregroundColor(isMissionActive ? .red : (mission.disasterType?.color ?? Color("brandOrange")))
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 16)
                                     .background(Color.white)
@@ -369,6 +394,16 @@ struct MissionDetailView: View {
         return formatter
     }
 
+    private var isMissionActive: Bool {
+        // Check if current global mission matches this mission
+        if let currentMission = missionStateManager.currentMission,
+           let thisMission = mission
+        {
+            return currentMission.id == thisMission.id
+        }
+        return false
+    }
+
     private func startMission() {
         guard let mission = mission else { return }
 
@@ -386,6 +421,16 @@ struct MissionDetailView: View {
             // Switch to map tab
             selectedTab = .map
         }
+    }
+
+    private func cancelMission() {
+        print("❌ Mission cancelled")
+
+        // Reset global mission state
+        missionStateManager.resetMission()
+
+        // Dismiss the sheet
+        dismiss()
     }
 }
 
