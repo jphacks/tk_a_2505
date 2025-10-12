@@ -361,8 +361,6 @@ struct MissionDetailView: View {
                                     .background(Color.white)
                                     .cornerRadius(16)
                                 }
-                                .scaleEffect(isAnimating ? 1.05 : 1.0)
-                                .animation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true), value: isAnimating)
                             }
                             .padding(.horizontal, 24)
                             .padding(.bottom, 40)
