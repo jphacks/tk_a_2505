@@ -168,6 +168,73 @@ class MissionController {
             .execute()
     }
 
+    /// Checks if user has an active mission with status 'have'
+    /// Returns the active mission if found, nil otherwise
+    func fetchActiveMission(userId: UUID) async -> Mission? {
+        do {
+            print("🔍 Checking for active mission for user: \(userId)")
+
+            let userIdLowercase = userId.uuidString.lowercased()
+
+            let response: [Mission] = try await supabase
+                .from("missions")
+                .select()
+                .eq("user_id", value: userIdLowercase)
+                .eq("status", value: "have")
+                .order("created_at", ascending: false)
+                .limit(1)
+                .execute()
+                .value
+
+            if let mission = response.first {
+                print("✅ Found active mission: \(mission.id)")
+                return mission
+            } else {
+                print("ℹ️ No active mission found")
+                return nil
+            }
+        } catch {
+            print("❌ Error checking for active mission: \(error)")
+            return nil
+        }
+    }
+
+    /// Checks if user has an active mission, and if not, generates a new one
+    /// This should be called when the app launches
+    func ensureUserHasActiveMission(userId: UUID) async {
+        print("🚀 Ensuring user has an active mission...")
+
+        // Check if user already has an active mission
+        let activeMission = await fetchActiveMission(userId: userId)
+
+        if activeMission != nil {
+            print("✅ User already has an active mission, skipping generation")
+            todaysMission = activeMission
+            return
+        }
+
+        // No active mission found, generate a new one
+        print("🎯 No active mission found, generating new mission...")
+        isLoading = true
+        errorMessage = nil
+
+        do {
+            let missionGenerator = MissionGenerator()
+            let newMission = try await missionGenerator.generateMission()
+
+            print("✅ New mission generated: \(newMission.id)")
+            print("   Title: \(newMission.title ?? "nil")")
+            print("   Status: \(newMission.status.rawValue)")
+
+            todaysMission = newMission
+        } catch {
+            errorMessage = "Failed to generate mission: \(error.localizedDescription)"
+            print("❌ Error generating mission: \(error)")
+        }
+
+        isLoading = false
+    }
+
     /// Resets the controller state
     func reset() {
         isLoading = false
