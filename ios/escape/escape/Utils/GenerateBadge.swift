@@ -58,6 +58,87 @@ class BadgeGenerator {
 
     // MARK: - Private Helper Methods
 
+    /// Fetches the shelter address from Supabase by name
+    /// - Parameter locationName: The name of the shelter
+    /// - Returns: The address string, or empty string if not found
+    private func fetchShelterAddress(locationName: String) async -> String {
+        do {
+            struct Shelter: Codable {
+                let address: String
+            }
+
+            let response: [Shelter] = try await supabase
+                .from("shelters")
+                .select("address")
+                .eq("name", value: locationName)
+                .limit(1)
+                .execute()
+                .value
+
+            return response.first?.address ?? ""
+        } catch {
+            debugPrint("⚠️ Failed to fetch shelter address: \(error)")
+            return ""
+        }
+    }
+
+    /// Uses AI to generate location description and color theme from just the location name
+    /// - Parameter locationName: The name of the location
+    /// - Returns: Tuple containing (locationDescription, colorTheme)
+    private func generateLocationDetails(locationName: String) async throws -> (description: String, colorTheme: String) {
+        // Fetch the address from the shelters table
+        let address = await fetchShelterAddress(locationName: locationName)
+
+        // Build the prompt with both name and address
+        var locationInfo = "Given the location name \"\(locationName)\""
+        if !address.isEmpty {
+            locationInfo += " at address \"\(address)\""
+        }
+
+        let locationDetailsPrompt = """
+        \(locationInfo), generate a detailed description and color theme for creating a collectible badge.
+
+        Provide your response in the following format:
+        DESCRIPTION: [A detailed description of the location's key visual characteristics, iconic elements, architectural features, natural elements, or cultural significance. 2-3 sentences.]
+        COLOR_THEME: [Specific color palette that represents this location, e.g., "modern urban blues and greys, traditional greens and reds"]
+
+        Here is an example:
+
+        Input: Location name "後楽園" at address "Tokyo, Bunkyo City, Koraku 1-3-61"
+        Output:
+        DESCRIPTION: Features the iconic Tokyo Dome stadium, Kōrakuen Garden with traditional Japanese elements like bridges and ginkgo trees, and amusement park rides including Ferris wheels and roller coasters
+        COLOR_THEME: modern urban blues and greys for the Dome, traditional greens, reds, and golds for the garden elements
+
+        Now generate the description and color theme for the given location. Be specific and visual in your descriptions. Focus on elements that would make a great badge design.
+        """
+
+        // Call Gemini to generate location details
+        let response = try await edgeFunctions.generateScenario(prompt: locationDetailsPrompt)
+
+        // Parse the response
+        let (description, colorTheme) = parseLocationDetails(from: response)
+
+        return (description, colorTheme)
+    }
+
+    /// Parses the AI response to extract description and color theme
+    private func parseLocationDetails(from response: String) -> (description: String, colorTheme: String) {
+        let lines = response.components(separatedBy: .newlines)
+
+        var description = "A notable location"
+        var colorTheme = "vibrant and diverse colors"
+
+        for line in lines {
+            if line.hasPrefix("DESCRIPTION:") {
+                description = line.replacingOccurrences(of: "DESCRIPTION:", with: "").trimmingCharacters(in: .whitespaces)
+            } else if line.hasPrefix("COLOR_THEME:") {
+                colorTheme = line.replacingOccurrences(of: "COLOR_THEME:", with: "").trimmingCharacters(in: .whitespaces)
+            }
+        }
+
+        return (description, colorTheme)
+    }
+
     /// Generates an optimized prompt for badge creation using Gemini LLM
     private func generateBadgePrompt(
         locationName: String,
@@ -93,6 +174,21 @@ class BadgeGenerator {
     }
 
     // MARK: - Convenience Methods
+
+    /// Generates a badge using AI to create locationDescription and colorTheme from just the location name
+    /// - Parameter locationName: The name of the location (e.g., "後楽園", "Tokyo Tower")
+    /// - Returns: Tuple containing the badge image URL and the prompt used
+    func generateBadgeFromLocationName(_ locationName: String) async throws -> (imageUrl: String, prompt: String) {
+        // Step 1: Use AI to generate location description and color theme
+        let (locationDescription, colorTheme) = try await generateLocationDetails(locationName: locationName)
+
+        // Step 2: Generate the badge using the AI-generated details
+        return try await generateBadge(
+            locationName: locationName,
+            locationDescription: locationDescription,
+            colorTheme: colorTheme
+        )
+    }
 
     /// Quick badge generation with preset location data
     func generateBadgeForShelter(_ shelterName: String) async throws -> (imageUrl: String, prompt: String) {
