@@ -14,6 +14,10 @@ struct DevView: View {
     @State private var locationDescription = ""
     @State private var colorTheme = ""
     @State private var showImagePreview = false
+    @State private var showMissionResult = false
+    @State private var realShelters: [Shelter] = []
+    @State private var realBadges: [Badge] = []
+    @State private var selectedShelter: Shelter?
 
     var body: some View {
         NavigationStack {
@@ -109,6 +113,52 @@ struct DevView: View {
                     .foregroundColor(.red)
                 } header: {
                     Text("dev.presets")
+                }
+
+                Section {
+                    Button("dev.load_real_shelters") {
+                        Task {
+                            await loadRealShelters()
+                        }
+                    }
+
+                    if !realBadges.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 20) {
+                                ForEach(realBadges.prefix(5)) { badge in
+                                    BadgeItemView(badge: badge)
+                                        .onTapGesture {
+                                            if let shelterId = UUID(uuidString: badge.id),
+                                               let shelter = realShelters.first(where: { $0.id == shelterId.uuidString })
+                                            {
+                                                selectedShelter = shelter
+                                                showMissionResult = true
+                                            }
+                                        }
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                        .frame(height: 200)
+                    }
+
+                    if !realShelters.isEmpty {
+                        ForEach(realShelters.prefix(3), id: \.id) { shelter in
+                            Button("Test: \(shelter.name)") {
+                                selectedShelter = shelter
+                                showMissionResult = true
+                            }
+                            .font(.caption)
+                        }
+                    }
+
+                    Button("dev.test_mission_result") {
+                        selectedShelter = nil
+                        showMissionResult = true
+                    }
+                    .fontWeight(.semibold)
+                } header: {
+                    Text("dev.ui_components")
                 }
 
                 Section {
@@ -294,6 +344,12 @@ struct DevView: View {
                     ImagePreviewView(imageUrl: imageUrl)
                 }
             }
+            .sheet(isPresented: $showMissionResult) {
+                MissionResultView(
+                    mission: sampleMission,
+                    shelter: selectedShelter ?? sampleShelter
+                )
+            }
         }
     }
 
@@ -347,6 +403,187 @@ struct DevView: View {
         case .completed:
             return .purple.opacity(0.2)
         }
+    }
+
+    private func loadRealShelters() async {
+        do {
+            // Load shelter badges with their associated shelter information
+            let shelterBadges: [ShelterBadgeWithDetails] = try await supabase
+                .from("shelter_badges")
+                .select("""
+                    id,
+                    badge_name,
+                    shelter_id,
+                    first_user_id,
+                    created_at,
+                    shelter:shelters(
+                        id,
+                        number,
+                        common_id,
+                        name,
+                        address,
+                        municipality,
+                        is_shelter,
+                        is_flood,
+                        is_landslide,
+                        is_storm_surge,
+                        is_earthquake,
+                        is_tsunami,
+                        is_fire,
+                        is_inland_flood,
+                        is_volcano,
+                        is_same_address_as_shelter,
+                        other_municipal_notes,
+                        accepted_people,
+                        latitude,
+                        longitude,
+                        remarks,
+                        last_updated
+                    )
+                """)
+                .limit(5)
+                .execute()
+                .value
+
+            await MainActor.run {
+                // Extract shelters and convert shelter badges to UI badges
+                realShelters = shelterBadges.compactMap { $0.shelter }
+                realBadges = shelterBadges.compactMap { shelterBadgeDetail in
+                    guard let shelter = shelterBadgeDetail.shelter else { return nil }
+
+                    // Create a Badge object using shelter information and badge data
+                    return Badge(
+                        id: shelterBadgeDetail.shelterId.uuidString,
+                        name: shelter.name,
+                        icon: determineIcon(for: shelterBadgeDetail.badgeName),
+                        color: determineColor(for: shelterBadgeDetail.badgeName),
+                        isUnlocked: true,
+                        imageName: determineImageName(for: shelter.name),
+                        imageUrl: constructImageUrl(for: shelterBadgeDetail.badgeName),
+                        badgeNumber: shelter.commonId,
+                        address: shelter.address,
+                        municipality: shelter.municipality,
+                        isShelter: shelter.isShelter ?? false,
+                        isFlood: shelter.isFlood ?? false,
+                        isLandslide: shelter.isLandslide ?? false,
+                        isStormSurge: shelter.isStormSurge ?? false,
+                        isEarthquake: shelter.isEarthquake ?? false,
+                        isTsunami: shelter.isTsunami ?? false,
+                        isFire: shelter.isFire ?? false,
+                        isInlandFlood: shelter.isInlandFlood ?? false,
+                        isVolcano: shelter.isVolcano ?? false,
+                        latitude: shelter.latitude,
+                        longitude: shelter.longitude,
+                        firstUserName: nil
+                    )
+                }
+            }
+        } catch {
+            print("Failed to load shelter badges: \(error)")
+        }
+    }
+
+    private func determineIcon(for badgeName: String) -> String {
+        let lowerName = badgeName.lowercased()
+
+        if lowerName.contains("first") || lowerName.contains("pioneer") {
+            return "star.fill"
+        } else if lowerName.contains("shelter") || lowerName.contains("避難所") {
+            return "house.fill"
+        } else if lowerName.contains("earthquake") || lowerName.contains("地震") {
+            return "waveform.path.ecg"
+        } else if lowerName.contains("flood") || lowerName.contains("洪水") {
+            return "water.waves"
+        } else if lowerName.contains("fire") || lowerName.contains("火災") {
+            return "flame.fill"
+        } else {
+            return "medal.fill"
+        }
+    }
+
+    private func determineColor(for badgeName: String) -> Color {
+        let lowerName = badgeName.lowercased()
+
+        if lowerName.contains("first") || lowerName.contains("pioneer") {
+            return Color("brandOrange")
+        } else if lowerName.contains("earthquake") || lowerName.contains("地震") {
+            return Color("brandOrange")
+        } else if lowerName.contains("flood") || lowerName.contains("tsunami") ||
+            lowerName.contains("洪水") || lowerName.contains("津波")
+        {
+            return Color("brandDarkBlue")
+        } else if lowerName.contains("fire") || lowerName.contains("火災") {
+            return Color("brandRed")
+        } else {
+            return Color("brandPeach")
+        }
+    }
+
+    private func determineImageName(for shelterName: String) -> String? {
+        let lowerName = shelterName.lowercased()
+
+        if lowerName.contains("後楽園") || lowerName.contains("korakuen") {
+            return "korakuen"
+        } else if lowerName.contains("東大") || lowerName.contains("todai") {
+            return "todaimae"
+        } else if lowerName.contains("ロゴ") || lowerName.contains("logo") {
+            return "logo"
+        }
+
+        return nil
+    }
+
+    private func constructImageUrl(for badgeName: String) -> String? {
+        guard !badgeName.isEmpty else { return nil }
+        let baseUrl = "https://wmmddehrriniwxsgnwqy.supabase.co/storage/v1/object/public/shelter_badges"
+        return "\(baseUrl)/\(badgeName)"
+    }
+
+    // MARK: - Sample Data for Testing
+
+    private var sampleMission: Mission {
+        Mission(
+            id: UUID(),
+            userId: UUID(),
+            title: "地震避難訓練",
+            overview: "マグニチュード7.3の地震が発生しました。最寄りの避難所へ安全に避難してください。",
+            disasterType: .earthquake,
+            evacuationRegion: "東京都文京区",
+            status: .completed,
+            steps: 1234,
+            distances: 850.0,
+            createdAt: Date()
+        )
+    }
+
+    private var sampleShelter: Shelter {
+        // Use a fixed UUID for testing - this should be a real shelter ID from your database
+        let testShelterId = "550e8400-e29b-41d4-a716-446655440000"
+
+        return Shelter(
+            id: testShelterId,
+            number: 1,
+            commonId: "BUNKYO001",
+            name: "後楽園避難所",
+            address: "東京都文京区後楽1-3-61",
+            municipality: "文京区",
+            isShelter: true,
+            isFlood: false,
+            isLandslide: false,
+            isStormSurge: false,
+            isEarthquake: true,
+            isTsunami: false,
+            isFire: true,
+            isInlandFlood: false,
+            isVolcano: false,
+            isSameAddressAsShelter: true,
+            otherMunicipalNotes: nil,
+            acceptedPeople: "避難住民",
+            latitude: 35.7056,
+            longitude: 139.7519,
+            remarks: "東京ドーム近く",
+            lastUpdated: Date()
+        )
     }
 }
 
