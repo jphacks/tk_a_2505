@@ -227,31 +227,29 @@ struct MissionChartView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            Chart {
-                ForEach(missions, id: \.id) { mission in
-                    let date = mission.createdAt
+            Chart(missions, id: \.id) { mission in
+                let date = mission.createdAt
 
-                    // 歩数の棒グラフ
-                    BarMark(
-                        x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
-                        y: .value(String(localized: "chart.steps_label", table: "Localizable"), mission.steps ?? 0)
-                    )
-                    .foregroundStyle(Color("brandMediumBlue").opacity(0.7))
+                // 歩数の棒グラフ
+                BarMark(
+                    x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
+                    y: .value(String(localized: "chart.steps_label", table: "Localizable"), mission.steps ?? 0)
+                )
+                .foregroundStyle(Color("brandMediumBlue").opacity(0.7))
 
-                    // 距離の折れ線グラフ（スケール調整のため1000倍）
-                    LineMark(
-                        x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
-                        y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
-                    )
-                    .foregroundStyle(Color("brandOrange"))
-                    .lineStyle(StrokeStyle(lineWidth: 2))
+                // 距離の折れ線グラフ（スケール調整のため1000倍）
+                LineMark(
+                    x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
+                    y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
+                )
+                .foregroundStyle(Color("brandOrange"))
+                .lineStyle(StrokeStyle(lineWidth: 2))
 
-                    PointMark(
-                        x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
-                        y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
-                    )
-                    .foregroundStyle(Color("brandOrange"))
-                }
+                PointMark(
+                    x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
+                    y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
+                )
+                .foregroundStyle(Color("brandOrange"))
             }
             .chartYAxis {
                 AxisMarks(position: .leading) { value in
@@ -298,31 +296,29 @@ struct StatsDetailView: View {
                         Text("home.stats.recent_missions", tableName: "Localizable")
                             .font(.headline)
 
-                        Chart {
-                            ForEach(missions, id: \.id) { mission in
-                                let date = mission.createdAt
+                        Chart(missions, id: \.id) { mission in
+                            let date = mission.createdAt
 
-                                BarMark(
-                                    x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
-                                    y: .value(String(localized: "chart.steps_label", table: "Localizable"), mission.steps ?? 0),
-                                    width: .fixed(30)
-                                )
-                                .foregroundStyle(Color("brandMediumBlue").opacity(0.7))
+                            BarMark(
+                                x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
+                                y: .value(String(localized: "chart.steps_label", table: "Localizable"), mission.steps ?? 0),
+                                width: .fixed(30)
+                            )
+                            .foregroundStyle(Color("brandMediumBlue").opacity(0.7))
 
-                                LineMark(
-                                    x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
-                                    y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
-                                )
-                                .foregroundStyle(Color("brandOrange"))
-                                .lineStyle(StrokeStyle(lineWidth: 3))
+                            LineMark(
+                                x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
+                                y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
+                            )
+                            .foregroundStyle(Color("brandOrange"))
+                            .lineStyle(StrokeStyle(lineWidth: 3))
 
-                                PointMark(
-                                    x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
-                                    y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
-                                )
-                                .foregroundStyle(Color("brandOrange"))
-                                .symbolSize(50)
-                            }
+                            PointMark(
+                                x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
+                                y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
+                            )
+                            .foregroundStyle(Color("brandOrange"))
+                            .symbolSize(50)
                         }
                         .frame(height: 200)
                         .chartYAxis {
