@@ -227,7 +227,7 @@ struct MissionChartView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            Chart(missions, id: \.id) { mission in
+            Chart(missions) { mission in
                 let date = mission.createdAt
 
                 // 歩数の棒グラフ
@@ -296,7 +296,7 @@ struct StatsDetailView: View {
                         Text("home.stats.recent_missions", tableName: "Localizable")
                             .font(.headline)
 
-                        Chart(missions, id: \.id) { mission in
+                        Chart(missions) { mission in
                             let date = mission.createdAt
 
                             BarMark(

@@ -9,15 +9,8 @@
 /* Begin PBXBuildFile section */
 		779935F02E96964200339B51 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 779935EF2E96964200339B51 /* Auth */; };
 		779935F42E96980600339B51 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 779935F32E96980600339B51 /* Supabase */; };
-<<<<<<< HEAD
-=======
-		DD55E6A82E9A3FFE00F8AB50 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = DD55E6A72E9A3FFE00F8AB50 /* Lottie */; };
-<<<<<<< HEAD
->>>>>>> origin/main
-=======
 		DD55E72D2E9A45EC00F8AB50 /* korakuen.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DD55E72B2E9A45EC00F8AB50 /* korakuen.jpg */; };
 		DD55E72E2E9A45EC00F8AB50 /* todaimae.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DD55E72C2E9A45EC00F8AB50 /* todaimae.jpg */; };
->>>>>>> origin/main
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -448,11 +441,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-<<<<<<< HEAD
 				DEVELOPMENT_TEAM = 68BP6L3U4A;
-=======
-				DEVELOPMENT_TEAM = 5W85326XZZ;
->>>>>>> origin/main
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = escape/Info.plist;
@@ -487,11 +476,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-<<<<<<< HEAD
-				DEVELOPMENT_TEAM = 68BP6L3U4A;
-=======
 				DEVELOPMENT_TEAM = 5W85326XZZ;
->>>>>>> origin/main
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = escape/Info.plist;
