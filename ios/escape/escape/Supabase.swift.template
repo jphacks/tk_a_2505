@@ -1,0 +1,15 @@
+//
+//  Supabase.swift
+//  escape
+//
+//  Created by Thanasan Kumdee on 8/10/2568 BE.
+//
+
+import Foundation
+import Supabase
+
+
+let supabase = SupabaseClient(
+    supabaseURL: URL(string: "https://your-project.supabase.co")!,
+    supabaseKey: "your_supabase_publishable_key_here"
+)
