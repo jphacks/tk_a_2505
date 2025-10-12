@@ -5,6 +5,7 @@
 //  Created for development and testing purposes
 //
 
+import Supabase
 import SwiftUI
 
 struct DevView: View {
