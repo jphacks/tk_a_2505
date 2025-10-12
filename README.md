@@ -1,5 +1,5 @@
 
-![IMAGE ALT TEXT HERE](media/header.png)
+![IMAGE ALT TEXT HERE](media/banner.jpg)
 
 ## 製品概要
 
@@ -15,7 +15,7 @@
 
 研究によると、日本で防災訓練に参加したことがある人は全体の約15％にとどまり、**約半数（50％）は一度も参加したことがない**と報告されています。また、18〜29歳の若年層ではわずか33.3％と、他の世代に比べて参加率が最も低くなっています。外国人住民の間でも、情報や環境の違いから防災行動への参加が難しいケースが多く見られます。
 
-（参考: [PMC+1](https://pmc.ncbi.nlm.nih.gov/articles/PMC11543362/?utm_source=chatgpt.com), [JMAJ](https://www.jmaj.jp/download.php?id=10.31662%2Fjmaj.2024-0049&utm_source=chatgpt.com), [J-STAGE](https://www.jstage.jst.go.jp/article/itel/2/1/2_2.1.Trans.p007/_pdf?utm_source=chatgpt.com)）
+（参考: [PMC+1](https://pmc.ncbi.nlm.nih.gov/articles/PMC11543362/?utm_source=chatgpt.com), [JMAJ](https://www.jmaj.jp/download.php?id=10.31662%2Fjmaj.2024-0049), [J-STAGE](https://www.jstage.jst.go.jp/article/itel/2/1/2_2.1.Trans.p007/_pdf)）
 
 この現状を変え、誰もが避難訓練を楽しみながら継続できる未来を目指し、私たちは『歩いて避難訓練を習慣化できるアプリ: HiNan! 』を開発しました。
 
