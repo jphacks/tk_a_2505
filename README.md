@@ -1,6 +1,10 @@
 
 ![IMAGE ALT TEXT HERE](media/banner.jpg)
 
+## 受賞 🏆
+
+**東京会場A Hack Day Sponsor Award** - 川田テクノシステム株式会社
+
 ## 製品概要
 
 ### HiNan!
@@ -105,9 +109,15 @@ AIが地域に合わせて毎日新しい災害シナリオを生成し、ユー
 
   1. [`ios/escape/escape/Map/MapView.swift`](ios/escape/escape/Map/MapView.swift)
         **何がすごいのか**: リアルタイムの位置追跡と、ユーザーに向かって追いかけてくるゾンビのAI経路探索アルゴリズムを実装した、災害時の避難訓練を体験できるインタラクティブな地図ビュー
-     
+
   2. [`supabase/edge_functions/generate_mission/index.ts`](supabase/edge_functions/generate_mission/index.ts)
         **何がすごいのか**: Gemini AIを使って日本語の災害シナリオをJSON形式で生成し、システムプロンプトで出力を制御。AI呼び出し、レスポンスのパース、バリデーション、データベース保存まで、エラーハンドリングと詳細なロギングを含めた完全なパイプラインを実装。
 
     3. [`ios/escape/escape/Home/MissionController.swift`](ios/escape/escape/Home/MissionController.swift)
         **何がすごいのか**: Supabaseとの通信ロジックを完全に分離し、Observable patternでクリーンなアーキテクチャを実現。タイムゾーンを考慮した日付範囲のクエリで「今日のミッション」を判定し、ユーザーがミッションを持っていない場合は自動的に新しいミッションを生成する賢い仕組みを実装。
+
+### リポジトリガイド
+
+- ディレクトリ詳細は [リポジトリガイド](repository-guide.md) をご覧ください。
+
+- 環境構築については [setup.md](setup.md) をご覧ください。
