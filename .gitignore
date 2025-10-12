@@ -6,3 +6,8 @@ CLAUDE.md
 *.xcodeproj/project.xcworkspace/xcuserdata/
 *.xcodeproj/xcuserdata/
 **/*xcuserdata*
+supabase/.temp
+supabase/supabase
+
+# Configuration files with secrets
+ios/escape/escape/Supabase.swift
