@@ -214,6 +214,18 @@ struct MissionResultView: View {
                 return
             }
 
+            // Double-check that badge doesn't exist before generating
+            let existingBadgeRecheck = try await badgeService.getBadgeForShelter(shelterId: shelterUUID)
+            if let existingBadge = existingBadgeRecheck {
+                // Badge was created by another request, use it
+                acquiredBadge = createBadgeUIModel(from: existingBadge, shelter: shelter)
+                generatedBadgeUrl = existingBadge.getImageUrl()
+                try? await badgeService.unlockBadge(badgeId: existingBadge.id)
+                isBadgeGenerated = true
+                showSuccessAlert = true
+                return
+            }
+
             // Generate badge using devtools method with user description
             await badgeController.generateBadge(
                 locationName: shelter.name,
@@ -224,9 +236,24 @@ struct MissionResultView: View {
             if let badgeUrl = badgeController.generatedBadgeUrl {
                 generatedBadgeUrl = badgeUrl
 
+                // Extract filename from URL for badge name
+                let badgeFileName = extractFileNameFromUrl(badgeUrl) ?? "badge_\(Int(Date().timeIntervalSince1970 * 1000)).png"
+
+                // Final check before creating to prevent race conditions
+                let finalCheck = try await badgeService.getBadgeForShelter(shelterId: shelterUUID)
+                if let existingBadge = finalCheck {
+                    // Badge was created by another request, use it instead
+                    acquiredBadge = createBadgeUIModel(from: existingBadge, shelter: shelter)
+                    generatedBadgeUrl = existingBadge.getImageUrl()
+                    try? await badgeService.unlockBadge(badgeId: existingBadge.id)
+                    isBadgeGenerated = true
+                    showSuccessAlert = true
+                    return
+                }
+
                 // Step 1: Create shelter badge in shelter_badges table
                 let createdBadge = try await badgeService.createShelterBadge(
-                    badgeName: "First Visit: \(shelter.name)",
+                    badgeName: badgeFileName,
                     shelterId: shelterUUID,
                     firstUserId: await supabase.auth.session.user.id
                 )
@@ -275,6 +302,19 @@ struct MissionResultView: View {
             longitude: shelter.longitude,
             firstUserName: "You"
         )
+    }
+
+    // Helper function to extract filename from URL
+    private func extractFileNameFromUrl(_ urlString: String) -> String? {
+        guard let url = URL(string: urlString) else { return nil }
+        let fileName = url.lastPathComponent
+
+        // If the filename doesn't contain a proper extension, return nil
+        if fileName.contains(".") {
+            return fileName
+        }
+
+        return nil
     }
 }
 
