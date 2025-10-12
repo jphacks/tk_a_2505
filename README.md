@@ -103,3 +103,4 @@ AIが地域に合わせて毎日新しい災害シナリオを生成し、ユー
 
 - 特に力を入れた部分をファイルリンク、またはcommit_idを記載してください。
     - ecb694083f6c4d1909f82ac7f64a585d08134f8e https://github.com/jphacks/tk_a_2505/pull/12
+    - ea87d076ecc82fbcb9a59662706691d085516b03 https://github.com/jphacks/tk_a_2505/pull/39
