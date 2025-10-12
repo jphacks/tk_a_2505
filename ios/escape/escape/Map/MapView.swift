@@ -9,6 +9,15 @@ import CoreLocation
 import MapKit
 import SwiftUI
 
+// MARK: - Zombie Model
+
+struct Zombie: Identifiable {
+    let id = UUID()
+    var coordinate: CLLocationCoordinate2D
+    var angle: Double // Direction of movement
+    var speed: Double // Speed in meters per second
+}
+
 struct MapView: View {
     @StateObject private var locationManager = LocationManager()
     @State private var mapController = MapController()
@@ -21,6 +30,10 @@ struct MapView: View {
     @State private var showDangerZoneAlert = false
     @State private var dangerZoneIndex: Int?
     @State private var showPinDetailsSheet = false
+    @State private var showCompleteView = false
+    @State private var showZombieAlert = false
+    @State private var zombies: [Zombie] = []
+    @State private var hitByZombieIds: Set<UUID> = []
     @Environment(\.missionStateManager) var missionStateManager
 
     var body: some View {
@@ -39,7 +52,9 @@ struct MapView: View {
             isPresented: $showShelterReachedAlert,
             presenting: reachedShelter
         ) { _ in
-            Button(String(localized: "map.shelter.ok_button", bundle: .main), role: .cancel) {}
+            Button(String(localized: "map.shelter.ok_button", bundle: .main), role: .cancel) {
+                showCompleteView = true
+            }
         } message: { shelter in
             Text(String(format: NSLocalizedString("map.shelter.reached_message", bundle: .main, comment: ""), shelter.name))
         }
@@ -52,9 +67,22 @@ struct MapView: View {
         } message: { _ in
             Text(String(localized: "map.danger_zone.alert_message", bundle: .main))
         }
+        .alert(
+            String(localized: "map.zombie.alert_title", bundle: .main),
+            isPresented: $showZombieAlert
+        ) {
+            Button(String(localized: "map.shelter.ok_button", bundle: .main), role: .cancel) {}
+        } message: {
+            Text(String(localized: "map.zombie.alert_message", bundle: .main))
+        }
         .sheet(isPresented: $showPinDetailsSheet) {
             pinDetailsSheet
                 .presentationDetents([.medium, .large])
+        }
+        .fullScreenCover(isPresented: $showCompleteView) {
+            if let shelter = reachedShelter {
+                CompleteView(shelter: shelter)
+            }
         }
         .onAppear {
             if locationManager.authorizationStatus == .notDetermined {
@@ -88,6 +116,7 @@ struct MapView: View {
         }
         .onChange(of: locationManager.location) { _, newValue in
             // Refresh shelters when location updates
+
             if let location = newValue {
                 Task {
                     // TODO: radius
@@ -100,11 +129,11 @@ struct MapView: View {
 
                 // Check if user has reached any shelter
                 // TODO: CHANGE THE NUMBER FOR RADIUS
-                if missionStateManager.currentMissionState == .inProgress {
+                if missionStateManager.currentMission != nil {
                     if let shelter = mapController.checkShelterProximity(
                         userLatitude: location.coordinate.latitude,
                         userLongitude: location.coordinate.longitude,
-                        radiusMeters: 1.0
+                        radiusMeters: 10
                     ) {
                         reachedShelter = shelter
                         showShelterReachedAlert = true
@@ -121,9 +150,23 @@ struct MapView: View {
 //                }
             }
         }
-        .onChange(of: missionStateManager.currentMission) {
+        .onChange(of: missionStateManager.currentMission) { _, newValue in
             // Update shelter filter when mission changes
             updateShelterFilter()
+
+            // Spawn zombies if zombie mission started
+            if let mission = newValue,
+               mission.disasterType == .zombie,
+               mission.status == .active || mission.status == .inProgress
+            {
+                if let location = locationManager.location {
+                    spawnZombies(around: location.coordinate)
+                    startZombieMovement()
+                }
+            } else {
+                // Clear zombies if no zombie mission
+                zombies.removeAll()
+            }
         }
     }
 
@@ -131,32 +174,198 @@ struct MapView: View {
 
     /// Updates the shelter filter based on the current mission's disaster type
     private func updateShelterFilter() {
-        print("🔄 updateShelterFilter called")
-
-        // Clear existing filters first
         mapController.clearFilters()
-        print("   Cleared existing filters")
 
         // If there's an active or in-progress mission with a disaster type, filter shelters
         if let mission = missionStateManager.currentMission {
-            print("   Current mission found:")
-            print("   - Status: \(mission.status.rawValue)")
-            print("   - Disaster type: \(mission.disasterType?.rawValue ?? "nil")")
-
             if mission.status == .active || mission.status == .inProgress {
                 if let disasterType = mission.disasterType {
                     mapController.selectedDisasterTypes.insert(disasterType)
-                    print("   ✅ Set disaster type filter: \(disasterType.rawValue)")
-                } else {
-                    print("   ⚠️ Mission has no disaster type")
                 }
-            } else {
-                print("   ⚠️ Mission is not active or in progress")
             }
         } else {
             print("   ⚠️ No current mission")
         }
-        // Otherwise show all shelters (no filter)
+    }
+
+    /// Spawn zombies around user location
+    private func spawnZombies(around center: CLLocationCoordinate2D, count: Int = 10) {
+        zombies.removeAll()
+        hitByZombieIds.removeAll()
+
+        for _ in 0 ..< count {
+            // Random distance from user (50m to 300m)
+            let distance = Double.random(in: 50 ... 300) // meters
+            let angle = Double.random(in: 0 ... (2 * .pi))
+
+            // Convert distance and angle to coordinate offset
+            let latOffset = (distance * cos(angle)) / 111_000 // 1 degree ≈ 111km
+            let lonOffset = (distance * sin(angle)) / (111_000 * cos(center.latitude * .pi / 180))
+
+            let zombieCoord = CLLocationCoordinate2D(
+                latitude: center.latitude + latOffset,
+                longitude: center.longitude + lonOffset
+            )
+
+            let zombie = Zombie(
+                coordinate: zombieCoord,
+                angle: Double.random(in: 0 ... (2 * .pi)),
+                speed: Double.random(in: 0.5 ... 2.0) // 0.5-2 m/s
+            )
+
+            zombies.append(zombie)
+        }
+
+        print("🧟 Spawned \(zombies.count) zombies!")
+    }
+
+    /// Start zombie movement timer
+    private func startZombieMovement() {
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+            // Stop if no zombie mission
+            guard let mission = missionStateManager.currentMission,
+                  mission.disasterType == .zombie,
+                  mission.status == .active || mission.status == .inProgress
+            else {
+                timer.invalidate()
+                return
+            }
+
+            moveZombies()
+        }
+    }
+
+    /// Move zombies toward the user with some randomness
+    private func moveZombies() {
+        guard let userLocation = locationManager.location else { return }
+
+        for i in 0 ..< zombies.count {
+            // Calculate direction to user
+            let deltaLat = userLocation.coordinate.latitude - zombies[i].coordinate.latitude
+            let deltaLon = userLocation.coordinate.longitude - zombies[i].coordinate.longitude
+            let angleToUser = atan2(deltaLon, deltaLat)
+
+            // Check distance to user
+            let distanceToUser = calculateDistanceInMeters(
+                from: zombies[i].coordinate,
+                to: userLocation.coordinate
+            )
+
+            // If zombie is close to user (within 2 meters) and hasn't hit before
+            if distanceToUser <= 4, !hitByZombieIds.contains(zombies[i].id) {
+                hitByZombieIds.insert(zombies[i].id)
+                showZombieAlert = true
+                print("🧟 Zombie hit! Distance: \(distanceToUser)m")
+            }
+
+            // Mix following behavior with random movement
+            // 70% toward user, 30% random
+            let followStrength = 0.7
+            let randomAngle = Double.random(in: -0.5 ... 0.5) // Add some randomness
+            zombies[i].angle = angleToUser * followStrength + zombies[i].angle * (1 - followStrength) + randomAngle
+
+            // Move zombie based on speed and angle
+            let distance = zombies[i].speed * 1.0 // 1 second interval
+            let latOffset = (distance * cos(zombies[i].angle)) / 111_000
+            let lonOffset = (distance * sin(zombies[i].angle)) / (111_000 * cos(zombies[i].coordinate.latitude * .pi / 180))
+
+            zombies[i].coordinate = CLLocationCoordinate2D(
+                latitude: zombies[i].coordinate.latitude + latOffset,
+                longitude: zombies[i].coordinate.longitude + lonOffset
+            )
+        }
+    }
+
+    /// Calculate distance between two coordinates in meters
+    private func calculateDistanceInMeters(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D) -> Double {
+        let earthRadius = 6_371_000.0 // meters
+
+        let dLat = (to.latitude - from.latitude) * .pi / 180
+        let dLon = (to.longitude - from.longitude) * .pi / 180
+
+        let a = sin(dLat / 2) * sin(dLat / 2) +
+            cos(from.latitude * .pi / 180) * cos(to.latitude * .pi / 180) *
+            sin(dLon / 2) * sin(dLon / 2)
+
+        let c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        return earthRadius * c
+    }
+
+    /// Mission details card shown on top left of map
+    @ViewBuilder
+    private func missionDetailsCard(mission: Mission) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Disaster type badge
+            HStack(spacing: 8) {
+                if let disasterType = mission.disasterType {
+                    Image(systemName: disasterType.emergencyIcon)
+                        .font(.system(size: 16))
+                        .foregroundColor(.white)
+
+                    Text(disasterType.localizedName)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(mission.disasterType?.color ?? Color.red)
+            .cornerRadius(8)
+
+            // Mission title
+            if let title = mission.title {
+                Text(title)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                    .lineLimit(2)
+            }
+
+            // Evacuation region
+            if let region = mission.evacuationRegion {
+                HStack(spacing: 4) {
+                    Image(systemName: "location.fill")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    Text(region)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
+            }
+
+            // Mission stats (if available)
+            if let steps = mission.steps, let distance = mission.distances {
+                HStack(spacing: 16) {
+                    // Steps
+                    HStack(spacing: 4) {
+                        Image(systemName: "figure.walk")
+                            .font(.caption2)
+                        Text("\(steps)")
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                    }
+
+                    // Distance
+                    HStack(spacing: 4) {
+                        Image(systemName: "map")
+                            .font(.caption2)
+                        Text(String(format: "%.1f km", distance / 1000))
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                    }
+                }
+                .foregroundColor(.secondary)
+            }
+        }
+        .padding(12)
+        .background(.ultraThinMaterial)
+        .cornerRadius(12)
+        .shadow(radius: 8)
+        .frame(maxWidth: 280)
     }
 
     private var mapView: some View {
@@ -181,6 +390,22 @@ struct MapView: View {
                     .foregroundStyle(Color.red.opacity(0.25))
                     .stroke(Color.red, lineWidth: 2)
             }
+
+            // Display zombies if zombie mission is active
+            ForEach(zombies) { zombie in
+                Annotation("", coordinate: zombie.coordinate) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.green.opacity(0.3))
+                            .frame(width: 36, height: 36)
+
+                        Image(systemName: "brain.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(.green)
+                            .shadow(color: .black.opacity(0.5), radius: 2)
+                    }
+                }
+            }
         }
         .mapStyle(.standard(elevation: .realistic))
         .safeAreaPadding(.top)
@@ -189,7 +414,22 @@ struct MapView: View {
             MapUserLocationButton()
             MapCompass()
         }
-
+        .overlay(alignment: .leading) {
+            // Mission details card on top left
+            if let mission = missionStateManager.currentMission,
+               mission.status == .active || mission.status == .inProgress
+            {
+                VStack {
+                    HStack {
+                        missionDetailsCard(mission: mission)
+                            .padding(.leading, 8)
+                        Spacer()
+                    }
+                    Spacer()
+                }
+                .padding(.top, 60)
+            }
+        }
         .overlay(alignment: .trailing) {
             VStack {
                 if mapController.isLoading {
@@ -200,9 +440,7 @@ struct MapView: View {
                         .shadow(radius: 2)
                 }
 
-                if missionStateManager.currentMissionState == .active,
-                   let mission = missionStateManager.currentMission
-                {
+                if let mission = missionStateManager.currentMission {
                     EmergencyOverlay(
                         disasterType: mission.disasterType ?? .earthquake,
                         evacuationRegion: mission.evacuationRegion ?? "Unknown Region",

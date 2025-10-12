@@ -142,8 +142,13 @@ class MapController {
 
     /// Check if user has reached any shelters within a specified radius (in meters)
     /// Returns the shelter if reached and not previously tracked, nil otherwise
+    /// Only checks filtered shelters (based on current disaster type)
     func checkShelterProximity(userLatitude: Double, userLongitude: Double, radiusMeters: Double = 50.0) -> Shelter? {
-        for shelter in shelters {
+        print("🔍 Checking shelter proximity:")
+        print("   Checking \(filteredShelters.count) filtered shelters (out of \(shelters.count) total)")
+        print("   Radius: \(radiusMeters)m")
+
+        for shelter in filteredShelters {
             // Skip if already reached
             if reachedShelters.contains(shelter.id) {
                 continue
@@ -158,11 +163,15 @@ class MapController {
 
             let distanceMeters = distanceKm * 1000
 
+            print("   Shelter: '\(shelter.name)' - Distance: \(String(format: "%.1f", distanceMeters))m")
+
             if distanceMeters <= radiusMeters {
+                print("   ✅ REACHED SHELTER: '\(shelter.name)'")
                 reachedShelters.insert(shelter.id)
                 return shelter
             }
         }
+        print("   ❌ No shelter within radius")
         return nil
     }
 

@@ -78,10 +78,13 @@ extension Shelter {
 
     /// Returns true if the shelter supports the given disaster type
     /// If isShelter is true, it supports all disaster types
+    /// Zombie type accepts any shelter (even non-shelters)
     func supports(disasterType: DisasterType) -> Bool {
-        // Full shelters (isShelter == true) support all disaster types
+        if disasterType == .zombie {
+            return true
+        }
+
         if isShelter == true {
-            print("      ✅ Shelter '\(name)' supports all (isShelter=true)")
             return true
         }
 
@@ -104,9 +107,11 @@ extension Shelter {
             supported = isInlandFlood == true
         case .volcano:
             supported = isVolcano == true
+        case .zombie:
+            // Already handled above
+            supported = true
         }
 
-        print("      \(supported ? "✅" : "❌") Shelter '\(name)' - \(disasterType.rawValue): \(supported)")
         return supported
     }
 }
@@ -122,6 +127,7 @@ enum DisasterType: String, CaseIterable, Codable {
     case fire = "Fire"
     case inlandFlood = "Inland Flood"
     case volcano = "Volcano"
+    case zombie = "Zombie"
 
     var iconName: String {
         switch self {
@@ -141,6 +147,8 @@ enum DisasterType: String, CaseIterable, Codable {
             return "drop.fill"
         case .volcano:
             return "triangle.fill"
+        case .zombie:
+            return "cross.case.fill"
         }
     }
 }
@@ -166,6 +174,8 @@ extension DisasterType {
             return "arrow.down.to.line"
         case .volcano:
             return "smoke.fill"
+        case .zombie:
+            return "brain.fill"
         }
     }
 
@@ -185,6 +195,8 @@ extension DisasterType {
             return Color("brandPeach")
         case .volcano:
             return Color("brandRed")
+        case .zombie:
+            return Color.green
         }
     }
 
@@ -204,6 +216,8 @@ extension DisasterType {
             return [Color("brandPeach"), Color("brandOrange")]
         case .volcano:
             return [Color("brandRed"), Color("brandOrange")]
+        case .zombie:
+            return [Color.green, Color.mint]
         }
     }
 
@@ -225,6 +239,8 @@ extension DisasterType {
             return String(localized: "home.disaster.inland_flood", table: "Localizable")
         case .volcano:
             return String(localized: "home.disaster.volcano", table: "Localizable")
+        case .zombie:
+            return String(localized: "home.disaster.zombie", table: "Localizable")
         }
     }
 }

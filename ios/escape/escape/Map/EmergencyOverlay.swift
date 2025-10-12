@@ -56,6 +56,8 @@ struct EmergencyOverlay: View {
             return Color.purple
         case .landslide:
             return Color.brown
+        case .zombie:
+            return Color.green
         }
     }
 
@@ -77,6 +79,8 @@ struct EmergencyOverlay: View {
             return String(localized: "home.disaster.inland_flood", bundle: .main)
         case .volcano:
             return String(localized: "home.disaster.volcano", bundle: .main)
+        case .zombie:
+            return String(localized: "home.disaster.zombie", bundle: .main)
         }
     }
 
