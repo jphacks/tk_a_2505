@@ -146,13 +146,14 @@ struct MapView: View {
         }
         .onChange(of: locationManager.location) { _, newValue in
             // Refresh shelters when location updates
-
+            print("AAAA")
             if let location = newValue {
                 handleNewLocation(location: location)
             }
         }
         .onChange(of: missionStateManager.currentMission) { _, newValue in
             // Update shelter filter when mission changes
+            print("BBBBB")
             updateShelterFilter()
 
             // Spawn zombies if zombie mission started
@@ -188,7 +189,7 @@ struct MapView: View {
             if let shelter = mapController.checkShelterProximity(
                 userLatitude: location.coordinate.latitude,
                 userLongitude: location.coordinate.longitude,
-                radiusMeters: 1000
+                radiusMeters: 15
             ) {
                 reachedShelter = shelter
                 showShelterReachedAlert = true
@@ -479,22 +480,7 @@ struct MapView: View {
             MapUserLocationButton()
             MapCompass()
         }
-        .overlay(alignment: .leading) {
-            // Mission details card on top left
-            if let mission = missionStateManager.currentMission,
-               mission.status == .active || mission.status == .inProgress
-            {
-                VStack {
-                    HStack {
-                        missionDetailsCard(mission: mission)
-                            .padding(.leading, 8)
-                        Spacer()
-                    }
-                    Spacer()
-                }
-                .padding(.top, 60)
-            }
-        }
+
         .overlay(alignment: .trailing) {
             VStack {
                 if mapController.isLoading {
