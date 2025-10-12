@@ -16,6 +16,11 @@ class MapController {
     var isLoading = false
     var errorMessage: String?
     var selectedDisasterTypes: Set<DisasterType> = []
+    var reachedShelters: Set<String> = [] // Track shelters user has reached
+
+    // Geofence properties - multiple polygons
+    var geofencePolygons: [[CLLocationCoordinate2D]] = []
+    var enteredPolygons: Set<Int> = [] // Track which polygons user has entered
 
     /// Filtered shelters based on selected disaster types
     var filteredShelters: [Shelter] {
@@ -121,5 +126,144 @@ class MapController {
     /// Clear all filters
     func clearFilters() {
         selectedDisasterTypes.removeAll()
+    }
+
+    /// Check if user has reached any shelters within a specified radius (in meters)
+    /// Returns the shelter if reached and not previously tracked, nil otherwise
+    func checkShelterProximity(userLatitude: Double, userLongitude: Double, radiusMeters: Double = 50.0) -> Shelter? {
+        for shelter in shelters {
+            // Skip if already reached
+            if reachedShelters.contains(shelter.id) {
+                continue
+            }
+
+            let distanceKm = calculateDistance(
+                lat1: userLatitude,
+                lon1: userLongitude,
+                lat2: shelter.latitude,
+                lon2: shelter.longitude
+            )
+
+            let distanceMeters = distanceKm * 1000
+
+            if distanceMeters <= radiusMeters {
+                reachedShelters.insert(shelter.id)
+                return shelter
+            }
+        }
+        return nil
+    }
+
+    /// Reset reached shelters tracking
+    func resetReachedShelters() {
+        reachedShelters.removeAll()
+    }
+
+    /// Generate multiple random polygons around the user's location
+    func generateRandomGeofencePolygons(userLatitude: Double, userLongitude: Double) {
+        geofencePolygons.removeAll()
+
+        // Generate 5-8 random polygons
+        let polygonCount = Int.random(in: 5 ... 8)
+
+        for _ in 0 ..< polygonCount {
+            // Random polygon size (50-150m radius)
+            let polygonSize = Double.random(in: 50 ... 150) // meters
+
+            // Random offset from user (100m to 800m away)
+            let offsetDistance = Double.random(in: 100 ... 800)
+            let randomAngle = Double.random(in: 0 ... (2 * .pi))
+
+            // Calculate center point offset in degrees
+            let latOffset = (offsetDistance * cos(randomAngle)) / 111_000
+            let lonOffset = (offsetDistance * sin(randomAngle)) / (111_000 * cos(userLatitude * .pi / 180))
+
+            let centerLat = userLatitude + latOffset
+            let centerLon = userLongitude + lonOffset
+
+            // Create irregular polygon with 4-7 sides
+            let sides = Int.random(in: 4 ... 7)
+            var polygonPoints: [CLLocationCoordinate2D] = []
+
+            for i in 0 ..< sides {
+                let angle = (Double(i) / Double(sides)) * 2 * .pi
+
+                // Add some randomness to the radius for irregular shape
+                let radiusVariation = Double.random(in: 0.7 ... 1.3)
+                let pointRadius = polygonSize * radiusVariation
+
+                // Calculate point coordinates
+                let pointLatOffset = (pointRadius * cos(angle)) / 111_000
+                let pointLonOffset = (pointRadius * sin(angle)) / (111_000 * cos(centerLat * .pi / 180))
+
+                let coordinate = CLLocationCoordinate2D(
+                    latitude: centerLat + pointLatOffset,
+                    longitude: centerLon + pointLonOffset
+                )
+                polygonPoints.append(coordinate)
+            }
+
+            geofencePolygons.append(polygonPoints)
+        }
+
+        print("Generated \(geofencePolygons.count) random danger zone polygons")
+    }
+
+    /// Clear all geofence polygons
+    func clearGeofence() {
+        geofencePolygons.removeAll()
+        enteredPolygons.removeAll()
+    }
+
+    /// Check if user location is inside any danger zone polygon
+    /// Returns the index of the first polygon entered (if not already tracked)
+    func checkPolygonEntry(userLatitude: Double, userLongitude: Double) -> Int? {
+        let userPoint = CLLocationCoordinate2D(latitude: userLatitude, longitude: userLongitude)
+
+        for (index, polygon) in geofencePolygons.enumerated() {
+            // Skip if already entered this polygon
+            if enteredPolygons.contains(index) {
+                continue
+            }
+
+            // Check if point is inside polygon using ray casting algorithm
+            if isPointInPolygon(point: userPoint, polygon: polygon) {
+                enteredPolygons.insert(index)
+                return index
+            }
+        }
+
+        return nil
+    }
+
+    /// Ray casting algorithm to determine if a point is inside a polygon
+    private func isPointInPolygon(point: CLLocationCoordinate2D, polygon: [CLLocationCoordinate2D]) -> Bool {
+        guard polygon.count >= 3 else { return false }
+
+        var inside = false
+        var j = polygon.count - 1
+
+        for i in 0 ..< polygon.count {
+            let xi = polygon[i].longitude
+            let yi = polygon[i].latitude
+            let xj = polygon[j].longitude
+            let yj = polygon[j].latitude
+
+            let intersect = ((yi > point.latitude) != (yj > point.latitude)) &&
+                (point.longitude < (xj - xi) * (point.latitude - yi) / (yj - yi) + xi)
+
+            if intersect {
+                inside.toggle()
+            }
+
+            j = i
+        }
+
+        return inside
+    }
+
+    /// Reset entered polygons tracking
+    func resetEnteredPolygons() {
+        enteredPolygons.removeAll()
     }
 }
