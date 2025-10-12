@@ -13,14 +13,35 @@ struct MissionCardView: View {
     let mission: Mission?
     let onTap: () -> Void
     @State private var isAnimating = false
+    @Environment(\.missionStateManager) private var missionStateManager
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("home.mission.todays_mission", tableName: "Localizable")
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
+                VStack(alignment: .leading, spacing: 8) {
+                    // Active mission indicator (only shown when mission is active in global state)
+                    if let mission = mission,
+                       let currentMission = missionStateManager.currentMission,
+                       mission.id == currentMission.id
+                    {
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(Color("brandOrange"))
+                                .frame(width: 8, height: 8)
+                                .shadow(color: Color("brandOrange").opacity(0.5), radius: 4, x: 0, y: 0)
+
+                            Text("home.mission.activated", tableName: "Localizable")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(Color("brandOrange"))
+                        }
+                    }
+
+                    Text("home.mission.todays_mission", tableName: "Localizable")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                }
 
                 Spacer()
             }
@@ -30,7 +51,7 @@ struct MissionCardView: View {
                     ZStack {
                         // グラデーション背景
                         LinearGradient(
-                            gradient: Gradient(colors: [Color("brandOrange"), Color("brandRed")]),
+                            gradient: Gradient(colors: mission.disasterType?.gradientColors ?? [Color("brandOrange"), Color("brandRed")]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -42,11 +63,11 @@ struct MissionCardView: View {
                             HStack(alignment: .top) {
                                 VStack(alignment: .leading, spacing: 4) {
                                     HStack {
-                                        Image(systemName: disasterType.emergencyIcon)
+                                        Image(systemName: mission.disasterType?.emergencyIcon ?? "exclamationmark.triangle.fill")
                                             .font(.title)
                                             .foregroundColor(.white)
 
-                                        Text(disasterType.rawValue)
+                                        Text(mission.disasterType?.localizedName ?? "Disaster")
                                             .font(.caption)
                                             .fontWeight(.semibold)
                                             .foregroundColor(.white.opacity(0.9))
@@ -56,7 +77,7 @@ struct MissionCardView: View {
                                             .cornerRadius(8)
                                     }
 
-                                    Text(mission.title ?? "ミッション")
+                                    Text(mission.title ?? "")
                                         .font(.title2)
                                         .fontWeight(.bold)
                                         .foregroundColor(.white)
@@ -73,7 +94,7 @@ struct MissionCardView: View {
                             }
 
                             // 説明文
-                            Text(mission.overview ?? "避難訓練を開始してください")
+                            Text(mission.overview ?? "")
                                 .font(.body)
                                 .foregroundColor(.white.opacity(0.9))
                                 .lineLimit(3)
@@ -81,7 +102,7 @@ struct MissionCardView: View {
                         }
                         .padding(20)
                     }
-                    .shadow(color: Color("brandOrange").opacity(0.3), radius: 15, x: 0, y: 8)
+                    .shadow(color: (mission.disasterType?.color ?? Color("brandOrange")).opacity(0.3), radius: 15, x: 0, y: 8)
                 }
                 .buttonStyle(PlainButtonStyle())
             } else {
@@ -130,7 +151,7 @@ struct MissionCardContent: View {
         ZStack {
             // グラデーション背景
             LinearGradient(
-                gradient: Gradient(colors: [Color("brandOrange"), Color("brandRed"), .black.opacity(0.3)]),
+                gradient: Gradient(colors: (mission.disasterType?.gradientColors ?? [Color("brandOrange"), Color("brandRed")]) + [.black.opacity(0.3)]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -142,23 +163,21 @@ struct MissionCardContent: View {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            if let disasterType = mission.disasterType {
-                                Image(systemName: disasterType.emergencyIcon)
-                                    .font(.title)
-                                    .foregroundColor(.white)
+                            Image(systemName: mission.disasterType?.emergencyIcon ?? "exclamationmark.triangle.fill")
+                                .font(.title)
+                                .foregroundColor(.white)
 
-                                Text(disasterType.rawValue)
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.white.opacity(0.9))
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color.white.opacity(0.25))
-                                    .cornerRadius(8)
-                            }
+                            Text(mission.disasterType?.localizedName ?? "Disaster")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white.opacity(0.9))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.white.opacity(0.25))
+                                .cornerRadius(8)
                         }
 
-                        Text(mission.title ?? "ミッション")
+                        Text(mission.title ?? "")
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
@@ -175,7 +194,7 @@ struct MissionCardContent: View {
                 }
 
                 // 説明文
-                Text(mission.overview ?? "避難訓練を開始してください")
+                Text(mission.overview ?? "")
                     .font(.body)
                     .foregroundColor(.white.opacity(0.9))
                     .lineLimit(3)
@@ -183,7 +202,7 @@ struct MissionCardContent: View {
             }
             .padding(20)
         }
-        .shadow(color: Color("brandOrange").opacity(0.3), radius: 15, x: 0, y: 8)
+        .shadow(color: (mission.disasterType?.color ?? Color("brandOrange")).opacity(0.3), radius: 15, x: 0, y: 8)
     }
 }
 
@@ -191,16 +210,19 @@ struct MissionCardContent: View {
 
 struct MissionDetailView: View {
     let mission: Mission?
+    @Binding var selectedTab: Tab
+    @Binding var isPresented: Bool
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.missionStateManager) private var missionStateManager
     @State private var isAnimating = false
 
     var body: some View {
         NavigationStack {
             ZStack {
-                if let mission = mission {
+                if let mission = mission, let disasterType = mission.disasterType {
                     // 背景グラデーション
                     LinearGradient(
-                        gradient: Gradient(colors: [Color("brandOrange"), Color("brandRed")]),
+                        gradient: Gradient(colors: mission.disasterType?.gradientColors ?? [Color("brandOrange"), Color("brandRed")]),
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -211,13 +233,11 @@ struct MissionDetailView: View {
                             // ヘッダーセクション
                             VStack(spacing: 16) {
                                 HStack {
-                                    if let disasterType = mission.disasterType {
-                                        Image(systemName: disasterType.emergencyIcon)
-                                            .font(.system(size: 60))
-                                            .foregroundColor(.white)
-                                            .scaleEffect(isAnimating ? 1.1 : 1.0)
-                                            .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
-                                    }
+                                    Image(systemName: mission.disasterType?.emergencyIcon ?? "exclamationmark.triangle.fill")
+                                        .font(.system(size: 60))
+                                        .foregroundColor(.white)
+                                        .scaleEffect(isAnimating ? 1.1 : 1.0)
+                                        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
 
                                     Spacer()
 
@@ -225,18 +245,16 @@ struct MissionDetailView: View {
                                 }
 
                                 VStack(alignment: .leading, spacing: 8) {
-                                    if let disasterType = mission.disasterType {
-                                        Text(disasterType.rawValue)
-                                            .font(.title3)
-                                            .fontWeight(.semibold)
-                                            .foregroundColor(.white.opacity(0.9))
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 6)
-                                            .background(Color.white.opacity(0.25))
-                                            .cornerRadius(12)
-                                    }
+                                    Text(mission.disasterType?.localizedName ?? "Disaster")
+                                        .font(.title3)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.white.opacity(0.9))
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.white.opacity(0.25))
+                                        .cornerRadius(12)
 
-                                    Text(mission.title ?? "ミッション")
+                                    Text(mission.title ?? "")
                                         .font(.largeTitle)
                                         .fontWeight(.bold)
                                         .foregroundColor(.white)
@@ -255,7 +273,7 @@ struct MissionDetailView: View {
                                         .font(.headline)
                                         .foregroundColor(.white)
 
-                                    Text(mission.overview ?? "避難訓練を開始してください")
+                                    Text(mission.overview ?? "")
                                         .font(.body)
                                         .foregroundColor(.white.opacity(0.9))
                                         .lineSpacing(4)
@@ -323,17 +341,21 @@ struct MissionDetailView: View {
                             // アクションボタン
                             VStack(spacing: 16) {
                                 Button(action: {
-                                    // TODO: ミッション開始処理
+                                    if isMissionActive {
+                                        cancelMission()
+                                    } else {
+                                        startMission()
+                                    }
                                 }) {
                                     HStack {
-                                        Image(systemName: "play.circle.fill")
+                                        Image(systemName: isMissionActive ? "xmark.circle.fill" : "play.circle.fill")
                                             .font(.title2)
 
-                                        Text("home.mission.start", tableName: "Localizable")
+                                        Text(isMissionActive ? String(localized: "home.mission.cancel", table: "Localizable") : String(localized: "home.mission.start", table: "Localizable"))
                                             .font(.headline)
                                             .fontWeight(.bold)
                                     }
-                                    .foregroundColor(Color("brandOrange"))
+                                    .foregroundColor(isMissionActive ? .red : (mission.disasterType?.color ?? Color("brandOrange")))
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 16)
                                     .background(Color.white)
@@ -371,10 +393,49 @@ struct MissionDetailView: View {
         formatter.locale = Locale(identifier: "ja_JP")
         return formatter
     }
+
+    private var isMissionActive: Bool {
+        // Check if current global mission matches this mission
+        if let currentMission = missionStateManager.currentMission,
+           let thisMission = mission
+        {
+            return currentMission.id == thisMission.id
+        }
+        return false
+    }
+
+    private func startMission() {
+        guard let mission = mission else { return }
+
+        // Update global mission state
+        missionStateManager.updateMission(mission)
+
+        print("🚀 Mission started: \(mission.title ?? "Unknown")")
+        print("📍 Navigating to map...")
+
+        // Dismiss the sheet
+        isPresented = false
+
+        // Small delay to ensure smooth transition
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            // Switch to map tab
+            selectedTab = .map
+        }
+    }
+
+    private func cancelMission() {
+        print("❌ Mission cancelled")
+
+        // Reset global mission state
+        missionStateManager.resetMission()
+
+        // Dismiss the sheet
+        dismiss()
+    }
 }
 
 #Preview {
-    MissionCardView(
+    MissionDetailView(
         mission: Mission(
             id: UUID(),
             userId: UUID(),
@@ -387,6 +448,7 @@ struct MissionDetailView: View {
             distances: 1.2,
             createdAt: Date()
         ),
-        onTap: {}
+        selectedTab: .constant(.home),
+        isPresented: .constant(true)
     )
 }

@@ -5,10 +5,12 @@
 //  Created by Thanasan Kumdee on 11/10/2568 BE.
 //
 
+import Supabase
 import SwiftUI
 
 struct HomeView: View {
-    @State private var currentMission: Mission? = nil
+    @Binding var selectedTab: Tab
+    @State private var missionController = MissionController()
     @State private var userBadges: [Badge] = []
     @State private var badgeStats: (total: Int, unlocked: Int) = (0, 0)
     @State private var showingMissionDetail = false
@@ -33,10 +35,36 @@ struct HomeView: View {
                     .padding(.horizontal)
 
                     // 現在のミッション セクション
-                    MissionCardView(mission: currentMission) {
-                        showingMissionDetail = true
+                    if missionController.isLoading {
+                        // Loading state
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 200)
+                            .padding(.horizontal)
+                    } else if let errorMessage = missionController.errorMessage {
+                        // Error state
+                        VStack(spacing: 12) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.largeTitle)
+                                .foregroundColor(.red)
+                            Text(errorMessage)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                            Button("Retry") {
+                                loadCurrentMission()
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 200)
+                        .padding(.horizontal)
+                    } else {
+                        MissionCardView(mission: missionController.todaysMission) {
+                            showingMissionDetail = true
+                        }
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
 
                     // バッジコレクション セクション
                     BadgeCollectionView(badges: userBadges, stats: badgeStats)
@@ -50,7 +78,11 @@ struct HomeView: View {
             }
             .navigationBarHidden(true)
             .sheet(isPresented: $showingMissionDetail) {
-                MissionDetailView(mission: currentMission)
+                MissionDetailView(
+                    mission: missionController.todaysMission,
+                    selectedTab: $selectedTab,
+                    isPresented: $showingMissionDetail
+                )
             }
             .onAppear {
                 loadCurrentMission()
@@ -60,19 +92,28 @@ struct HomeView: View {
     }
 
     private func loadCurrentMission() {
-        // TODO: Supabaseから現在のミッションを取得
-        currentMission = Mission(
-            id: UUID(),
-            userId: UUID(),
-            title: "震度6強の地震発生！避難所へ緊急避難せよ",
-            overview: "AI解析により、マグニチュード7.2の大地震が発生したシナリオが生成されました。建物の倒壊や火災の危険があります。最寄りの避難所まで安全なルートで避難してください。",
-            disasterType: .earthquake,
-            evacuationRegion: "文京区",
-            status: .active,
-            steps: nil,
-            distances: nil,
-            createdAt: Date()
-        )
+        Task {
+            // Get current user ID from Supabase auth
+            guard let currentUser = supabase.auth.currentUser else {
+                missionController.errorMessage = "Not authenticated"
+                print("⚠️ User not authenticated")
+                return
+            }
+
+            let userId = currentUser.id
+            print("👤 Current user ID: \(userId)")
+            print("👤 User email: \(currentUser.email ?? "none")")
+            print("👤 UUID lowercase: \(userId.uuidString.lowercased())")
+
+            // Fetch today's mission from Supabase
+            await missionController.fetchTodaysMission(userId: userId)
+
+            // Debug: If no mission found, try fetching latest mission
+            if missionController.todaysMission == nil && missionController.errorMessage == nil {
+                print("ℹ️ No today's mission found, trying to fetch latest...")
+                await missionController.fetchLatestMission(userId: userId)
+            }
+        }
     }
 
     private func loadUserBadges() {
@@ -94,9 +135,9 @@ struct HomeView: View {
 }
 
 #Preview("HomeView - English") {
-    HomeView().environment(\.locale, .init(identifier: "en"))
+    HomeView(selectedTab: .constant(.home)).environment(\.locale, .init(identifier: "en"))
 }
 
 #Preview("HomeView - Japanese") {
-    HomeView().environment(\.locale, .init(identifier: "ja"))
+    HomeView(selectedTab: .constant(.home)).environment(\.locale, .init(identifier: "ja"))
 }

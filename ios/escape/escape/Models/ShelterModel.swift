@@ -101,7 +101,7 @@ extension Shelter {
 
 // MARK: - Disaster Type Enum
 
-enum DisasterType: String, CaseIterable {
+enum DisasterType: String, CaseIterable, Codable {
     case flood = "Flood"
     case landslide = "Landslide"
     case stormSurge = "Storm Surge"
@@ -131,12 +131,18 @@ enum DisasterType: String, CaseIterable {
             return "triangle.fill"
         }
     }
+}
 
+// MARK: - UI Extensions for DisasterType
+
+import SwiftUI
+
+extension DisasterType {
     var emergencyIcon: String {
         switch self {
         case .earthquake:
             return "house.and.flag.fill"
-        case .flood:
+        case .flood, .inlandFlood:
             return "drop.fill"
         case .fire:
             return "flame.circle.fill"
@@ -146,10 +152,67 @@ enum DisasterType: String, CaseIterable {
             return "water.waves.and.arrow.up"
         case .landslide:
             return "arrow.down.to.line"
-        case .inlandFlood:
-            return "drop.fill"
         case .volcano:
-            return "triangle.fill"
+            return "smoke.fill"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .earthquake:
+            return Color("brandOrange")
+        case .flood, .inlandFlood:
+            return Color("brandDarkBlue")
+        case .fire:
+            return Color("brandRed")
+        case .stormSurge:
+            return Color("brandMediumBlue")
+        case .tsunami:
+            return Color("brandDarkBlue")
+        case .landslide:
+            return Color("brandPeach")
+        case .volcano:
+            return Color("brandRed")
+        }
+    }
+
+    var gradientColors: [Color] {
+        switch self {
+        case .earthquake:
+            return [Color("brandOrange"), Color("brandRed")]
+        case .flood, .inlandFlood:
+            return [Color("brandDarkBlue"), Color("brandMediumBlue")]
+        case .fire:
+            return [Color("brandRed"), Color("brandOrange")]
+        case .stormSurge:
+            return [Color("brandMediumBlue"), Color("brandDarkBlue")]
+        case .tsunami:
+            return [Color("brandDarkBlue"), Color("brandMediumBlue")]
+        case .landslide:
+            return [Color("brandPeach"), Color("brandOrange")]
+        case .volcano:
+            return [Color("brandRed"), Color("brandOrange")]
+        }
+    }
+
+    var localizedName: String {
+        switch self {
+        case .earthquake:
+            return String(localized: "home.disaster.earthquake", table: "Localizable")
+        case .flood:
+            return String(localized: "home.disaster.flood", table: "Localizable")
+        case .fire:
+            return String(localized: "home.disaster.fire", table: "Localizable")
+        case .stormSurge:
+            return String(localized: "home.disaster.typhoon", table: "Localizable")
+        case .tsunami:
+            return String(localized: "home.disaster.tsunami", table: "Localizable")
+        case .landslide:
+            return String(localized: "home.disaster.landslide", table: "Localizable")
+        case .inlandFlood:
+            return String(localized: "home.disaster.inland_flood", table: "Localizable")
+        case .volcano:
+            return String(localized: "home.disaster.volcano", table: "Localizable")
         }
     }
 }
