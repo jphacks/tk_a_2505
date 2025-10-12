@@ -27,10 +27,6 @@ struct HomeView: View {
                             .foregroundColor(Color("brandOrange"))
 
                         Spacer()
-
-                        Image(systemName: "person.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(.gray)
                     }
                     .padding(.horizontal)
 

@@ -16,7 +16,7 @@ enum MissionState: String, Codable {
 }
 
 /// Represents a mission record from the database
-struct Mission: Codable, Identifiable {
+struct Mission: Codable, Identifiable, Equatable {
     let id: UUID
     let userId: UUID?
     let title: String?

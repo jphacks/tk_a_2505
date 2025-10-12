@@ -622,6 +622,9 @@
         }
       }
     },
+    "Disaster Type" : {
+
+    },
     "Disaster Type (optional)" : {
 
     },
@@ -822,6 +825,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "火山"
+          }
+        }
+      }
+    },
+    "home.disaster.zombie" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zombie"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゾンビ"
           }
         }
       }
@@ -1577,6 +1597,159 @@
         }
       }
     },
+    "map.pin_details.done" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完了"
+          }
+        }
+      }
+    },
+    "map.pin_details.hinanbasho.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temporary evacuation areas for specific disasters. Check if they support your disaster type."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "特定の災害に対応する一時避難場所。災害タイプに対応しているか確認してください。"
+          }
+        }
+      }
+    },
+    "map.pin_details.hinanbasho.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temporary Evacuation Area"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一時避難場所"
+          }
+        }
+      }
+    },
+    "map.pin_details.hinanbasho.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hinanbasho (避難場所)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "避難場所"
+          }
+        }
+      }
+    },
+    "map.pin_details.hinanjo.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Designated evacuation shelters that support all disaster types. These facilities provide comprehensive protection."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべての災害タイプに対応する指定避難所。包括的な保護を提供する施設です。"
+          }
+        }
+      }
+    },
+    "map.pin_details.hinanjo.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Designated Evacuation Shelter"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "指定避難所"
+          }
+        }
+      }
+    },
+    "map.pin_details.hinanjo.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hinanjo (避難所)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "避難所"
+          }
+        }
+      }
+    },
+    "map.pin_details.legend_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Map Legend"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マップ凡例"
+          }
+        }
+      }
+    },
+    "map.pin_details.navigation_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pin Information"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ピン情報"
+          }
+        }
+      }
+    },
     "map.shelter.ok_button" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1628,13 +1801,57 @@
         }
       }
     },
+    "map.zombie.alert_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A zombie got too close! Keep running to the shelter!"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゾンビが近づいてきた！避難所まで走り続けて！"
+          }
+        }
+      }
+    },
+    "map.zombie.alert_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zombie Attack!"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゾンビ襲来！"
+          }
+        }
+      }
+    },
+    "Mission Complete!" : {
+
+    },
     "Mission context (optional)" : {
 
     },
     "Mission Generator" : {
 
     },
+    "Mission Generator (Mock)" : {
+      "comment" : "The title of the section in the developer view related to the mission generator.",
+      "isCommentAutoGenerated" : true
+    },
     "Mission Parameters" : {
+
+    },
+    "Mission Summary" : {
 
     },
     "nav.dev" : {
@@ -1793,6 +2010,9 @@
       "isCommentAutoGenerated" : true
     },
     "Retry" : {
+
+    },
+    "Return to Map" : {
 
     },
     "setting.account_section" : {
@@ -1965,6 +2185,12 @@
         }
       }
     },
+    "Share Results" : {
+
+    },
+    "Shelter Information" : {
+
+    },
     "stats.period.day" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2023,6 +2249,9 @@
 
     },
     "Title:" : {
+
+    },
+    "You've reached the shelter safely" : {
 
     },
     "歩数: %lld 歩" : {
