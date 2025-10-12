@@ -9,10 +9,6 @@
 /* Begin PBXBuildFile section */
 		779935F02E96964200339B51 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 779935EF2E96964200339B51 /* Auth */; };
 		779935F42E96980600339B51 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 779935F32E96980600339B51 /* Supabase */; };
-<<<<<<< HEAD
-=======
-		DD55E6A82E9A3FFE00F8AB50 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = DD55E6A72E9A3FFE00F8AB50 /* Lottie */; };
->>>>>>> origin/main
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
