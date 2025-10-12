@@ -70,9 +70,110 @@ struct DetailBadgeFrontView: View {
                 .blur(radius: 3)
 
             // メインの画像表示
-            if let imageName = badge.imageName, !imageName.isEmpty {
+            if let imageUrl = badge.imageUrl, !imageUrl.isEmpty {
+                // Use AsyncImage for remote URLs
+                AsyncImage(url: URL(string: imageUrl)) { phase in
+                    switch phase {
+                    case .empty:
+                        ProgressView()
+                            .frame(width: 120, height: 120)
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 120, height: 120)
+                            .clipShape(Circle())
+                            .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 4)
+                    case .failure:
+                        // Fallback to imageName if URL fails
+                        if let imageName = badge.imageName, !imageName.isEmpty {
+                            DetailImageLoader(imageName: imageName)
+                        } else {
+                            ZStack {
+                                Circle()
+                                    .fill(
+                                        RadialGradient(
+                                            gradient: Gradient(colors: [
+                                                badge.color.opacity(0.9),
+                                                badge.color.opacity(0.7),
+                                                badge.color.opacity(0.5),
+                                                badge.color.opacity(0.3),
+                                            ]),
+                                            center: .topLeading,
+                                            startRadius: 10,
+                                            endRadius: 60
+                                        )
+                                    )
+                                    .frame(width: 150, height: 150)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(
+                                                LinearGradient(
+                                                    gradient: Gradient(colors: [
+                                                        Color.white.opacity(0.8),
+                                                        Color.white.opacity(0.3),
+                                                        Color.clear,
+                                                        Color.black.opacity(0.2),
+                                                    ]),
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                ),
+                                                lineWidth: 3
+                                            )
+                                    )
+
+                                Image(systemName: "photo")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.white)
+                                    .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 2)
+                            }
+                        }
+                    @unknown default:
+                        ZStack {
+                            Circle()
+                                .fill(
+                                    RadialGradient(
+                                        gradient: Gradient(colors: [
+                                            badge.color.opacity(0.9),
+                                            badge.color.opacity(0.7),
+                                            badge.color.opacity(0.5),
+                                            badge.color.opacity(0.3),
+                                        ]),
+                                        center: .topLeading,
+                                        startRadius: 10,
+                                        endRadius: 60
+                                    )
+                                )
+                                .frame(width: 150, height: 150)
+                                .overlay(
+                                    Circle()
+                                        .stroke(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [
+                                                    Color.white.opacity(0.8),
+                                                    Color.white.opacity(0.3),
+                                                    Color.clear,
+                                                    Color.black.opacity(0.2),
+                                                ]),
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 3
+                                        )
+                                )
+
+                            Image(systemName: "photo")
+                                .font(.system(size: 40))
+                                .foregroundColor(.white)
+                                .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 2)
+                        }
+                    }
+                }
+            } else if let imageName = badge.imageName, !imageName.isEmpty {
+                // Fallback to local image
                 DetailImageLoader(imageName: imageName)
             } else {
+                // No image available
                 ZStack {
                     Circle()
                         .fill(
@@ -197,7 +298,7 @@ struct DetailBadgeBackView: View {
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.7))
 
-                    Text("getter_name")
+                    Text(badge.firstUserName ?? "Unknown User")
                         .font(.headline)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
