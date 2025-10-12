@@ -30,7 +30,7 @@ struct MissionCardView: View {
                     ZStack {
                         // グラデーション背景
                         LinearGradient(
-                            gradient: Gradient(colors: disasterType.gradientColors),
+                            gradient: Gradient(colors: mission.disasterType?.gradientColors ?? [Color("brandOrange"), Color("brandRed")]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -42,11 +42,11 @@ struct MissionCardView: View {
                             HStack(alignment: .top) {
                                 VStack(alignment: .leading, spacing: 4) {
                                     HStack {
-                                        Image(systemName: disasterType.emergencyIcon)
+                                        Image(systemName: mission.disasterType?.emergencyIcon ?? "exclamationmark.triangle.fill")
                                             .font(.title)
                                             .foregroundColor(.white)
 
-                                        Text(disasterType.localizedName)
+                                        Text(mission.disasterType?.localizedName ?? "Disaster")
                                             .font(.caption)
                                             .fontWeight(.semibold)
                                             .foregroundColor(.white.opacity(0.9))
@@ -81,7 +81,7 @@ struct MissionCardView: View {
                         }
                         .padding(20)
                     }
-                    .shadow(color: disasterType.color.opacity(0.3), radius: 15, x: 0, y: 8)
+                    .shadow(color: (mission.disasterType?.color ?? Color("brandOrange")).opacity(0.3), radius: 15, x: 0, y: 8)
                 }
                 .buttonStyle(PlainButtonStyle())
             } else {
@@ -127,63 +127,61 @@ struct MissionCardContent: View {
     let mission: Mission
 
     var body: some View {
-        if let disasterType = mission.disasterType {
-            ZStack {
-                // グラデーション背景
-                LinearGradient(
-                    gradient: Gradient(colors: disasterType.gradientColors + [.black.opacity(0.3)]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .cornerRadius(20)
+        ZStack {
+            // グラデーション背景
+            LinearGradient(
+                gradient: Gradient(colors: (mission.disasterType?.gradientColors ?? [Color("brandOrange"), Color("brandRed")]) + [.black.opacity(0.3)]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .cornerRadius(20)
 
-                // コンテンツ
-                VStack(alignment: .leading, spacing: 16) {
-                    // ヘッダー部分
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Image(systemName: disasterType.emergencyIcon)
-                                    .font(.title)
-                                    .foregroundColor(.white)
-
-                                Text(disasterType.localizedName)
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.white.opacity(0.9))
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color.white.opacity(0.25))
-                                    .cornerRadius(8)
-                            }
-
-                            Text(mission.title ?? "")
-                                .font(.title2)
-                                .fontWeight(.bold)
+            // コンテンツ
+            VStack(alignment: .leading, spacing: 16) {
+                // ヘッダー部分
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Image(systemName: mission.disasterType?.emergencyIcon ?? "exclamationmark.triangle.fill")
+                                .font(.title)
                                 .foregroundColor(.white)
-                                .multilineTextAlignment(.leading)
+
+                            Text(mission.disasterType?.localizedName ?? "Disaster")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white.opacity(0.9))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.white.opacity(0.25))
+                                .cornerRadius(8)
                         }
 
-                        Spacer()
-
-                        VStack(spacing: 4) {
-                            Image(systemName: "chevron.right.circle.fill")
-                                .font(.title2)
-                                .foregroundColor(.white.opacity(0.8))
-                        }
+                        Text(mission.title ?? "")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.leading)
                     }
 
-                    // 説明文
-                    Text(mission.overview ?? "")
-                        .font(.body)
-                        .foregroundColor(.white.opacity(0.9))
-                        .lineLimit(3)
-                        .multilineTextAlignment(.leading)
+                    Spacer()
+
+                    VStack(spacing: 4) {
+                        Image(systemName: "chevron.right.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.white.opacity(0.8))
+                    }
                 }
-                .padding(20)
+
+                // 説明文
+                Text(mission.overview ?? "")
+                    .font(.body)
+                    .foregroundColor(.white.opacity(0.9))
+                    .lineLimit(3)
+                    .multilineTextAlignment(.leading)
             }
-            .shadow(color: disasterType.color.opacity(0.3), radius: 15, x: 0, y: 8)
+            .padding(20)
         }
+        .shadow(color: (mission.disasterType?.color ?? Color("brandOrange")).opacity(0.3), radius: 15, x: 0, y: 8)
     }
 }
 
@@ -203,7 +201,7 @@ struct MissionDetailView: View {
                 if let mission = mission, let disasterType = mission.disasterType {
                     // 背景グラデーション
                     LinearGradient(
-                        gradient: Gradient(colors: disasterType.gradientColors),
+                        gradient: Gradient(colors: mission.disasterType?.gradientColors ?? [Color("brandOrange"), Color("brandRed")]),
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -214,7 +212,7 @@ struct MissionDetailView: View {
                             // ヘッダーセクション
                             VStack(spacing: 16) {
                                 HStack {
-                                    Image(systemName: disasterType.emergencyIcon)
+                                    Image(systemName: mission.disasterType?.emergencyIcon ?? "exclamationmark.triangle.fill")
                                         .font(.system(size: 60))
                                         .foregroundColor(.white)
                                         .scaleEffect(isAnimating ? 1.1 : 1.0)
@@ -226,7 +224,7 @@ struct MissionDetailView: View {
                                 }
 
                                 VStack(alignment: .leading, spacing: 8) {
-                                    Text(disasterType.localizedName)
+                                    Text(mission.disasterType?.localizedName ?? "Disaster")
                                         .font(.title3)
                                         .fontWeight(.semibold)
                                         .foregroundColor(.white.opacity(0.9))
@@ -278,6 +276,39 @@ struct MissionDetailView: View {
                                             .font(.body)
                                             .foregroundColor(.white.opacity(0.9))
                                     }
+
+                                    if let evacuationRegion = mission.evacuationRegion {
+                                        HStack {
+                                            Image(systemName: "location")
+                                                .foregroundColor(.white.opacity(0.8))
+
+                                            Text("避難地域: \(evacuationRegion)")
+                                                .font(.body)
+                                                .foregroundColor(.white.opacity(0.9))
+                                        }
+                                    }
+
+                                    if let steps = mission.steps {
+                                        HStack {
+                                            Image(systemName: "figure.walk")
+                                                .foregroundColor(.white.opacity(0.8))
+
+                                            Text("歩数: \(steps) 歩")
+                                                .font(.body)
+                                                .foregroundColor(.white.opacity(0.9))
+                                        }
+                                    }
+
+                                    if let distance = mission.distances {
+                                        HStack {
+                                            Image(systemName: "ruler")
+                                                .foregroundColor(.white.opacity(0.8))
+
+                                            Text(String(format: "距離: %.1f km", distance))
+                                                .font(.body)
+                                                .foregroundColor(.white.opacity(0.9))
+                                        }
+                                    }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(20)
@@ -299,7 +330,7 @@ struct MissionDetailView: View {
                                             .font(.headline)
                                             .fontWeight(.bold)
                                     }
-                                    .foregroundColor(disasterType.color)
+                                    .foregroundColor(mission.disasterType?.color ?? Color("brandOrange"))
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 16)
                                     .background(Color.white)
@@ -364,12 +395,12 @@ struct MissionDetailView: View {
             id: UUID(),
             userId: UUID(),
             title: "震度6強の地震発生！避難所へ緊急避難せよ",
-            overview: "AI解析により、マグニチュード7.2の大地震が発生したシナリオが生成されました。",
+            overview: "AI解析により、マグニチュード7.2の大地震が発生したシナリオが生成されました。建物の倒壊や火災の危険があります。最寄りの避難所まで安全なルートで避難してください。",
             disasterType: .earthquake,
-            evacuationRegion: nil,
+            evacuationRegion: "文京区",
             status: .active,
-            steps: nil,
-            distances: nil,
+            steps: 2500,
+            distances: 1.2,
             createdAt: Date()
         ),
         selectedTab: .constant(.home),

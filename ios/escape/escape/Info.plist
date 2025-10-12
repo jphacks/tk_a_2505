@@ -15,9 +15,5 @@
 			</array>
 		</dict>
 	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>このアプリは、現在地を地図上に表示し、近くの避難所を見つけるのに役立てるために、位置情報を使用します。</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>このアプリは、現在地を地図上に表示し、近くの避難所を見つけるのに役立てるために、位置情報を使用します。</string>
 </dict>
 </plist>
