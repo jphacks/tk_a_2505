@@ -168,6 +168,102 @@ class MissionController {
             .execute()
     }
 
+    /// Checks if user has an active mission with status 'have' created today
+    /// Returns the active mission if found, nil otherwise
+    func fetchActiveMission(userId: UUID) async -> Mission? {
+        do {
+            print("🔍 Checking for today's active mission for user: \(userId)")
+
+            // Get start and end of today in user's local timezone
+            let calendar = Calendar.current
+            let now = Date()
+            let startOfToday = calendar.startOfDay(for: now)
+
+            guard let endOfToday = calendar.date(byAdding: .day, value: 1, to: startOfToday) else {
+                print("❌ Failed to calculate date range")
+                return nil
+            }
+
+            // Format dates as ISO8601 UTC strings for database query
+            let formatter = ISO8601DateFormatter()
+            formatter.timeZone = TimeZone(secondsFromGMT: 0)
+
+            let startString = formatter.string(from: startOfToday)
+            let endString = formatter.string(from: endOfToday)
+
+            print("📅 Checking date range: \(startString) to \(endString)")
+
+            let userIdLowercase = userId.uuidString.lowercased()
+
+            // Query for missions with status 'have' created today
+            let response: [Mission] = try await supabase
+                .from("missions")
+                .select()
+                .eq("user_id", value: userIdLowercase)
+                .eq("status", value: "have")
+                .gte("created_at", value: startString)
+                .lt("created_at", value: endString)
+                .order("created_at", ascending: false)
+                .limit(1)
+                .execute()
+                .value
+
+            if let mission = response.first {
+                print("✅ Found today's active mission: \(mission.id)")
+                print("   Status: \(mission.status.rawValue)")
+                print("   Created: \(mission.createdAt)")
+                return mission
+            } else {
+                print("ℹ️ No active mission found for today")
+                return nil
+            }
+        } catch {
+            print("❌ Error checking for today's active mission: \(error)")
+            return nil
+        }
+    }
+
+    /// Ensures user has an active mission for today
+    /// Checks if user has a mission with status 'have' created today
+    /// If not (either completed today's mission or it's a new day), generates a new mission
+    /// This should be called when the app launches
+    func ensureUserHasActiveMission(userId: UUID) async {
+        print("🚀 Ensuring user has an active mission for today...")
+
+        // Check if user already has an active mission created today
+        let activeMission = await fetchActiveMission(userId: userId)
+
+        if activeMission != nil {
+            print("✅ User already has an active mission for today, skipping generation")
+            todaysMission = activeMission
+            return
+        }
+
+        // No active mission found for today, generate a new one
+        // This happens when:
+        // 1. It's a new day (previous mission was yesterday or earlier)
+        // 2. User completed today's mission (status changed from 'have' to 'done')
+        print("🎯 No active mission found for today, generating new daily mission...")
+        isLoading = true
+        errorMessage = nil
+
+        do {
+            let missionGenerator = MissionGenerator()
+            let newMission = try await missionGenerator.generateMission()
+
+            print("✅ New daily mission generated: \(newMission.id)")
+            print("   Title: \(newMission.title ?? "nil")")
+            print("   Status: \(newMission.status.rawValue)")
+
+            todaysMission = newMission
+        } catch {
+            errorMessage = "Failed to generate mission: \(error.localizedDescription)"
+            print("❌ Error generating mission: \(error)")
+        }
+
+        isLoading = false
+    }
+
     /// Resets the controller state
     func reset() {
         isLoading = false

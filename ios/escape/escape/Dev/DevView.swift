@@ -10,8 +10,11 @@ import SwiftUI
 struct DevView: View {
     @Environment(\.missionStateManager) var missionStateManager
     @State private var controller = BadgeController()
+    @State private var missionController = MissionGeneratorController()
     @State private var locationName = ""
     @State private var showImagePreview = false
+    @State private var missionContext = ""
+    @State private var selectedDisasterType: DisasterType?
     @State private var showMissionResult = false
     @State private var realShelters: [Shelter] = []
     @State private var realBadges: [Badge] = []
@@ -111,6 +114,18 @@ struct DevView: View {
                 }
 
                 Section {
+                    TextField("Mission context (optional)", text: $missionContext, axis: .vertical)
+                        .lineLimit(2...4)
+                        .autocorrectionDisabled()
+
+                    Picker("Disaster Type (optional)", selection: $selectedDisasterType) {
+                        Text("Random").tag(nil as DisasterType?)
+                        ForEach(DisasterType.allCases, id: \.self) { type in
+                            Text(type.rawValue).tag(type as DisasterType?)
+                        }
+                    }
+                } header: {
+                    Text("Mission Parameters")
                     Button("dev.load_real_shelters") {
                         Task {
                             await loadRealShelters()
@@ -184,7 +199,7 @@ struct DevView: View {
                         Button(action: generateMission) {
                             HStack {
                                 Spacer()
-                                if missionStateManager.currentMissionState == .inProgress {
+                                if missionController.isGenerating {
                                     ProgressView()
                                         .progressViewStyle(CircularProgressViewStyle())
                                 } else {
@@ -194,15 +209,28 @@ struct DevView: View {
                                 Spacer()
                             }
                         }
-                        .disabled(missionStateManager.currentMissionState == .inProgress)
+                        .disabled(missionController.isGenerating)
 
                         Button("Reset Mission") {
                             missionStateManager.resetMission()
+                            missionController.reset()
+                            missionContext = ""
+                            selectedDisasterType = nil
                         }
                         .foregroundColor(.orange)
                     }
+
+                    if let errorMessage = missionController.errorMessage {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.red)
+                            Text(errorMessage)
+                                .foregroundColor(.red)
+                                .font(.subheadline)
+                        }
+                    }
                 } header: {
-                    Text("Mission Generator (Mock)")
+                    Text("Mission Generator")
                 }
 
                 // Current Mission Details
@@ -374,14 +402,17 @@ struct DevView: View {
 
     private func generateMission() {
         Task {
-            // Set to in progress
-            missionStateManager.updateMissionState(.inProgress)
+            // Generate the mission using the edge function
+            let context = missionContext.isEmpty ? nil : missionContext
+            await missionController.generateMission(
+                context: context,
+                disasterTypeHint: selectedDisasterType
+            )
 
-            // Mock: Wait 2 seconds to simulate generation
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
-
-            // Set to active after "generation"
-            missionStateManager.updateMissionState(.active)
+            // If successful, update the mission state manager
+            if let mission = missionController.generatedMission {
+                missionStateManager.updateMission(mission)
+            }
         }
     }
 
