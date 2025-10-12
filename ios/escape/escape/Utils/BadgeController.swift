@@ -45,6 +45,25 @@ class BadgeController {
         }
     }
 
+    func generateBadgeFromLocationName(_ locationName: String) async {
+        isGenerating = true
+        errorMessage = nil
+        defer { isGenerating = false }
+
+        do {
+            let result = try await badgeGenerator.generateBadgeFromLocationName(locationName)
+
+            generatedBadgeUrl = result.imageUrl
+            generatedPrompt = result.prompt
+
+            debugPrint("✅ Badge generated successfully from location name: \(locationName)")
+            debugPrint("📝 Prompt: \(result.prompt)")
+        } catch {
+            errorMessage = error.localizedDescription
+            debugPrint("❌ Badge generation error: \(error)")
+        }
+    }
+
     func generateBadgeForShelter(_ shelterName: String) async {
         isGenerating = true
         errorMessage = nil
