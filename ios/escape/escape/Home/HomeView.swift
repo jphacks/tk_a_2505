@@ -12,6 +12,7 @@ struct HomeView: View {
     @Binding var selectedTab: Tab
     @State private var missionController = MissionController()
     @State private var userBadges: [Badge] = []
+    @State private var badgeStats: (total: Int, unlocked: Int) = (0, 0)
     @State private var showingMissionDetail = false
 
     var body: some View {
@@ -62,7 +63,7 @@ struct HomeView: View {
                     }
 
                     // バッジコレクション セクション
-                    BadgeCollectionView(badges: userBadges)
+                    BadgeCollectionView(badges: userBadges, stats: badgeStats)
                         .padding(.horizontal)
 
                     // 統計情報
@@ -112,37 +113,19 @@ struct HomeView: View {
     }
 
     private func loadUserBadges() {
-        // TODO: Supabaseからユーザーのバッジを取得
-        let sampleBadges = [
-            ("1", "後楽園", "star.fill", "korakuen", "B001", "東京都文京区後楽1-3-61", "文京区", true, true, false, false, true, false, true, true, false, 35.7056, 139.7514),
-            ("2", "東大前", "house.fill", "todaimae", "B002", "東京都文京区本郷7-3-1", "文京区", true, false, false, false, true, false, true, false, false, 35.7123, 139.7614),
-            ("3", "ロゴ", "timer", "logo", "B003", "東京都文京区湯島3-30-1", "文京区", true, true, true, false, true, false, true, false, false, 35.7081, 139.7686),
-            ("4", "避難所D", "checkmark.circle.fill", nil, "B004", "東京都文京区千駄木2-19-1", "文京区", true, false, false, false, true, false, true, false, false, 35.7265, 139.7610),
-        ]
+        Task {
+            do {
+                let badgeService = BadgeService()
+                let collectedBadges = try await badgeService.getUserCollectedBadgesWithDetails()
+                userBadges = collectedBadges.map { $0.toBadge() }
 
-        userBadges = sampleBadges.map { sample in
-            Badge(
-                id: sample.0,
-                name: sample.1,
-                icon: sample.2,
-                color: Badge.randomColor,
-                isUnlocked: true,
-                imageName: sample.3,
-                badgeNumber: sample.4,
-                address: sample.5,
-                municipality: sample.6,
-                isShelter: sample.7,
-                isFlood: sample.8,
-                isLandslide: sample.9,
-                isStormSurge: sample.10,
-                isEarthquake: sample.11,
-                isTsunami: sample.12,
-                isFire: sample.13,
-                isInlandFlood: sample.14,
-                isVolcano: sample.15,
-                latitude: sample.16,
-                longitude: sample.17
-            )
+                // Fetch badge statistics
+                badgeStats = try await badgeService.getBadgeStats()
+            } catch {
+                debugPrint("❌ Failed to load badges: \(error)")
+                userBadges = [] // Fallback to empty array on error
+                badgeStats = (0, 0)
+            }
         }
     }
 }

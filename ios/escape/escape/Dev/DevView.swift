@@ -11,8 +11,6 @@ struct DevView: View {
     @Environment(\.missionStateManager) var missionStateManager
     @State private var controller = BadgeController()
     @State private var locationName = ""
-    @State private var locationDescription = ""
-    @State private var colorTheme = ""
     @State private var showImagePreview = false
 
     var body: some View {
@@ -21,16 +19,13 @@ struct DevView: View {
                 Section {
                     TextField("dev.location_name", text: $locationName)
                         .autocorrectionDisabled()
-
-                    TextField("dev.location_description", text: $locationDescription, axis: .vertical)
-                        .lineLimit(3 ... 6)
-                        .autocorrectionDisabled()
-
-                    TextField("dev.color_theme", text: $colorTheme)
-                        .autocorrectionDisabled()
                 } header: {
                     Text("dev.badge_generator_header")
                         .textCase(nil)
+                } footer: {
+                    Text("AI will automatically generate the description and color theme")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
 
                 Section {
@@ -298,28 +293,17 @@ struct DevView: View {
     }
 
     private func generateBadge() {
-        let finalColorTheme = colorTheme.isEmpty ? nil : colorTheme
-        let finalDescription = locationDescription.isEmpty ? "A notable location" : locationDescription
-
         Task {
-            await controller.generateBadge(
-                locationName: locationName,
-                locationDescription: finalDescription,
-                colorTheme: finalColorTheme
-            )
+            await controller.generateBadgeFromLocationName(locationName)
         }
     }
 
     private func loadKorakuenPreset() {
         locationName = "後楽園"
-        locationDescription = "Features the iconic Tokyo Dome stadium, Kōrakuen Garden with traditional Japanese elements like bridges and ginkgo trees, and amusement park rides including Ferris wheels and roller coasters"
-        colorTheme = "modern urban blues and greys for the Dome, traditional greens, reds, and golds for the garden elements"
     }
 
     private func clearFields() {
         locationName = ""
-        locationDescription = ""
-        colorTheme = ""
         controller.reset()
     }
 
