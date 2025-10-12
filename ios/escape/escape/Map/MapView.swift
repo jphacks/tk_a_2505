@@ -103,8 +103,10 @@ struct MapView: View {
                 .presentationDetents([.medium, .large])
         }
         .fullScreenCover(isPresented: $showCompleteView) {
-            if let shelter = reachedShelter {
-                CompleteView(shelter: shelter)
+            if let shelter = reachedShelter,
+               let currentMission = missionStateManager.currentMission
+            {
+                MissionResultView(mission: currentMission, shelter: shelter)
             }
         }
         .onAppear {
@@ -190,6 +192,12 @@ struct MapView: View {
             ) {
                 reachedShelter = shelter
                 showShelterReachedAlert = true
+
+                // ミッションを完了状態に更新
+                print("🎯 Shelter reached! Updating mission state to completed")
+                print("📝 Current mission before update: \(missionStateManager.currentMission?.status.rawValue ?? "nil")")
+                missionStateManager.updateMissionState(.completed)
+                print("✅ Mission state after update: \(missionStateManager.currentMission?.status.rawValue ?? "nil")")
             }
         }
 
