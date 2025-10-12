@@ -145,6 +145,21 @@ struct MissionResultView: View {
                 return
             }
 
+            // Step 0: Verify shelter exists in database
+            do {
+                let _: Shelter = try await supabase
+                    .from("shelters")
+                    .select()
+                    .eq("id", value: shelterUUID)
+                    .single()
+                    .execute()
+                    .value
+            } catch {
+                errorMessage = "Shelter not found in database. Please use a real shelter from the database."
+                isGeneratingBadge = false
+                return
+            }
+
             // Step 1: Check if badge exists for this shelter in shelter_badges table
             let existingBadge = try await badgeService.getBadgeForShelter(shelterId: shelterUUID)
 
@@ -177,6 +192,28 @@ struct MissionResultView: View {
         showDescriptionInput = false
 
         do {
+            // Convert shelter.id to UUID
+            guard let shelterUUID = UUID(uuidString: shelter.id) else {
+                errorMessage = "Invalid shelter ID format"
+                isGeneratingBadge = false
+                return
+            }
+
+            // Verify shelter exists in database before creating badge
+            do {
+                let _: Shelter = try await supabase
+                    .from("shelters")
+                    .select()
+                    .eq("id", value: shelterUUID)
+                    .single()
+                    .execute()
+                    .value
+            } catch {
+                errorMessage = "Shelter not found in database. Please use a real shelter from the database."
+                isGeneratingBadge = false
+                return
+            }
+
             // Generate badge using devtools method with user description
             await badgeController.generateBadge(
                 locationName: shelter.name,
@@ -186,13 +223,6 @@ struct MissionResultView: View {
 
             if let badgeUrl = badgeController.generatedBadgeUrl {
                 generatedBadgeUrl = badgeUrl
-
-                // Convert shelter.id to UUID
-                guard let shelterUUID = UUID(uuidString: shelter.id) else {
-                    errorMessage = "Invalid shelter ID format"
-                    isGeneratingBadge = false
-                    return
-                }
 
                 // Step 1: Create shelter badge in shelter_badges table
                 let createdBadge = try await badgeService.createShelterBadge(

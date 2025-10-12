@@ -122,6 +122,12 @@ struct DevView: View {
                         }
                     }
 
+                    Button("Load Direct Shelters") {
+                        Task {
+                            await loadDirectShelters()
+                        }
+                    }
+
                     if !realBadges.isEmpty {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 20) {
@@ -153,8 +159,11 @@ struct DevView: View {
                     }
 
                     Button("dev.test_mission_result") {
-                        selectedShelter = nil
-                        showMissionResult = true
+                        Task {
+                            // Always load fresh shelter data from database
+                            await loadSpecificShelter()
+                            showMissionResult = true
+                        }
                     }
                     .fontWeight(.semibold)
                 } header: {
@@ -539,6 +548,59 @@ struct DevView: View {
         return "\(baseUrl)/\(badgeName)"
     }
 
+    private func loadDirectShelters() async {
+        do {
+            // Load shelters directly from shelters table
+            let shelters: [Shelter] = try await supabase
+                .from("shelters")
+                .select()
+                .limit(10)
+                .execute()
+                .value
+
+            await MainActor.run {
+                realShelters = shelters
+                realBadges = [] // Clear badges since we're loading shelters directly
+                print("Loaded \(shelters.count) direct shelters")
+                if let firstShelter = shelters.first {
+                    print("First shelter: \(firstShelter.name) - \(firstShelter.address)")
+                }
+            }
+        } catch {
+            print("Failed to load direct shelters: \(error)")
+        }
+    }
+
+    private func loadSpecificShelter() async {
+        do {
+            // Load the specific shelter by ID from database
+            let testShelterId = "808f4c01-049f-4512-b9d2-95540b3fe8d8"
+            guard let shelterUUID = UUID(uuidString: testShelterId) else {
+                print("Invalid shelter UUID")
+                return
+            }
+
+            let shelter: Shelter = try await supabase
+                .from("shelters")
+                .select()
+                .eq("id", value: shelterUUID)
+                .single()
+                .execute()
+                .value
+
+            await MainActor.run {
+                selectedShelter = shelter
+                print("Loaded specific shelter: \(shelter.name) - \(shelter.address)")
+            }
+        } catch {
+            print("Failed to load specific shelter: \(error)")
+            // Fallback to sample shelter if database fetch fails
+            await MainActor.run {
+                selectedShelter = sampleShelter
+            }
+        }
+    }
+
     // MARK: - Sample Data for Testing
 
     private var sampleMission: Mission {
@@ -557,16 +619,16 @@ struct DevView: View {
     }
 
     private var sampleShelter: Shelter {
-        // Use a fixed UUID for testing - this should be a real shelter ID from your database
-        let testShelterId = "550e8400-e29b-41d4-a716-446655440000"
+        // Fallback shelter - try to use real data first
+        let testShelterId = "808f4c01-049f-4512-b9d2-95540b3fe8d8"
 
         return Shelter(
             id: testShelterId,
             number: 1,
-            commonId: "BUNKYO001",
-            name: "後楽園避難所",
-            address: "東京都文京区後楽1-3-61",
-            municipality: "文京区",
+            commonId: "SAMPLE001",
+            name: "サンプル避難所",
+            address: "サンプル住所",
+            municipality: "サンプル区",
             isShelter: true,
             isFlood: false,
             isLandslide: false,
@@ -581,7 +643,7 @@ struct DevView: View {
             acceptedPeople: "避難住民",
             latitude: 35.7056,
             longitude: 139.7519,
-            remarks: "東京ドーム近く",
+            remarks: "フェッチしたデータを使用することを推奨",
             lastUpdated: Date()
         )
     }
