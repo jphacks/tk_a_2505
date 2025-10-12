@@ -62,16 +62,16 @@ struct HomeView: View {
     private func loadCurrentMission() {
         // TODO: Supabaseから現在のミッションを取得
         currentMission = Mission(
-            id: "1",
+            id: UUID(),
+            userId: UUID(),
             title: "震度6強の地震発生！避難所へ緊急避難せよ",
-            name: "緊急地震避難訓練",
-            description: "AI解析により、マグニチュード7.2の大地震が発生したシナリオが生成されました。建物の倒壊や火災の危険があります。最寄りの避難所まで安全なルートで避難してください。",
+            overview: "AI解析により、マグニチュード7.2の大地震が発生したシナリオが生成されました。建物の倒壊や火災の危険があります。最寄りの避難所まで安全なルートで避難してください。",
             disasterType: .earthquake,
-            estimatedDuration: 15,
-            distance: 800,
-            severity: .critical,
-            isUrgent: true,
-            aiGeneratedAt: Date()
+            evacuationRegion: "文京区",
+            status: .active,
+            steps: nil,
+            distances: nil,
+            createdAt: Date()
         )
     }
 

@@ -18,6 +18,9 @@ class MissionStateManager {
     /// Mission data (to be expanded in the future)
     var missionData: String?
 
+    /// Current active mission
+    var currentMission: Mission?
+
     /// Singleton instance for non-SwiftUI contexts
     static let shared = MissionStateManager()
 
@@ -30,10 +33,21 @@ class MissionStateManager {
         currentMissionState = newState
     }
 
+    /// Updates the current mission
+    func updateCurrentMission(_ mission: Mission?) {
+        currentMission = mission
+        if let mission = mission {
+            currentMissionState = mission.status
+        } else {
+            currentMissionState = .noMission
+        }
+    }
+
     /// Resets mission state to default
     func resetMission() {
         currentMissionState = .noMission
         missionData = nil
+        currentMission = nil
     }
 
     // MARK: - Future Mission Data Methods
