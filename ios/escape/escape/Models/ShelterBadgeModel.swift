@@ -328,53 +328,90 @@ struct Badge: Identifiable {
     var supportedDisasters: [(icon: String, name: String)] {
         var disasters: [(icon: String, name: String)] = []
 
-        if isEarthquake {
+        // If this is a shelter, show all disaster types
+        if isShelter {
             disasters.append((
                 icon: "waveform.path.ecg",
                 name: String(localized: "home.disaster.earthquake", table: "Localizable")
             ))
-        }
-        if isFlood {
             disasters.append((
                 icon: "water.waves",
                 name: String(localized: "home.disaster.flood", table: "Localizable")
             ))
-        }
-        if isFire {
             disasters.append((
                 icon: "flame.fill",
                 name: String(localized: "home.disaster.fire", table: "Localizable")
             ))
-        }
-        if isTsunami {
             disasters.append((
                 icon: "water.waves.and.arrow.up",
                 name: String(localized: "home.disaster.tsunami", table: "Localizable")
             ))
-        }
-        if isLandslide {
             disasters.append((
                 icon: "mountain.2.fill",
                 name: String(localized: "home.disaster.landslide", table: "Localizable")
             ))
-        }
-        if isStormSurge {
             disasters.append((
                 icon: "wind",
                 name: String(localized: "home.disaster.storm_surge", table: "Localizable")
             ))
-        }
-        if isInlandFlood {
             disasters.append((
                 icon: "drop.fill",
                 name: String(localized: "home.disaster.inland_flood", table: "Localizable")
             ))
-        }
-        if isVolcano {
             disasters.append((
                 icon: "triangle.fill",
                 name: String(localized: "home.disaster.volcano", table: "Localizable")
             ))
+        } else {
+            // For non-shelter badges, check individual disaster flags
+            if isEarthquake {
+                disasters.append((
+                    icon: "waveform.path.ecg",
+                    name: String(localized: "home.disaster.earthquake", table: "Localizable")
+                ))
+            }
+            if isFlood {
+                disasters.append((
+                    icon: "water.waves",
+                    name: String(localized: "home.disaster.flood", table: "Localizable")
+                ))
+            }
+            if isFire {
+                disasters.append((
+                    icon: "flame.fill",
+                    name: String(localized: "home.disaster.fire", table: "Localizable")
+                ))
+            }
+            if isTsunami {
+                disasters.append((
+                    icon: "water.waves.and.arrow.up",
+                    name: String(localized: "home.disaster.tsunami", table: "Localizable")
+                ))
+            }
+            if isLandslide {
+                disasters.append((
+                    icon: "mountain.2.fill",
+                    name: String(localized: "home.disaster.landslide", table: "Localizable")
+                ))
+            }
+            if isStormSurge {
+                disasters.append((
+                    icon: "wind",
+                    name: String(localized: "home.disaster.storm_surge", table: "Localizable")
+                ))
+            }
+            if isInlandFlood {
+                disasters.append((
+                    icon: "drop.fill",
+                    name: String(localized: "home.disaster.inland_flood", table: "Localizable")
+                ))
+            }
+            if isVolcano {
+                disasters.append((
+                    icon: "triangle.fill",
+                    name: String(localized: "home.disaster.volcano", table: "Localizable")
+                ))
+            }
         }
 
         return disasters
