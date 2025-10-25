@@ -8,7 +8,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.tk-a-2505.escape</string>
+			<string>com.tk-a-2505.hinan</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>io.supabase.user-management</string>
