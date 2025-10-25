@@ -10,7 +10,7 @@ import SwiftUI
 
 struct AppView: View {
     @State var isAuthenticated = false
-    @State private var missionController = MissionController()
+    @State private var missionViewModel = MissionViewModel()
 
     var body: some View {
         Group {
@@ -28,7 +28,7 @@ struct AppView: View {
                     // When user is authenticated, ensure they have an active mission
                     if isAuthenticated, let session = state.session {
                         Task {
-                            await missionController.ensureUserHasActiveMission(userId: session.user.id)
+                            await missionViewModel.ensureUserHasActiveMission(userId: session.user.id)
                         }
                     }
                 }
