@@ -354,13 +354,14 @@ struct BadgeDetailView: View {
     let badge: Badge
     @Environment(\.dismiss) private var dismiss
     @State private var isAnimating = false
+    @State private var randomBackgroundColor = Badge.randomColor
 
     var body: some View {
         NavigationStack {
             ZStack {
                 // 背景グラデーション
                 LinearGradient(
-                    gradient: Gradient(colors: [badge.color, badge.color.opacity(0.7)]),
+                    gradient: Gradient(colors: [randomBackgroundColor, randomBackgroundColor.opacity(0.7)]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -502,7 +503,7 @@ struct BadgeDetailView: View {
                                             .font(.headline)
                                             .fontWeight(.bold)
                                     }
-                                    .foregroundColor(badge.color)
+                                    .foregroundColor(randomBackgroundColor)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 16)
                                     .background(Color.white)

@@ -26,3 +26,5 @@ supabase/supabase
 # Swift Package Manager
 .swiftpm/
 *.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+
+CLAUDE.md
