@@ -17,3 +17,9 @@ repos:
         language: system
         files: 'Localizable\.xcstrings$'
         pass_filenames: true
+      - id: lint-staged-web
+        name: Lint staged files (web)
+        entry: bash -c 'cd web && pnpm lint-staged'
+        language: system
+        files: '^web/.*\.(js|jsx|ts|tsx|json|css|md)$'
+        pass_filenames: false
