@@ -36,7 +36,6 @@
 		773D0A772E96912E0095C969 /* escapeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = escapeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		77F1242A2EAE57CA00A01186 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		77F1242B2EAE57CA00A01186 /* Config.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = Config.xcconfig.example; sourceTree = "<group>"; };
-		Config.xcconfig /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
