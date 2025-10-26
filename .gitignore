@@ -16,6 +16,36 @@ build/
 *.xcscmblueprint
 *.xccheckout
 
+# Xcode - Workspace settings (to prevent DEVELOPMENT_TEAM conflicts)
+*.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+*.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+*.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+
+# Xcode - Schemes (only ignore user-specific, not shared)
+# Shared schemes are typically committed, so we're not ignoring them here
+
+# Xcode - Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Xcode - Provisioning
+*.mobileprovision
+*.provisionprofile
+
+# Xcode - Code coverage
+*.gcda
+*.gcno
+
+# Xcode - Debugging
+*.dSYM/
+*.ipa
+
+# Xcode - Temporary files
+*.moved-aside
+*.swp
+*~.nib
+
 # Configuration files with secrets
 ios/escape/escape/Supabase.swift
 
