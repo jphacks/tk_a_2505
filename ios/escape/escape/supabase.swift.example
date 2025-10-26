@@ -1,0 +1,11 @@
+import Foundation
+import Supabase
+
+// Configuration file for Supabase client
+// Copy this file to supabase.swift and edit with your actual Supabase credentials
+// supabase.swift is git-ignored - each developer should have their own copy
+
+let supabase = SupabaseClient(
+    supabaseURL: URL(string: "https://your-project.supabase.co")!,
+    supabaseKey: "your-anon-key-here"
+)

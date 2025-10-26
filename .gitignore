@@ -17,7 +17,9 @@ build/
 *.xccheckout
 
 # Configuration files with secrets
+ios/escape/escape/supabase.swift
 ios/escape/escape/Supabase.swift
+ios/escape/Config.xcconfig
 
 # Supabase
 supabase/.temp
