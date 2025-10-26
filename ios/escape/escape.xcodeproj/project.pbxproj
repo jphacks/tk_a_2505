@@ -9,8 +9,6 @@
 /* Begin PBXBuildFile section */
 		779935F02E96964200339B51 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 779935EF2E96964200339B51 /* Auth */; };
 		779935F42E96980600339B51 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 779935F32E96980600339B51 /* Supabase */; };
-		
-		
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,7 +102,6 @@
 				773D0A7A2E96912E0095C969 /* escapeUITests */,
 				DD55E6A62E9A3FFE00F8AB50 /* Frameworks */,
 				773D0A612E96912A0095C969 /* Products */,
-				77F123AE2EAE570800A01186 /* Recovered References */,
 				77F1242A2EAE57CA00A01186 /* Config.xcconfig */,
 				77F1242B2EAE57CA00A01186 /* Config.xcconfig.example */,
 			);
@@ -120,7 +117,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-// Removed "Recovered References" group and its reference to Config.xcconfig
 		DD55E6A62E9A3FFE00F8AB50 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -254,8 +250,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				77F1242C2EAE57CA00A01186 /* Config.xcconfig.example in Resources */,
-				77F1242D2EAE57CA00A01186 /* Config.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -315,6 +309,7 @@
 /* Begin XCBuildConfiguration section */
 		773D0A7F2E96912E0095C969 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 77F1242A2EAE57CA00A01186 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -380,6 +375,7 @@
 		};
 		773D0A802E96912E0095C969 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 77F1242A2EAE57CA00A01186 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -438,7 +434,6 @@
 		};
 		773D0A822E96912E0095C969 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = Config.xcconfig /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -475,7 +470,6 @@
 		};
 		773D0A832E96912E0095C969 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = Config.xcconfig /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
