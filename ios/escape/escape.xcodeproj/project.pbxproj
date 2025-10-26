@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		779935F02E96964200339B51 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 779935EF2E96964200339B51 /* Auth */; };
 		779935F42E96980600339B51 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 779935F32E96980600339B51 /* Supabase */; };
-		77F1242C2EAE57CA00A01186 /* Config.xcconfig.example in Resources */ = {isa = PBXBuildFile; fileRef = 77F1242B2EAE57CA00A01186 /* Config.xcconfig.example */; };
-		77F1242D2EAE57CA00A01186 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 77F1242A2EAE57CA00A01186 /* Config.xcconfig */; };
+		
+		
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
