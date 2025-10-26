@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		779935F02E96964200339B51 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 779935EF2E96964200339B51 /* Auth */; };
 		779935F42E96980600339B51 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 779935F32E96980600339B51 /* Supabase */; };
+		77F1242C2EAE57CA00A01186 /* Config.xcconfig.example in Resources */ = {isa = PBXBuildFile; fileRef = 77F1242B2EAE57CA00A01186 /* Config.xcconfig.example */; };
+		77F1242D2EAE57CA00A01186 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 77F1242A2EAE57CA00A01186 /* Config.xcconfig */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,6 +34,9 @@
 		773D0A602E96912A0095C969 /* escape.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = escape.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		773D0A6D2E96912E0095C969 /* escapeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = escapeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		773D0A772E96912E0095C969 /* escapeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = escapeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		77F1242A2EAE57CA00A01186 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		77F1242B2EAE57CA00A01186 /* Config.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = Config.xcconfig.example; sourceTree = "<group>"; };
+		Config.xcconfig /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -100,6 +105,9 @@
 				773D0A7A2E96912E0095C969 /* escapeUITests */,
 				DD55E6A62E9A3FFE00F8AB50 /* Frameworks */,
 				773D0A612E96912A0095C969 /* Products */,
+				77F123AE2EAE570800A01186 /* Recovered References */,
+				77F1242A2EAE57CA00A01186 /* Config.xcconfig */,
+				77F1242B2EAE57CA00A01186 /* Config.xcconfig.example */,
 			);
 			sourceTree = "<group>";
 		};
@@ -111,6 +119,14 @@
 				773D0A772E96912E0095C969 /* escapeUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		77F123AE2EAE570800A01186 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				Config.xcconfig /* Config.xcconfig */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 		DD55E6A62E9A3FFE00F8AB50 /* Frameworks */ = {
@@ -246,6 +262,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				77F1242C2EAE57CA00A01186 /* Config.xcconfig.example in Resources */,
+				77F1242D2EAE57CA00A01186 /* Config.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -338,7 +356,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = W7J5NU6H5R;
+				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -403,7 +421,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = W7J5NU6H5R;
+				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -428,12 +446,13 @@
 		};
 		773D0A822E96912E0095C969 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = Config.xcconfig /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = W7J5NU6H5R;
+				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = escape/Info.plist;
@@ -450,7 +469,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.tk-a-2505.hinan";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -464,12 +483,13 @@
 		};
 		773D0A832E96912E0095C969 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = Config.xcconfig /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = W7J5NU6H5R;
+				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = escape/Info.plist;
@@ -486,7 +506,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.tk-a-2505.hinan";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

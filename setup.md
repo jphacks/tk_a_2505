@@ -15,21 +15,26 @@
 
 ## 2. iOS環境設定
 
-### Supabase認証情報の設定
+### Xcode設定ファイルのセットアップ
 1. テンプレートから設定ファイルを作成:
    ```bash
-   cp ios/escape/escape/Supabase.swift.template ios/escape/escape/Supabase.swift
+   cp ios/escape/Config.xcconfig.example ios/escape/Config.xcconfig
    ```
 
-2. `ios/escape/escape/Supabase.swift`を編集し、Supabase認証情報を入力:
-   ```swift
-   let supabase = SupabaseClient(
-       supabaseURL: URL(string: "https://your-project.supabase.co")!,
-       supabaseKey: "your_supabase_publishable_key_here"
-   )
+2. `ios/escape/Config.xcconfig`を編集する。
+
+**注意:** `Config.xcconfig`は機密情報を含むため、gitにコミットされません。各開発者が自分の値を設定してください。
+
+### Supabase認証情報の設定
+1. テンプレートからSwiftファイルを作成:
+   ```bash
+   cp ios/escape/escape/supabase.swift.example ios/escape/escape/supabase.swift
    ```
 
-**注意:** `Supabase.swift`は機密情報を含むため、gitにコミットされません。
+2. `ios/escape/escape/supabase.swift`を編集する。
+
+
+**注意:** `supabase.swift`は機密情報を含むため、gitにコミットされません。各開発者が自分の値を設定してください。
 
 ## 3. 開発ツールのセットアップ
 
@@ -39,12 +44,21 @@
    pip install pre-commit
    ```
 
-2. SwiftFormatをインストール:
+2. SwiftFormatとjqをインストール:
    ```bash
-   brew install swiftformat
+   brew install swiftformat jq
    ```
 
 3. pre-commit hooksを初期化:
    ```bash
    pre-commit install
    ```
+
+4. 既存ファイルにhooksを適用（オプション）:
+   ```bash
+   pre-commit run --all-files
+   ```
+
+**Pre-commit hooksの内容:**
+- SwiftFormatによるSwiftコードの自動フォーマット
+- `Localizable.xcstrings`ファイルの自動ソート（マージコンフリクト防止）

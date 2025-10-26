@@ -1,0 +1,8 @@
+// Configuration from environment
+// Edit this file manually with your local configuration values
+// This file is git-ignored - each developer should have their own copy
+
+PRODUCT_BUNDLE_IDENTIFIER = com.tk-a-2505.hinan
+DEVELOPMENT_TEAM = W7J5NU6H5R
+SUPABASE_URL = "https://wmmddehrriniwxsgnwqy.supabase.co"
+SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndtbWRkZWhycmluaXd4c2dud3F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MTI5ODUsImV4cCI6MjA3NTQ4ODk4NX0.myehBMgfswyqpECOO2p4hGyG7FJ9cJFEj-dwjlaKe0w
