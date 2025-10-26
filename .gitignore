@@ -1,15 +1,31 @@
-CLAUDE.md
 .DS_Store
 
-# Xcode
+# Xcode - User-specific files
 *.xcworkspace/xcuserdata/
 *.xcodeproj/project.xcworkspace/xcuserdata/
 *.xcodeproj/xcuserdata/
 **/*xcuserdata*
-supabase/.temp
-supabase/supabase
+
+# Xcode - Build products
+DerivedData/
+build/
+*.build/
+
+# Xcode - State files
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
 
 # Configuration files with secrets
 ios/escape/escape/supabase.swift
 ios/escape/escape/Supabase.swift
-ios/escape/Config.xcconfigios/escape/Config.xcconfig
+ios/escape/Config.xcconfig
+
+# Supabase
+supabase/.temp
+supabase/supabase
+
+# Swift Package Manager
+.swiftpm/
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/*
+!*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
