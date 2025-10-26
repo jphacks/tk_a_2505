@@ -1,7 +1,7 @@
 
 ![IMAGE ALT TEXT HERE](media/banner.jpg)
 
-## 🏆 受賞 
+## 🏆 受賞
 
 **東京会場A Hack Day Sponsor Award** - 川田テクノシステム株式会社
 
