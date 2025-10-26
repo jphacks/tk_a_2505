@@ -12,4 +12,4 @@ supabase/supabase
 # Configuration files with secrets
 ios/escape/escape/supabase.swift
 ios/escape/escape/Supabase.swift
-ios/escape/Config.xcconfig
+ios/escape/Config.xcconfigios/escape/Config.xcconfig
