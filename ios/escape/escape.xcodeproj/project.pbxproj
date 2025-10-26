@@ -120,14 +120,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		77F123AE2EAE570800A01186 /* Recovered References */ = {
-			isa = PBXGroup;
-			children = (
-				Config.xcconfig /* Config.xcconfig */,
-			);
-			name = "Recovered References";
-			sourceTree = "<group>";
-		};
+// Removed "Recovered References" group and its reference to Config.xcconfig
 		DD55E6A62E9A3FFE00F8AB50 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
