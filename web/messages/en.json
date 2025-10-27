@@ -1,0 +1,29 @@
+{
+  "metadata": {
+    "title": "HiNan! - Make evacuation drills a habit by walking",
+    "description": "HiNan! is a mobile app that makes evacuation drills fun, repeatable, and healthy by walking to nearby shelters based on AI-generated scenarios through gamification."
+  },
+  "homepage": {
+    "title": "Welcome",
+    "description": "HiNan! is a mobile app that makes evacuation drills fun, repeatable, and healthy by walking to nearby shelters based on AI-generated scenarios through gamification.",
+    "tagline": "Make evacuation drills a habit by walking",
+    "tryDemo": "Try Demo",
+    "learnMore": "Learn More",
+    "featuresTitle": "Why HiNan!?",
+    "featuresDescription": "Turn evacuation drills into an engaging, healthy habit",
+    "feature1Title": "AI-Generated Scenarios",
+    "feature1Description": "Practice realistic evacuation scenarios tailored to your location and environment",
+    "feature2Title": "Gamification",
+    "feature2Description": "Earn badges and track your progress while making safety training fun",
+    "feature3Title": "Walk & Stay Healthy",
+    "feature3Description": "Combine safety drills with physical exercise by walking to real shelters"
+  },
+  "navbar": {
+    "features": "Features",
+    "demo": "Demo",
+    "about": "About",
+    "credits": "Credits",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  }
+}

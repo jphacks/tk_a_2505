@@ -1,0 +1,6 @@
+// Configuration from environment
+// Copy this file to Config.xcconfig and edit with your local configuration values
+// Config.xcconfig is git-ignored - each developer should have their own copy
+
+PRODUCT_BUNDLE_IDENTIFIER = com.tk-a-2505.hinan
+DEVELOPMENT_TEAM = YOUR_TEAM_ID_HERE

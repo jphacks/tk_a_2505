@@ -9,3 +9,17 @@ repos:
     rev: 0.57.2
     hooks:
       - id: swiftformat
+-   repo: local
+    hooks:
+      - id: sort-localizable-xcstrings
+        name: Sort Localizable.xcstrings
+        entry: bash -c 'for file in "$@"; do jq --sort-keys . "$file" > "$file.tmp" && mv "$file.tmp" "$file"; done' --
+        language: system
+        files: 'Localizable\.xcstrings$'
+        pass_filenames: true
+      - id: lint-staged-web
+        name: Lint staged files (web)
+        entry: bash -c 'cd web && pnpm lint-staged'
+        language: system
+        files: '^web/.*\.(js|jsx|ts|tsx|json|css|md)$'
+        pass_filenames: false

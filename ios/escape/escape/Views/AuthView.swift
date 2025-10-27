@@ -27,77 +27,63 @@ struct AuthView: View {
         })
     }
 
+    private var isSignInDisabled: Bool {
+        viewModel.isLoading || viewModel.email.isEmpty ||
+            (viewModel.usePasswordAuth && viewModel.password.isEmpty) ||
+            (viewModel.isSignUp && !viewModel.passwordsMatch)
+    }
+
     private var loginView: some View {
         VStack(spacing: 0) {
-            Spacer()
+            // Header
+            AuthHeader()
 
-            // Logo and title
-            VStack(spacing: 24) {
-                Image("icon")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 100, height: 100)
-                    .clipShape(RoundedRectangle(cornerRadius: 22))
-                    .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
-
-                VStack(spacing: 8) {
-                    Text("auth.welcome")
-                        .font(.system(size: 28, weight: .bold))
-
-                    Text("auth.sign_in_description")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
-                }
-            }
-            .padding(.bottom, 48)
-
-            Spacer()
-
-            // Email input and button
+            // Form
             VStack(spacing: 16) {
-                // Email field
-                HStack(spacing: 12) {
-                    Image(systemName: "envelope.fill")
-                        .foregroundColor(.secondary)
-                        .font(.system(size: 16))
-
-                    TextField("auth.email", text: $viewModel.email)
-                        .textContentType(.emailAddress)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .keyboardType(.emailAddress)
-                        .font(.body)
-                }
-                .padding(16)
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
-
-                // Sign in button
-                Button(action: {
-                    viewModel.signInButtonTapped()
-                }) {
-                    HStack {
-                        Spacer()
-                        if viewModel.isLoading {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        } else {
-                            Text("auth.sign_in")
-                                .fontWeight(.semibold)
+                // Auth mode toggle
+                AuthModeToggle(
+                    usePasswordAuth: $viewModel.usePasswordAuth,
+                    onPasswordAuthChange: { newValue in
+                        if !newValue {
+                            viewModel.isSignUp = false
                         }
-                        Spacer()
                     }
-                    .frame(height: 52)
-                    .background(viewModel.email.isEmpty ? Color.gray.opacity(0.3) : Color.accentColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
+                )
+
+                // Form fields
+                AuthFormFields(
+                    email: $viewModel.email,
+                    password: $viewModel.password,
+                    confirmPassword: $viewModel.confirmPassword,
+                    usePasswordAuth: viewModel.usePasswordAuth,
+                    isSignUp: viewModel.isSignUp,
+                    passwordsMatch: viewModel.passwordsMatch
+                )
+
+                // Sign in/up button
+                PrimaryButton(
+                    title: viewModel.isSignUp ? "auth.sign_up" : "auth.sign_in",
+                    isLoading: viewModel.isLoading,
+                    isDisabled: isSignInDisabled,
+                    action: { viewModel.signInButtonTapped() }
+                )
+                .padding(.top, 8)
+
+                // Toggle sign up/sign in (only show for password auth)
+                if viewModel.usePasswordAuth {
+                    AuthToggleLink(isSignUp: viewModel.isSignUp) {
+                        withAnimation(.none) {
+                            viewModel.isSignUp.toggle()
+                        }
+                    }
                 }
-                .disabled(viewModel.isLoading || viewModel.email.isEmpty)
             }
-            .padding(.horizontal, 32)
-            .padding(.bottom, 48)
+            .padding(.horizontal, 28)
+
+            Spacer()
+
+            // Terms and Privacy Policy
+            AuthFooter(openURL: openURL)
         }
         .contentShape(Rectangle())
         .onTapGesture {
@@ -126,15 +112,27 @@ struct AuthView: View {
                 VStack(spacing: 12) {
                     switch result {
                     case .success:
-                        Text("auth.check_inbox")
-                            .font(.system(size: 28, weight: .bold))
-                            .multilineTextAlignment(.center)
+                        if viewModel.lastAuthType == .passwordSignUp {
+                            Text("auth.verify_email")
+                                .font(.system(size: 28, weight: .bold))
+                                .multilineTextAlignment(.center)
 
-                        Text("auth.check_inbox_description")
-                            .font(.body)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 32)
+                            Text("auth.verify_email_description")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 32)
+                        } else {
+                            Text("auth.check_inbox")
+                                .font(.system(size: 28, weight: .bold))
+                                .multilineTextAlignment(.center)
+
+                            Text("auth.check_inbox_description")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 32)
+                        }
                     case let .failure(error):
                         Text("auth.error")
                             .font(.system(size: 28, weight: .bold))
@@ -150,10 +148,21 @@ struct AuthView: View {
 
                 // Action buttons
                 VStack(spacing: 12) {
-                    if case .success = result {
-                        Button(action: {
-                            openMailApp()
-                        }) {
+                    if case .success = result, viewModel.lastAuthType != .passwordSignIn {
+                        Menu {
+                            Button(action: { openMailApp(scheme: "message://") }) {
+                                Label("Mail", systemImage: "envelope")
+                            }
+                            Button(action: { openMailApp(scheme: "googlegmail://") }) {
+                                Label("Gmail", systemImage: "envelope")
+                            }
+                            Button(action: { openMailApp(scheme: "ms-outlook://") }) {
+                                Label("Outlook", systemImage: "envelope")
+                            }
+                            Button(action: { openMailApp(scheme: "ymail://") }) {
+                                Label("Yahoo Mail", systemImage: "envelope")
+                            }
+                        } label: {
                             HStack {
                                 Spacer()
                                 Text("auth.open_mail")
@@ -193,10 +202,14 @@ struct AuthView: View {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 
-    private func openMailApp() {
-        if let url = URL(string: "message://") {
+    private func openMailApp(scheme: String) {
+        if let url = URL(string: scheme) {
             UIApplication.shared.open(url)
         }
+    }
+
+    private func openURL(_ url: URL) {
+        UIApplication.shared.open(url)
     }
 }
 
