@@ -12,8 +12,19 @@ import SwiftUI
 @Observable
 class AuthViewModel {
     var email = ""
+    var password = ""
+    var confirmPassword = ""
+    var usePasswordAuth = false
+    var isSignUp = false
     var isLoading = false
     var result: Result<Void, Error>?
+    var lastAuthType: AuthType = .magicLink
+
+    enum AuthType {
+        case magicLink
+        case passwordSignIn
+        case passwordSignUp
+    }
 
     // MARK: - Dependencies
 
@@ -33,13 +44,33 @@ class AuthViewModel {
             defer { isLoading = false }
 
             do {
-                try await authService.signInWithOTP(
-                    email: email,
-                    redirectTo: URL(
-                        string: "io.supabase.user-management://login-callback"
+                if isSignUp && usePasswordAuth {
+                    lastAuthType = .passwordSignUp
+                    try await authService.signUp(
+                        email: email,
+                        password: password,
+                        redirectTo: URL(
+                            string: "io.supabase.user-management://login-callback"
+                        )
                     )
-                )
-                result = .success(())
+                    result = .success(())
+                } else if usePasswordAuth {
+                    lastAuthType = .passwordSignIn
+                    try await authService.signInWithPassword(
+                        email: email,
+                        password: password
+                    )
+                    // Don't show result page for password sign-in
+                } else {
+                    lastAuthType = .magicLink
+                    try await authService.signInWithOTP(
+                        email: email,
+                        redirectTo: URL(
+                            string: "io.supabase.user-management://login-callback"
+                        )
+                    )
+                    result = .success(())
+                }
             } catch {
                 result = .failure(error)
             }
@@ -56,7 +87,13 @@ class AuthViewModel {
 
     func reset() {
         email = ""
+        password = ""
+        confirmPassword = ""
         result = nil
         isLoading = false
+    }
+
+    var passwordsMatch: Bool {
+        password == confirmPassword
     }
 }

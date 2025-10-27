@@ -11,6 +11,32 @@ import Supabase
 class AuthSupabase {
     // MARK: - Authentication Operations
 
+    /// Signs up a new user with email and password
+    /// - Parameters:
+    ///   - email: User's email address
+    ///   - password: User's password
+    ///   - redirectTo: URL to redirect to after email confirmation
+    /// - Throws: Authentication error if sign up fails
+    func signUp(email: String, password: String, redirectTo: URL? = nil) async throws {
+        try await supabase.auth.signUp(
+            email: email,
+            password: password,
+            redirectTo: redirectTo
+        )
+    }
+
+    /// Signs in a user with email and password
+    /// - Parameters:
+    ///   - email: User's email address
+    ///   - password: User's password
+    /// - Throws: Authentication error if sign in fails
+    func signInWithPassword(email: String, password: String) async throws {
+        try await supabase.auth.signIn(
+            email: email,
+            password: password
+        )
+    }
+
     /// Signs in a user with OTP (email magic link)
     /// - Parameters:
     ///   - email: User's email address

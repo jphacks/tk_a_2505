@@ -10,11 +10,14 @@ import SwiftUI
 
 struct AppView: View {
     @State var isAuthenticated = false
+    @State var isCheckingAuth = true
     @State private var missionViewModel = MissionViewModel()
 
     var body: some View {
         Group {
-            if isAuthenticated {
+            if isCheckingAuth {
+                ProgressView()
+            } else if isAuthenticated {
                 NavigationView()
             } else {
                 AuthView()
@@ -24,6 +27,7 @@ struct AppView: View {
             for await state in supabase.auth.authStateChanges {
                 if [.initialSession, .signedIn, .signedOut].contains(state.event) {
                     isAuthenticated = state.session != nil
+                    isCheckingAuth = false
 
                     // When user is authenticated, ensure they have an active mission
                     if isAuthenticated, let session = state.session {
