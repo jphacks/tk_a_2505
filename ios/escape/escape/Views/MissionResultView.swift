@@ -130,9 +130,57 @@ struct MissionResultView: View {
                 Text(viewModel.isFirstVisitor ? "result.first_visitor_message" : "result.badge_unlocked_message")
             }
             .task {
+                
+
                 await viewModel.handleMissionCompletion(shelter: shelter)
             }
+            .safeAreaInset(edge: .bottom) {
+                Group {
+                    if let shareItem = shareItem {
+                        // Present the system share sheet with our prepared message and preview icon.
+                        ShareLink(
+                            item: shareItem,
+                            preview: SharePreview(shareItem.message, image: Image("icon"))
+                        ) {
+                            HStack(spacing: 12) {
+                                Image(systemName: "square.and.arrow.up")
+                                    .font(.system(size: 24, weight: .semibold))
+                                Text("Share")
+                                    .font(.system(size: 28, weight: .bold))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 60)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(Color("brandOrange"))
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 16)
+                        .background(.ultraThinMaterial)
+                    }
+                }
+            }
         }
+    }
+}
+
+private extension MissionResultView {
+    // Turn the view-model payload into the Transferable object that ShareLink expects.
+    var shareItem: BadgeShareItem? {
+        guard let payload = viewModel.sharePayload else {
+            return nil
+        }
+
+        return BadgeShareItem(message: payload.message, imageURL: payload.imageURL)
+    }
+}
+
+// Wrap the share payload in a Transferable so ShareLink can hand it to the system share sheet.
+struct BadgeShareItem: Transferable {
+    let message: String
+    let imageURL: URL?
+
+    static var transferRepresentation: some TransferRepresentation {
+        ProxyRepresentation(exporting: \.message)
     }
 }
 
