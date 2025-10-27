@@ -1,6 +1,7 @@
 "use client";
 
-import { useParams, usePathname } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/routing";
 import { Globe, Check } from "lucide-react";
 import {
   DropdownMenu,
@@ -16,14 +17,11 @@ const languages = [
 
 export function LanguageSwitcher() {
   const params = useParams();
+  const router = useRouter();
   const pathname = usePathname();
 
   const handleLanguageChange = (newLocale: string) => {
-    const segments = pathname.split("/");
-    segments[1] = newLocale;
-    const newPath = segments.join("/");
-    // eslint-disable-next-line react-hooks/immutability
-    window.location.href = newPath;
+    router.replace(pathname, { locale: newLocale });
   };
 
   const currentLocale = params.locale as string;
