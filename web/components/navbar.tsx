@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "./language-switcher";
 import { assetPrefix } from "@/lib/asset-prefix";
@@ -8,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/routing";
 
 export function Navbar() {
   const t = useTranslations("navbar");
@@ -20,14 +19,8 @@ export function Navbar() {
     { key: "about", href: "/about" },
   ];
 
-  const secondaryNavItems = [
-    { key: "privacy", href: "/privacy-policy" },
-    { key: "terms", href: "/terms-of-service" },
-  ];
-
   const isActive = (href: string) => {
-    const locale = pathname.split("/")[1];
-    return pathname === `/${locale}${href}`;
+    return pathname === href;
   };
 
   return (
@@ -65,20 +58,6 @@ export function Navbar() {
                 {t(item.key)}
               </Link>
             ))}
-            <div className="mx-2 h-6 w-px bg-zinc-300 dark:bg-zinc-700" />
-            {secondaryNavItems.map((item) => (
-              <Link
-                key={item.key}
-                href={item.href}
-                className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  isActive(item.href)
-                    ? "bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-400"
-                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
-                }`}
-              >
-                {t(item.key)}
-              </Link>
-            ))}
             <div className="ml-2">
               <LanguageSwitcher />
             </div>
@@ -107,9 +86,6 @@ export function Navbar() {
       {mobileMenuOpen && (
         <div className="border-t border-zinc-200/50 bg-white/95 backdrop-blur-lg dark:border-zinc-800/50 dark:bg-zinc-900/95 md:hidden">
           <div className="space-y-1 px-3 pb-3 pt-2">
-            <div className="mb-2 px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-500">
-              Main
-            </div>
             {mainNavItems.map((item) => (
               <Link
                 key={item.key}
@@ -119,24 +95,6 @@ export function Navbar() {
                   isActive(item.href)
                     ? "bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-400"
                     : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                }`}
-              >
-                {t(item.key)}
-              </Link>
-            ))}
-            <div className="my-2 border-t border-zinc-200 dark:border-zinc-800" />
-            <div className="mb-2 px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-500">
-              Legal
-            </div>
-            {secondaryNavItems.map((item) => (
-              <Link
-                key={item.key}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block rounded-lg px-3 py-2.5 text-base font-medium transition-colors ${
-                  isActive(item.href)
-                    ? "bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-400"
-                    : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
                 }`}
               >
                 {t(item.key)}

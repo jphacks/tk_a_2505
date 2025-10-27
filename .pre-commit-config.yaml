@@ -17,6 +17,12 @@ repos:
         language: system
         files: 'Localizable\.xcstrings$'
         pass_filenames: true
+      - id: sort-web-messages
+        name: Sort web message JSON files
+        entry: bash -c 'for file in "$@"; do jq --sort-keys . "$file" > "$file.tmp" && mv "$file.tmp" "$file"; done' --
+        language: system
+        files: '^web/messages/(en|ja)\.json$'
+        pass_filenames: true
       - id: lint-staged-web
         name: Lint staged files (web)
         entry: bash -c 'cd web && pnpm lint-staged'
