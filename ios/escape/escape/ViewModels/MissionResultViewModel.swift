@@ -8,6 +8,12 @@
 import Foundation
 import SwiftUI
 
+// Carry the text and optional image URL we want to hand to the share sheet.
+struct BadgeSharePayload {
+    let message: String
+    let imageURL: URL?
+}
+
 @MainActor
 @Observable
 class MissionResultViewModel {
@@ -20,6 +26,14 @@ class MissionResultViewModel {
     var showDescriptionInput = false
     var userDescription = ""
     var acquiredBadge: Badge?
+    // Prepare the text and optional image link we want to share when a badge is unlocked.
+    var sharePayload: BadgeSharePayload? {
+        guard let badge = acquiredBadge else { return nil }
+        return BadgeSharePayload(
+            message: "I just earned the \(badge.name) badge in HiNan!",
+            imageURL: badge.imageUrl.flatMap { URL(string: $0) }
+        )
+    }
 
     // MARK: - Dependencies
 
