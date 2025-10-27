@@ -62,7 +62,6 @@ struct IconSecureField: View {
             Image(systemName: icon)
                 .font(.system(size: InputFieldStyle.iconSize))
                 .foregroundColor(InputFieldStyle.iconColor)
-                .frame(width: 25)
 
             SecureField(placeholder, text: $text)
                 .font(.system(size: InputFieldStyle.fontSize))
