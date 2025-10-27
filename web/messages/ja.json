@@ -5,7 +5,25 @@
   },
   "homepage": {
     "title": "ようこそ",
-    "description": "これはローカライズされたNext.jsアプリケーションです",
-    "tagline": "歩いて避難訓練を習慣にする"
+    "description": "HiNan! は、AIが生成するシナリオに基づき、実際に近くの避難所まで歩いて避難訓練を行うモバイルアプリです。ゲーミフィケーションを通して、避難訓練を楽しく・繰り返せる・健康的な体験にします。",
+    "tagline": "歩いて避難訓練を習慣にする",
+    "tryDemo": "デモを試す",
+    "learnMore": "詳しく見る",
+    "featuresTitle": "HiNan!の特徴",
+    "featuresDescription": "避難訓練を楽しく健康的な習慣に変える",
+    "feature1Title": "AI生成シナリオ",
+    "feature1Description": "あなたの場所や環境に合わせた現実的な避難シナリオを練習できます",
+    "feature2Title": "ゲーミフィケーション",
+    "feature2Description": "バッジを獲得し、進捗を追跡しながら、安全訓練を楽しく続けられます",
+    "feature3Title": "歩いて健康に",
+    "feature3Description": "実際の避難所まで歩くことで、安全訓練と運動を両立できます"
+  },
+  "navbar": {
+    "features": "機能",
+    "demo": "デモ",
+    "about": "概要",
+    "credits": "クレジット",
+    "privacy": "プライバシーポリシー",
+    "terms": "利用規約"
   }
 }

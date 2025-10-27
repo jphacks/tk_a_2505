@@ -29,3 +29,7 @@ supabase/supabase
 .swiftpm/
 *.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/*
 !*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+
+web/.next
+web/out
