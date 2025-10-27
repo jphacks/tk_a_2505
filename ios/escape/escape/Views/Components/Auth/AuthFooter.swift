@@ -18,7 +18,9 @@ struct AuthFooter: View {
 
             HStack(spacing: 3) {
                 Button(action: {
-                    openURL(URL(string: "https://jphacks.github.io/tk_a_2505/terms-of-service")!)
+                    if let url = URL(string: "https://jphacks.github.io/tk_a_2505/terms-of-service") {
+                        openURL(url)
+                    }
                 }) {
                     Text("auth.terms_of_service")
                         .font(.system(size: 11))
@@ -30,7 +32,9 @@ struct AuthFooter: View {
                     .foregroundColor(.secondary.opacity(0.8))
 
                 Button(action: {
-                    openURL(URL(string: "https://jphacks.github.io/tk_a_2505/privacy-policy")!)
+                    if let url = URL(string: "https://jphacks.github.io/tk_a_2505/privacy-policy") {
+                        openURL(url)
+                    }
                 }) {
                     Text("auth.privacy_policy")
                         .font(.system(size: 11))
