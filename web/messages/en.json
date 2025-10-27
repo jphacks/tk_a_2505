@@ -1,0 +1,11 @@
+{
+  "metadata": {
+    "title": "HiNan! - Make evacuation drills a habit by walking",
+    "description": "HiNan! is a mobile app that makes evacuation drills fun, repeatable, and healthy by walking to nearby shelters based on AI-generated scenarios through gamification."
+  },
+  "homepage": {
+    "title": "Welcome",
+    "description": "This is a localized Next.js application",
+    "tagline": "Make evacuation drills a habit by walking"
+  }
+}
