@@ -8,6 +8,7 @@ import {
 } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { Navbar } from "@/components/navbar";
 import "../globals.css";
 
 const notoSansJP = Noto_Sans_JP({
@@ -54,6 +55,7 @@ export default async function LocaleLayout({
     <html lang={locale}>
       <body className={`${notoSansJP.variable} font-sans antialiased`}>
         <NextIntlClientProvider messages={messages}>
+          <Navbar />
           {children}
         </NextIntlClientProvider>
       </body>
