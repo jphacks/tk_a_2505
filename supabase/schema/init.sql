@@ -209,8 +209,10 @@ CREATE TABLE IF NOT EXISTS "public"."mission_results" (
     "user_id" "uuid" NOT NULL,
     "steps" bigint,
     "distances" double precision,
+    "shelter_id" "uuid" DEFAULT "gen_random_uuid"(),
     CONSTRAINT "mission_results_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "mission_results_mission_id_fkey" FOREIGN KEY ("mission_id") REFERENCES "public"."missions"("id") ON UPDATE CASCADE,
+    CONSTRAINT "mission_results_shelter_id_fkey" FOREIGN KEY ("shelter_id") REFERENCES "public"."shelters"("id") ON UPDATE CASCADE,
     CONSTRAINT "mission_results_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON UPDATE CASCADE ON DELETE CASCADE
 );
 
