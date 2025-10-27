@@ -18,7 +18,7 @@ struct AuthFooter: View {
 
             HStack(spacing: 3) {
                 Button(action: {
-                    if let url = URL(string: "https://jphacks.github.io/tk_a_2505/tos") {
+                    if let url = URL(string: "https://jphacks.github.io/tk_a_2505/en/tos/") {
                         openURL(url)
                     }
                 }) {
@@ -32,7 +32,7 @@ struct AuthFooter: View {
                     .foregroundColor(.secondary.opacity(0.8))
 
                 Button(action: {
-                    if let url = URL(string: "https://jphacks.github.io/tk_a_2505/privacy") {
+                    if let url = URL(string: "https://jphacks.github.io/tk_a_2505/en/privacy") {
                         openURL(url)
                     }
                 }) {
