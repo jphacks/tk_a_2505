@@ -131,7 +131,7 @@ struct MissionResultView: View {
             }
             .task {
                 
-
+            
                 await viewModel.handleMissionCompletion(shelter: shelter)
             }
             .safeAreaInset(edge: .bottom) {
@@ -145,7 +145,8 @@ struct MissionResultView: View {
                             HStack(spacing: 12) {
                                 Image(systemName: "square.and.arrow.up")
                                     .font(.system(size: 24, weight: .semibold))
-                                Text("Share")
+                                // Pull the button title from localization so it adapts per language.
+                                Text(String(localized: "result.share_button", table: "Localizable"))
                                     .font(.system(size: 28, weight: .bold))
                             }
                             .frame(maxWidth: .infinity)
