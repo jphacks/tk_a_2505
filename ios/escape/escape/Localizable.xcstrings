@@ -2344,8 +2344,17 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Badge Created!"
-
+            "value" : "Badge Created!"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バッジを作成しました！"
+          }
+        }
+      }
+    },
     "Random" : {
 
     },
@@ -2680,7 +2689,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Generate Special Badge"
-
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スペシャルバッジを生成"
+          }
+        }
+      }
+    },
     "result.flood" : {
 
     },
@@ -2781,7 +2799,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "OK"
-
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        }
+      }
+    },
     "result.municipality" : {
 
     },
@@ -2803,8 +2830,6 @@
         }
       }
     },
-
-
     "result.shelter_info": {
       "extractionState": "manual",
       "localizations": {
@@ -2818,7 +2843,10 @@
           "stringUnit": {
             "state": "translated",
             "value": "避難所情報"
-
+          }
+        }
+      }
+    },
     "result.share_button" : {
       "comment" : "Title for the share button shown on the mission result screen",
       "extractionState" : "manual",
@@ -2863,7 +2891,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shelter Reached"
-
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "避難所に到着"
+          }
+        }
+      }
+    },
     "result.shelter_info" : {
 
     },
