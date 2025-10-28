@@ -2283,7 +2283,23 @@
         }
       }
     },
-    "result.address": {},
+    "result.address": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Address"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "住所"
+          }
+        }
+      }
+    },
     "result.badge_created": {
       "extractionState": "manual",
       "localizations": {
@@ -2576,7 +2592,23 @@
       }
     },
     "result.flood": {},
-    "result.generate_badge": {},
+    "result.generate_badge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generate Badge"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バッジを生成"
+          }
+        }
+      }
+    },
     "result.generate_special_badge": {
       "extractionState": "manual",
       "localizations": {
@@ -2645,7 +2677,23 @@
         }
       }
     },
-    "result.municipality": {},
+    "result.municipality": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Municipality"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "市区町村"
+          }
+        }
+      }
+    },
     "result.ok": {
       "extractionState": "manual",
       "localizations": {
@@ -2663,8 +2711,40 @@
         }
       }
     },
-    "result.shelter_info": {},
-    "result.shelter_name": {},
+    "result.shelter_info": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shelter Information"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "避難所情報"
+          }
+        }
+      }
+    },
+    "result.shelter_name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shelter Name"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "避難所名"
+          }
+        }
+      }
+    },
     "result.shelter_reached": {
       "extractionState": "manual",
       "localizations": {

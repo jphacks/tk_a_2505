@@ -28,6 +28,7 @@ class BadgeViewModel {
 
     func generateBadge(
         locationName: String,
+        locationAddress: String,
         locationDescription: String,
         colorTheme: String? = nil
     ) async {
@@ -38,6 +39,7 @@ class BadgeViewModel {
         do {
             let result = try await badgeGenerator.generateBadge(
                 locationName: locationName,
+                locationAddress: locationAddress,
                 locationDescription: locationDescription,
                 colorTheme: colorTheme
             )

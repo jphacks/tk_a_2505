@@ -38,17 +38,20 @@ class BadgeGenerator {
     /// Generates a collectible badge for a given location/shelter
     /// - Parameters:
     ///   - locationName: The name of the location/shelter (e.g., "後楽園")
-    ///   - locationDescription: Brief description of the location's characteristics
+    ///   - locationAddress: The address of the shelter (e.g., "東京都文京区後楽1-3-61")
+    ///   - locationDescription: Brief description of the location's characteristics (user-provided)
     ///   - colorTheme: Optional color theme (e.g., "blues and greens", "reds and golds")
     /// - Returns: Tuple containing the badge image URL and the prompt used
     func generateBadge(
         locationName: String,
+        locationAddress: String,
         locationDescription: String,
         colorTheme: String? = nil
     ) async throws -> (imageUrl: String, prompt: String) {
         // Step 1: Generate the optimized prompt using Gemini
         let badgePrompt = try await generateBadgePrompt(
             locationName: locationName,
+            locationAddress: locationAddress,
             locationDescription: locationDescription,
             colorTheme: colorTheme
         )
@@ -131,14 +134,14 @@ class BadgeGenerator {
     /// Generates an optimized prompt for badge creation using Gemini LLM
     private func generateBadgePrompt(
         locationName: String,
+        locationAddress: String,
         locationDescription: String,
         colorTheme: String?
     ) async throws -> String {
         // Build the user query
-        var userQuery = prompts.queryTemplate.replacingOccurrences(
-            of: "{LOCATION_NAME}",
-            with: locationName
-        )
+        var userQuery = prompts.queryTemplate
+            .replacingOccurrences(of: "{LOCATION_NAME}", with: locationName)
+            .replacingOccurrences(of: "{LOCATION_ADDRESS}", with: locationAddress)
 
         // Add location details
         let locationInfo = """
@@ -168,12 +171,16 @@ class BadgeGenerator {
     /// - Parameter locationName: The name of the location (e.g., "後楽園", "Tokyo Tower")
     /// - Returns: Tuple containing the badge image URL and the prompt used
     func generateBadgeFromLocationName(_ locationName: String) async throws -> (imageUrl: String, prompt: String) {
-        // Step 1: Use AI to generate location description and color theme
+        // Step 1: Fetch the address from Supabase
+        let address = await fetchShelterAddress(locationName: locationName)
+
+        // Step 2: Use AI to generate location description and color theme
         let (locationDescription, colorTheme) = try await generateLocationDetails(locationName: locationName)
 
-        // Step 2: Generate the badge using the AI-generated details
+        // Step 3: Generate the badge using the AI-generated details
         return try await generateBadge(
             locationName: locationName,
+            locationAddress: address,
             locationDescription: locationDescription,
             colorTheme: colorTheme
         )
@@ -181,11 +188,15 @@ class BadgeGenerator {
 
     /// Quick badge generation with preset location data
     func generateBadgeForShelter(_ shelterName: String) async throws -> (imageUrl: String, prompt: String) {
+        // Fetch address from database
+        let address = await fetchShelterAddress(locationName: shelterName)
+
         // You can add a dictionary of preset locations here
         let locationInfo = getShelterInfo(shelterName)
 
         return try await generateBadge(
             locationName: shelterName,
+            locationAddress: address,
             locationDescription: locationInfo.description,
             colorTheme: locationInfo.colorTheme
         )

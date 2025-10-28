@@ -122,9 +122,10 @@ class MissionResultViewModel {
                 return
             }
 
-            // Generate badge using devtools method with user description
+            // Generate badge using devtools method with shelter info and user description
             await badgeViewModel.generateBadge(
                 locationName: shelter.name,
+                locationAddress: shelter.address,
                 locationDescription: userDescription.isEmpty ? "A notable shelter location" : userDescription,
                 colorTheme: nil
             )
