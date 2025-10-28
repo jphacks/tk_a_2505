@@ -29,8 +29,10 @@ class MissionResultViewModel {
     // Prepare the text and optional image link we want to share when a badge is unlocked.
     var sharePayload: BadgeSharePayload? {
         guard let badge = acquiredBadge else { return nil }
+        // Pull a localized template and inject the badge name so the share message respects each language.
+        let template = NSLocalizedString("badge_share_message", comment: "Share message shown when a badge is earned")
         return BadgeSharePayload(
-            message: "I just earned the \(badge.name) badge in HiNan!",
+            message: String(format: template, badge.name),
             imageURL: badge.imageUrl.flatMap { URL(string: $0) }
         )
     }
