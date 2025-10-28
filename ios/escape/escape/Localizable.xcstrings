@@ -360,42 +360,6 @@
         }
       }
     },
-    "result.share_button" : {
-      "comment" : "Title for the share button shown on the mission result screen",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Share"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "共有する"
-          }
-        }
-      }
-    },
-    "badge_share_message" : {
-      "comment" : "Share message format used when the user earns a badge",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "I just earned the %@ badge in HiNan!"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "HiNan!で%@バッジを獲得しました！"
-          }
-        }
-      }
-    },
     "auth.terms_of_service" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -477,6 +441,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Badge No. %@"
+          }
+        }
+      }
+    },
+    "badge_share_message" : {
+      "comment" : "Share message format used when the user earns a badge",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I just earned the %@ badge in HiNan!"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HiNan!で%@バッジを獲得しました！"
           }
         }
       }
@@ -2822,6 +2804,7 @@
       }
     },
 
+
     "result.shelter_info": {
       "extractionState": "manual",
       "localizations": {
@@ -2835,10 +2818,27 @@
           "stringUnit": {
             "state": "translated",
             "value": "避難所情報"
+
+    "result.share_button" : {
+      "comment" : "Title for the share button shown on the mission result screen",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共有する"
+
           }
         }
       }
     },
+
     "result.shelter_name": {
       "extractionState": "manual",
       "localizations": {
@@ -3131,9 +3131,6 @@
           }
         }
       }
-    },
-    "Share" : {
-
     },
     "Share Results" : {
 
