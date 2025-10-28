@@ -36,6 +36,10 @@ class MissionResultViewModel {
             imageURL: badge.imageUrl.flatMap { URL(string: $0) }
         )
     }
+    // Cache the raw image data once we download the badge artwork for sharing.
+    var shareImageData: Data?
+    // Cache a snapshot image (as data) so we can show it in the share sheet preview.
+    var shareSnapshotData: Data?
 
     // MARK: - Dependencies
 
@@ -193,6 +197,21 @@ class MissionResultViewModel {
     }
 
     // MARK: - Helper Methods
+    // Download the badge artwork so the share sheet can include the actual image.
+    func loadShareImageData() async {
+        guard shareImageData == nil,
+              let url = sharePayload?.imageURL
+        else {
+            return
+        }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            shareImageData = data
+        } catch {
+            print("Failed to load badge image for sharing: \(error)")
+        }
+    }
 
     // Helper function to create Badge UI model
     private func createBadgeUIModel(from shelterBadge: ShelterBadge, shelter: Shelter, imageUrl: String? = nil) -> Badge {
