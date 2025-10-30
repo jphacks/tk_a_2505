@@ -5,9 +5,9 @@
 //  Created for mission result and badge management
 //
 
+import LinkPresentation
 import SwiftUI
 import UIKit // Needed to hand images to the system share sheet.
-import LinkPresentation
 
 struct MissionResultView: View {
     let mission: Mission
@@ -134,7 +134,6 @@ struct MissionResultView: View {
                 Text(viewModel.isFirstVisitor ? "result.first_visitor_message" : "result.badge_unlocked_message")
             }
             .task {
-                
                 await viewModel.handleMissionCompletion(shelter: shelter)
             }
             .safeAreaInset(edge: .bottom) {
@@ -416,11 +415,13 @@ private extension UIViewController {
             return presented.topMostViewController()
         }
         if let navigation = self as? UINavigationController,
-           let visible = navigation.visibleViewController {
+           let visible = navigation.visibleViewController
+        {
             return visible.topMostViewController()
         }
         if let tab = self as? UITabBarController,
-           let selected = tab.selectedViewController {
+           let selected = tab.selectedViewController
+        {
             return selected.topMostViewController()
         }
         return self
