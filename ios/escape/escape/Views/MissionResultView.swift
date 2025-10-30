@@ -134,6 +134,34 @@ struct MissionResultView: View {
                 Text(viewModel.isFirstVisitor ? "result.first_visitor_message" : "result.badge_unlocked_message")
             }
             .task {
+                // TEST ONLY: pre-seed a fake badge so we can exercise the share flow without visiting the shelter.
+                if viewModel.acquiredBadge == nil {
+                    viewModel.acquiredBadge = Badge(
+                        id: UUID().uuidString,
+                        name: "大岡山小学校",
+                        icon: "star.fill",
+                        color: .orange,
+                        isUnlocked: true,
+                        imageName: nil,
+                        imageUrl: nil,
+                        badgeNumber: "TEST-002",
+                        address: "東京都目黒区大岡山1-4-1",
+                        municipality: "目黒区",
+                        isShelter: true,
+                        isFlood: true,
+                        isLandslide: false,
+                        isStormSurge: false,
+                        isEarthquake: true,
+                        isTsunami: false,
+                        isFire: true,
+                        isInlandFlood: false,
+                        isVolcano: false,
+                        latitude: 35.6077,
+                        longitude: 139.6856,
+                        firstUserName: "Test User"
+                    )
+                }
+
                 await viewModel.handleMissionCompletion(shelter: shelter)
             }
             .safeAreaInset(edge: .bottom) {
@@ -146,10 +174,10 @@ struct MissionResultView: View {
                         } label: {
                             HStack(spacing: 12) {
                                 Image(systemName: "square.and.arrow.up")
-                                    .font(.system(size: 24, weight: .semibold))
+                                    .font(.system(size: 20, weight: .semibold))
                                 // Pull the button title from localization so it adapts per language.
                                 Text(String(localized: "result.share_button", table: "Localizable"))
-                                    .font(.system(size: 28, weight: .bold))
+                                    .font(.system(size: 22, weight: .semibold))
                             }
                             .frame(maxWidth: .infinity)
                             .frame(height: 60)
