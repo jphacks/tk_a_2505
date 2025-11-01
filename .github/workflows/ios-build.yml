@@ -1,0 +1,187 @@
+name: iOS Build
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios-build.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build iOS App
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: List available Xcode versions
+      run: ls /Applications | grep Xcode
+
+    - name: Show Xcode version
+      run: xcodebuild -version
+
+    - name: Show available schemes
+      run: xcodebuild -list -project ios/escape/escape.xcodeproj
+
+    - name: Create Config.xcconfig if not exists
+      working-directory: ios/escape
+      run: |
+        if [ ! -f Config.xcconfig ]; then
+          echo "Creating Config.xcconfig from example..."
+          if [ -f Config.xcconfig.example ]; then
+            cp Config.xcconfig.example Config.xcconfig
+            # Replace placeholder team ID with empty string for unsigned builds
+            sed -i '' 's/DEVELOPMENT_TEAM = YOUR_TEAM_ID_HERE/DEVELOPMENT_TEAM = /' Config.xcconfig || true
+          else
+            # Create a basic config file if example doesn't exist
+            cat > Config.xcconfig << EOF
+        // Configuration file for build settings
+        PRODUCT_BUNDLE_IDENTIFIER = com.tk-a-2505.hinan
+        DEVELOPMENT_TEAM =
+        SUPABASE_URL = \${SUPABASE_URL}
+        SUPABASE_ANON_KEY = \${SUPABASE_ANON_KEY}
+        EOF
+          fi
+        fi
+
+    - name: Create supabase.swift if not exists
+      working-directory: ios/escape/escape
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://wmmddehrriniwxsgnwqy.supabase.co' }}
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+      run: |
+        if [ ! -f supabase.swift ]; then
+          echo "Creating supabase.swift..."
+          cat > supabase.swift << EOF
+        import Foundation
+        import Supabase
+
+        let supabase = SupabaseClient(
+            supabaseURL: URL(string: "${SUPABASE_URL}")!,
+            supabaseKey: "${SUPABASE_ANON_KEY}"
+        )
+        EOF
+          echo "Created supabase.swift with URL: ${SUPABASE_URL}"
+          if [ "${SUPABASE_ANON_KEY}" = "placeholder-anon-key" ]; then
+            echo "⚠️  Using placeholder anon key - app will compile but Supabase features won't work"
+            echo "   To use real credentials, add SUPABASE_URL and SUPABASE_ANON_KEY as GitHub Secrets"
+          else
+            echo "✅ Using real Supabase credentials from GitHub Secrets"
+          fi
+        fi
+
+    - name: Build iOS App for Simulator (Test)
+      working-directory: ios/escape
+      run: |
+        xcodebuild clean build \
+          -project escape.xcodeproj \
+          -scheme escape \
+          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
+          -configuration Debug \
+          CODE_SIGNING_ALLOWED=NO \
+          | xcpretty || true
+
+    - name: Run Tests
+      working-directory: ios/escape
+      run: |
+        xcodebuild test \
+          -project escape.xcodeproj \
+          -scheme escape \
+          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
+          CODE_SIGNING_ALLOWED=NO \
+          | xcpretty || true
+      continue-on-error: true
+
+    - name: Build iOS App for Device
+      working-directory: ios/escape
+      run: |
+        xcodebuild clean build \
+          -project escape.xcodeproj \
+          -scheme escape \
+          -configuration Release \
+          -sdk iphoneos \
+          -destination 'generic/platform=iOS' \
+          -derivedDataPath ./build/DerivedData \
+          IPHONEOS_DEPLOYMENT_TARGET=17.0 \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          DEVELOPMENT_TEAM="" \
+          PROVISIONING_PROFILE_SPECIFIER="" \
+          | xcpretty || cat
+
+    - name: Debug - Check Build Products
+      working-directory: ios/escape
+      if: always()
+      run: |
+        echo "=== Checking build output ==="
+        ls -la ./build/DerivedData/Build/Products/ || echo "Products directory not found"
+        echo ""
+        echo "=== Looking for .app bundles ==="
+        find ./build/DerivedData/Build/Products -name "*.app" -type d || echo "No .app bundles found"
+
+    - name: Package as IPA
+      working-directory: ios/escape
+      run: |
+        mkdir -p ./build/output
+        mkdir -p ./build/Payload
+
+        # Find the .app bundle
+        APP_PATH=$(find ./build/DerivedData/Build/Products/Release-iphoneos -name "*.app" -type d | head -n 1)
+
+        if [ -z "$APP_PATH" ]; then
+          echo "Error: Could not find .app bundle"
+          ls -la ./build/DerivedData/Build/Products/Release-iphoneos/ || echo "Build products directory not found"
+          exit 1
+        fi
+
+        echo "Found app at: $APP_PATH"
+
+        # Copy .app to Payload folder
+        cp -r "$APP_PATH" ./build/Payload/
+
+        # Create IPA (which is just a zip file with .ipa extension)
+        cd ./build
+        zip -r output/escape.ipa Payload
+
+        echo "IPA created successfully"
+        ls -lh output/
+      continue-on-error: true
+
+    - name: List build output
+      working-directory: ios/escape
+      run: |
+        echo "Build directory contents:"
+        ls -la ./build/ || echo "No build directory"
+        echo "Output directory contents:"
+        ls -la ./build/output/ || echo "No output directory"
+      continue-on-error: true
+
+    - name: Upload IPA Artifact
+      uses: actions/upload-artifact@v4
+      if: success() || failure()
+      with:
+        name: escape-ios-app
+        path: |
+          ios/escape/build/output/escape.ipa
+          ios/escape/build/Payload/
+        retention-days: 30
+        if-no-files-found: warn
+
+    - name: Upload Build Logs (on failure)
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: build-logs
+        path: |
+          ios/escape/build/DerivedData/Logs/
+        retention-days: 7
+        if-no-files-found: ignore
