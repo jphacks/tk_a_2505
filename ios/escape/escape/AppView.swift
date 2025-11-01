@@ -12,8 +12,27 @@ struct AppView: View {
     @State var isAuthenticated = false
     @State var isCheckingAuth = true
     @State private var missionViewModel = MissionViewModel()
+    @State private var appConfigViewModel = AppConfigViewModel()
 
     var body: some View {
+        Group {
+            if appConfigViewModel.isCheckingConfig {
+                ProgressView()
+                    .task {
+                        await appConfigViewModel.checkAppConfig()
+                    }
+            } else if appConfigViewModel.isMaintenanceMode {
+                MaintenanceView(message: appConfigViewModel.appConfig?.getMaintenanceMessage())
+            } else if appConfigViewModel.requiresForceUpdate {
+                ForceUpdateView(message: appConfigViewModel.appConfig?.getForceUpdateMessage())
+            } else {
+                // Normal app flow
+                normalAppView
+            }
+        }
+    }
+
+    private var normalAppView: some View {
         Group {
             if isCheckingAuth {
                 ProgressView()
