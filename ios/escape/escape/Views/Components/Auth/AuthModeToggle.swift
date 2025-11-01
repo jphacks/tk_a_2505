@@ -14,7 +14,7 @@ struct AuthModeToggle: View {
     var body: some View {
         Picker("", selection: $usePasswordAuth) {
             Text("auth.magic_link").tag(false)
-            Text("auth.password").tag(true)
+            Text("auth.email_password").tag(true)
         }
         .pickerStyle(.segmented)
         .onChange(of: usePasswordAuth) { _, newValue in
