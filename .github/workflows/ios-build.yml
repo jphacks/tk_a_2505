@@ -34,8 +34,8 @@ jobs:
     - name: Create supabase.swift if not exists
       working-directory: ios/escape/escape
       env:
-        SUPABASE_URL: ${{ secrets.SUPABASE_URL}}
-        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY}}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://placeholder-url.supabase.co' }}
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
       run: |
         if [ ! -f supabase.swift ]; then
           echo "Creating supabase.swift..."
