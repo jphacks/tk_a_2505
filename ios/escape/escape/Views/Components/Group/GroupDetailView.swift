@@ -57,7 +57,8 @@ struct GroupDetailView: View {
             .sheet(isPresented: $showingInviteCode) {
                 if let group = groupViewModel.selectedGroup {
                     InviteCodeView(group: group)
-                        .presentationDetents([.medium])
+                        .presentationDetents([.medium, .large])
+                        .presentationDragIndicator(.visible)
                 }
             }
             .alert("グループから退出", isPresented: $showingLeaveAlert) {

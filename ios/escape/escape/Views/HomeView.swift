@@ -96,8 +96,6 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showingGroupBottomSheet) {
                 GroupBottomSheetView(groupViewModel: groupViewModel)
-                    .presentationDetents([.medium, .large])
-                    .presentationDragIndicator(.visible)
             }
             .onAppear {
                 loadCurrentMission()

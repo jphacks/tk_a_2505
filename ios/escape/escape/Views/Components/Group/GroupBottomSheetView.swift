@@ -10,6 +10,8 @@ import SwiftUI
 struct GroupBottomSheetView: View {
     @Bindable var groupViewModel: GroupViewModel
     @State private var selectedTab: GroupTab = .myGroups
+    @State private var randomBackgroundColor = Color("brandOrange")
+    @Environment(\.dismiss) private var dismiss
 
     enum GroupTab: String, CaseIterable {
         case myGroups = "my_groups"
@@ -41,74 +43,96 @@ struct GroupBottomSheetView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // Header
-                VStack(spacing: 16) {
-                    // Handle
-                    RoundedRectangle(cornerRadius: 2.5)
-                        .fill(Color.secondary.opacity(0.3))
-                        .frame(width: 36, height: 5)
-                        .padding(.top, 8)
+            ZStack {
+                // Simple white background
+                Color(.systemBackground)
+                    .ignoresSafeArea()
 
-                    // Title
-                    HStack {
-                        Text("グループ")
-                            .font(.title2)
-                            .fontWeight(.bold)
-
-                        Spacer()
-                    }
-                    .padding(.horizontal)
-                }
-
-                // Tab Selection
-                HStack(spacing: 0) {
-                    ForEach(GroupTab.allCases, id: \.rawValue) { tab in
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                selectedTab = tab
-                            }
-                        }) {
-                            VStack(spacing: 8) {
-                                Image(systemName: tab.icon)
-                                    .font(.title3)
-                                    .foregroundColor(selectedTab == tab ? Color("brandOrange") : .secondary)
-
-                                Text(tab.title)
-                                    .font(.caption)
-                                    .fontWeight(selectedTab == tab ? .medium : .regular)
-                                    .foregroundColor(selectedTab == tab ? Color("brandOrange") : .secondary)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(
-                                selectedTab == tab ? Color("brandOrange").opacity(0.1) : Color.clear
-                            )
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                }
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
-                .padding(.horizontal)
-                .padding(.bottom, 16)
-
-                // Content
                 ScrollView {
-                    switch selectedTab {
-                    case .myGroups:
-                        MyGroupsView(groupViewModel: groupViewModel)
-                    case .createGroup:
-                        CreateGroupView(groupViewModel: groupViewModel)
-                    case .joinGroup:
-                        JoinGroupView(groupViewModel: groupViewModel)
+                    VStack(spacing: 24) {
+                        // Simple Header Section
+                        VStack(spacing: 16) {
+                            Text("グループ")
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
+                        }
+                        .padding(.top, 20)
+
+                        // Simple Tab Selection
+                        HStack(spacing: 0) {
+                            ForEach(GroupTab.allCases, id: \.rawValue) { tab in
+                                Button(action: {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        selectedTab = tab
+                                    }
+                                }) {
+                                    VStack(spacing: 8) {
+                                        Image(systemName: tab.icon)
+                                            .font(.title3)
+                                            .foregroundColor(selectedTab == tab ? Color("brandOrange") : .secondary)
+
+                                        Text(tab.title)
+                                            .font(.caption)
+                                            .fontWeight(selectedTab == tab ? .medium : .regular)
+                                            .foregroundColor(selectedTab == tab ? Color("brandOrange") : .secondary)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 12)
+                                    .background(
+                                        selectedTab == tab ? Color("brandOrange").opacity(0.1) : Color.clear
+                                    )
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                        }
+                        .background(Color(.systemGray6))
+                        .cornerRadius(12)
+                        .padding(.horizontal, 20)
+
+                        // Content Section
+                        VStack {
+                            switch selectedTab {
+                            case .myGroups:
+                                MyGroupsView(groupViewModel: groupViewModel)
+                                    .transition(.asymmetric(
+                                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                                        removal: .move(edge: .leading).combined(with: .opacity)
+                                    ))
+                            case .createGroup:
+                                CreateGroupView(groupViewModel: groupViewModel)
+                                    .transition(.asymmetric(
+                                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                                        removal: .move(edge: .leading).combined(with: .opacity)
+                                    ))
+                            case .joinGroup:
+                                JoinGroupView(groupViewModel: groupViewModel)
+                                    .transition(.asymmetric(
+                                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                                        removal: .move(edge: .leading).combined(with: .opacity)
+                                    ))
+                            }
+                        }
+                        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: selectedTab)
+
+                        Spacer(minLength: 40)
                     }
+                    .padding(.horizontal, 24)
                 }
                 .refreshable {
                     await groupViewModel.loadUserGroups()
                 }
             }
-            .background(Color(.systemBackground))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("閉じる") {
+                        dismiss()
+                    }
+                    .foregroundColor(.primary)
+                    .fontWeight(.semibold)
+                }
+            }
         }
         .onAppear {
             Task {
@@ -143,20 +167,76 @@ struct MyGroupsView: View {
 
 struct EmptyGroupsView: View {
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "person.3")
-                .font(.system(size: 48))
-                .foregroundColor(.secondary)
+        VStack(spacing: 24) {
+            VStack(spacing: 16) {
+                Image(systemName: "person.3")
+                    .font(.system(size: 48))
+                    .foregroundColor(.secondary)
 
-            Text("まだグループに参加していません")
-                .font(.headline)
-                .foregroundColor(.secondary)
+                Text("まだグループに参加していません")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
 
-            Text("新しいグループを作成するか、\n招待コードでグループに参加してみましょう")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+                Text("新しいグループを作成するか、\n招待コードでグループに参加してみましょう")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+
+            // Simple suggestion cards
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(Color("brandOrange"))
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("グループ作成")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.primary)
+
+                        Text("新しいグループを作成")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                }
+                .padding(16)
+                .background(Color(.systemGray6))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                HStack(spacing: 12) {
+                    Image(systemName: "qrcode")
+                        .font(.system(size: 20))
+                        .foregroundColor(Color("brandOrange"))
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("グループ参加")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.primary)
+
+                        Text("招待コードで参加")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                }
+                .padding(16)
+                .background(Color(.systemGray6))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
         }
+        .padding(.horizontal, 20)
         .padding(.vertical, 40)
     }
 }
@@ -176,7 +256,7 @@ struct GroupCardView: View {
             }
         }) {
             HStack(spacing: 12) {
-                // Group Icon
+                // Simple Group Icon
                 Circle()
                     .fill(Color("brandOrange").opacity(0.2))
                     .frame(width: 48, height: 48)
@@ -230,7 +310,6 @@ struct GroupCardView: View {
         .buttonStyle(PlainButtonStyle())
         .sheet(isPresented: $showingGroupDetail) {
             GroupDetailView(groupViewModel: groupViewModel)
-                .presentationDetents([.medium, .large])
         }
     }
 }
