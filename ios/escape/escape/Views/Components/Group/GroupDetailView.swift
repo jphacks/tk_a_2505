@@ -39,17 +39,17 @@ struct GroupDetailView: View {
                             GroupStatsView(group: group)
                         }
                     } else {
-                        ProgressView("読み込み中...")
+                        ProgressView(String(localized: "group.detail.loading", bundle: .main))
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 }
                 .padding()
             }
-            .navigationTitle("グループ詳細")
+            .navigationTitle(String(localized: "group.detail.title", bundle: .main))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("閉じる") {
+                    Button(String(localized: "group.close", bundle: .main)) {
                         dismiss()
                     }
                 }
@@ -61,27 +61,27 @@ struct GroupDetailView: View {
                         .presentationDragIndicator(.visible)
                 }
             }
-            .alert("グループから退出", isPresented: $showingLeaveAlert) {
-                Button("退出", role: .destructive) {
+            .alert(String(localized: "group.detail.leave_alert_title", bundle: .main), isPresented: $showingLeaveAlert) {
+                Button(String(localized: "group.detail.leave_button", bundle: .main), role: .destructive) {
                     Task {
                         await groupViewModel.leaveCurrentGroup()
                         dismiss()
                     }
                 }
-                Button("キャンセル", role: .cancel) {}
+                Button(String(localized: "setting.cancel", bundle: .main), role: .cancel) {}
             } message: {
-                Text("本当にこのグループから退出しますか？")
+                Text(String(localized: "group.detail.leave_alert_message", bundle: .main))
             }
-            .alert("グループを削除", isPresented: $showingDeleteAlert) {
-                Button("削除", role: .destructive) {
+            .alert(String(localized: "group.detail.delete_alert_title", bundle: .main), isPresented: $showingDeleteAlert) {
+                Button(String(localized: "group.detail.delete_button", bundle: .main), role: .destructive) {
                     Task {
                         await groupViewModel.deleteGroup()
                         dismiss()
                     }
                 }
-                Button("キャンセル", role: .cancel) {}
+                Button(String(localized: "setting.cancel", bundle: .main), role: .cancel) {}
             } message: {
-                Text("このグループを完全に削除しますか？この操作は取り消せません。")
+                Text(String(localized: "group.detail.delete_alert_message", bundle: .main))
             }
         }
     }
@@ -160,7 +160,7 @@ struct GroupActionButtonsView: View {
             }) {
                 HStack {
                     Image(systemName: "qrcode")
-                    Text("招待コードを共有")
+                    Text("group.detail.share_invite", bundle: .main)
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
@@ -178,7 +178,7 @@ struct GroupActionButtonsView: View {
                     }) {
                         HStack {
                             Image(systemName: "pencil")
-                            Text("編集")
+                            Text("group.detail.edit", bundle: .main)
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -194,7 +194,7 @@ struct GroupActionButtonsView: View {
                     }) {
                         HStack {
                             Image(systemName: "trash")
-                            Text("削除")
+                            Text("group.detail.delete", bundle: .main)
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -210,7 +210,7 @@ struct GroupActionButtonsView: View {
                 }) {
                     HStack {
                         Image(systemName: "arrow.left.circle")
-                        Text("グループから退出")
+                        Text("group.detail.leave", bundle: .main)
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -231,22 +231,22 @@ struct GroupMembersView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("メンバー")
+                Text("group.detail.members", bundle: .main)
                     .font(.headline)
 
                 Spacer()
 
-                Text("\(groupViewModel.groupMembers.count)人")
+                Text(String(format: String(localized: "group.detail.member_count", bundle: .main), groupViewModel.groupMembers.count))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
 
             if groupViewModel.isLoading {
-                ProgressView("メンバーを読み込み中...")
+                ProgressView(String(localized: "group.detail.loading_members", bundle: .main))
                     .frame(maxWidth: .infinity)
                     .padding()
             } else if groupViewModel.groupMembers.isEmpty {
-                Text("メンバーが見つかりません")
+                Text("group.detail.no_members", bundle: .main)
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity)
@@ -290,7 +290,7 @@ struct MemberRowView: View {
                     .font(.body)
                     .fontWeight(.medium)
 
-                Text("参加日: \(member.member.joinedAt.formatted(date: .abbreviated, time: .omitted))")
+                Text(String(format: String(localized: "group.detail.joined_date", bundle: .main), member.member.joinedAt.formatted(date: .abbreviated, time: .omitted)))
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -328,7 +328,7 @@ struct MemberRowView: View {
                         Divider()
                     }
 
-                    Button("メンバーを削除", role: .destructive) {
+                    Button(String(localized: "group.detail.remove_member", bundle: .main), role: .destructive) {
                         Task {
                             await groupViewModel.removeMember(member)
                         }
@@ -353,16 +353,16 @@ struct GroupStatsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("グループ統計")
+            Text("group.detail.stats_title", bundle: .main)
                 .font(.headline)
 
             VStack(spacing: 12) {
-                StatRowView(title: "総ミッション数", value: "0", icon: "target")
-                StatRowView(title: "総バッジ数", value: "0", icon: "shield.fill")
-                StatRowView(title: "アクティブメンバー", value: "\(group.memberCount)", icon: "person.3.fill")
+                StatRowView(title: String(localized: "group.detail.stats_total_missions", bundle: .main), value: "0", icon: "target")
+                StatRowView(title: String(localized: "group.detail.stats_total_badges", bundle: .main), value: "0", icon: "shield.fill")
+                StatRowView(title: String(localized: "group.detail.stats_active_members", bundle: .main), value: "\(group.memberCount)", icon: "person.3.fill")
             }
 
-            Text("※ ランキング機能は今後実装予定です")
+            Text("group.detail.stats_ranking_note", bundle: .main)
                 .font(.caption2)
                 .foregroundColor(.secondary)
         }
@@ -410,11 +410,11 @@ struct InviteCodeView: View {
                         .font(.system(size: 48))
                         .foregroundColor(Color("brandOrange"))
 
-                    Text("招待コード")
+                    Text("group.join.invite_code", bundle: .main)
                         .font(.title2)
                         .fontWeight(.bold)
 
-                    Text("このコードを友達に共有して、グループに招待しましょう")
+                    Text("group.detail.invite_description", bundle: .main)
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -434,7 +434,7 @@ struct InviteCodeView: View {
                     }) {
                         HStack {
                             Image(systemName: "doc.on.clipboard")
-                            Text("コピー")
+                            Text("group.detail.copy", bundle: .main)
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -446,26 +446,26 @@ struct InviteCodeView: View {
 
                 // Info
                 VStack(spacing: 8) {
-                    Text("📋 使い方")
+                    Text("group.detail.usage_title", bundle: .main)
                         .font(.caption)
                         .fontWeight(.medium)
                         .foregroundColor(.secondary)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        GroupDetailInfoRow(icon: "1.circle", text: "上記のコードをコピー")
-                        GroupDetailInfoRow(icon: "2.circle", text: "友達にメッセージで送信")
-                        GroupDetailInfoRow(icon: "3.circle", text: "友達がアプリで入力して参加")
+                        GroupDetailInfoRow(icon: "1.circle", text: String(localized: "group.detail.usage_step1", bundle: .main))
+                        GroupDetailInfoRow(icon: "2.circle", text: String(localized: "group.detail.usage_step2", bundle: .main))
+                        GroupDetailInfoRow(icon: "3.circle", text: String(localized: "group.detail.usage_step3", bundle: .main))
                     }
                 }
 
                 Spacer()
             }
             .padding()
-            .navigationTitle("招待")
+            .navigationTitle(String(localized: "group.detail.invite_title", bundle: .main))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("閉じる") {
+                    Button(String(localized: "group.close", bundle: .main)) {
                         dismiss()
                     }
                 }

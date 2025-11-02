@@ -20,11 +20,11 @@ struct CreateGroupView: View {
                     .font(.system(size: 48))
                     .foregroundColor(Color("brandOrange"))
 
-                Text("新しいグループを作成")
+                Text("group.create.title", bundle: .main)
                     .font(.title2)
                     .fontWeight(.semibold)
 
-                Text("グループを作成して、友達や家族と防災訓練の成果を共有しましょう")
+                Text("group.create.description", bundle: .main)
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -36,11 +36,11 @@ struct CreateGroupView: View {
             VStack(spacing: 20) {
                 // Group Name Field
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("グループ名")
+                    Text("group.create.name_label", bundle: .main)
                         .font(.headline)
                         .foregroundColor(.primary)
 
-                    TextField("例: 田中家防災チーム", text: $groupViewModel.createGroupName)
+                    TextField(String(localized: "group.create.name_placeholder", bundle: .main), text: $groupViewModel.createGroupName)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .focused($isNameFieldFocused)
                         .onSubmit {
@@ -55,16 +55,16 @@ struct CreateGroupView: View {
 
                 // Group Description Field
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("説明（任意）")
+                    Text("group.create.description_label", bundle: .main)
                         .font(.headline)
                         .foregroundColor(.primary)
 
-                    TextField("例: 家族みんなで楽しく防災訓練", text: $groupViewModel.createGroupDescription, axis: .vertical)
+                    TextField(String(localized: "group.create.description_placeholder", bundle: .main), text: $groupViewModel.createGroupDescription, axis: .vertical)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .lineLimit(3 ... 6)
                         .focused($isDescriptionFieldFocused)
 
-                    Text("グループの目的や特徴を簡潔に説明してください")
+                    Text("group.create.description_hint", bundle: .main)
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
@@ -100,7 +100,7 @@ struct CreateGroupView: View {
                             Image(systemName: "plus")
                         }
 
-                        Text(groupViewModel.isCreatingGroup ? "作成中..." : "グループを作成")
+                        Text(groupViewModel.isCreatingGroup ? String(localized: "group.create.creating", bundle: .main) : String(localized: "group.create.button", bundle: .main))
                             .fontWeight(.semibold)
                     }
                     .frame(maxWidth: .infinity)
@@ -115,15 +115,15 @@ struct CreateGroupView: View {
 
                 // Info
                 VStack(spacing: 8) {
-                    Text("📋 作成後について")
+                    Text("group.create.after_title", bundle: .main)
                         .font(.caption)
                         .fontWeight(.medium)
                         .foregroundColor(.secondary)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        CreateGroupInfoRow(icon: "key", text: "招待コードが自動生成されます")
-                        CreateGroupInfoRow(icon: "crown", text: "あなたがグループのオーナーになります")
-                        CreateGroupInfoRow(icon: "person.badge.plus", text: "最大50人まで招待できます")
+                        CreateGroupInfoRow(icon: "key", text: String(localized: "group.create.after_invite_code", bundle: .main))
+                        CreateGroupInfoRow(icon: "crown", text: String(localized: "group.create.after_owner", bundle: .main))
+                        CreateGroupInfoRow(icon: "person.badge.plus", text: String(localized: "group.create.after_max_members", bundle: .main))
                     }
                     .padding(.horizontal)
                 }

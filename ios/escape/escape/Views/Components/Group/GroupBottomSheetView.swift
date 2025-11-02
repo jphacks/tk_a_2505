@@ -21,11 +21,11 @@ struct GroupBottomSheetView: View {
         var title: String {
             switch self {
             case .myGroups:
-                return "マイグループ"
+                return String(localized: "group.tab.my_groups", bundle: .main)
             case .createGroup:
-                return "グループ作成"
+                return String(localized: "group.tab.create_group", bundle: .main)
             case .joinGroup:
-                return "グループ参加"
+                return String(localized: "group.tab.join_group", bundle: .main)
             }
         }
 
@@ -52,7 +52,7 @@ struct GroupBottomSheetView: View {
                     VStack(spacing: 24) {
                         // Simple Header Section
                         VStack(spacing: 16) {
-                            Text("グループ")
+                            Text("group.title", bundle: .main)
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
                                 .foregroundColor(.primary)
@@ -126,7 +126,7 @@ struct GroupBottomSheetView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("閉じる") {
+                    Button(String(localized: "group.close", bundle: .main)) {
                         dismiss()
                     }
                     .foregroundColor(.primary)
@@ -150,7 +150,7 @@ struct MyGroupsView: View {
     var body: some View {
         LazyVStack(spacing: 12) {
             if groupViewModel.isLoading {
-                ProgressView("グループを読み込み中...")
+                ProgressView(String(localized: "group.list.loading", bundle: .main))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 40)
             } else if groupViewModel.userGroups.isEmpty {
@@ -173,11 +173,11 @@ struct EmptyGroupsView: View {
                     .font(.system(size: 48))
                     .foregroundColor(.secondary)
 
-                Text("まだグループに参加していません")
+                Text("group.empty.title", bundle: .main)
                     .font(.headline)
                     .foregroundColor(.secondary)
 
-                Text("新しいグループを作成するか、\n招待コードでグループに参加してみましょう")
+                Text("group.empty.description", bundle: .main)
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -191,11 +191,11 @@ struct EmptyGroupsView: View {
                         .foregroundColor(Color("brandOrange"))
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("グループ作成")
+                        Text("group.empty.create_action", bundle: .main)
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.primary)
 
-                        Text("新しいグループを作成")
+                        Text("group.empty.create_description", bundle: .main)
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                     }
@@ -216,11 +216,11 @@ struct EmptyGroupsView: View {
                         .foregroundColor(Color("brandOrange"))
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("グループ参加")
+                        Text("group.empty.join_action", bundle: .main)
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.primary)
 
-                        Text("招待コードで参加")
+                        Text("group.empty.join_description", bundle: .main)
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                     }

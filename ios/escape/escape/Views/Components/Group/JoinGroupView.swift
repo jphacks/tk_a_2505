@@ -19,11 +19,11 @@ struct JoinGroupView: View {
                     .font(.system(size: 48))
                     .foregroundColor(Color("brandOrange"))
 
-                Text("グループに参加")
+                Text("group.join.title", bundle: .main)
                     .font(.title2)
                     .fontWeight(.semibold)
 
-                Text("友達や家族から受け取った招待コードを入力して、グループに参加しましょう")
+                Text("group.join.description", bundle: .main)
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -34,7 +34,7 @@ struct JoinGroupView: View {
             // Invite Code Form
             VStack(spacing: 20) {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("招待コード")
+                    Text("group.join.invite_code", bundle: .main)
                         .font(.headline)
                         .foregroundColor(.primary)
 
@@ -70,16 +70,16 @@ struct JoinGroupView: View {
 
                     // Format Help
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("招待コードの形式:")
+                        Text("group.join.format_label", bundle: .main)
                             .font(.caption)
                             .fontWeight(.medium)
                             .foregroundColor(.secondary)
 
-                        Text("• 8文字の英数字（例: ABCD1234）")
+                        Text("group.join.format_rule_1", bundle: .main)
                             .font(.caption2)
                             .foregroundColor(.secondary)
 
-                        Text("• 大文字・小文字は区別されません")
+                        Text("group.join.format_rule_2", bundle: .main)
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
@@ -92,7 +92,7 @@ struct JoinGroupView: View {
                                 .foregroundColor(isValidInviteCode ? .green : .red)
                                 .font(.caption)
 
-                            Text(isValidInviteCode ? "有効な形式です" : "8文字の英数字を入力してください")
+                            Text(isValidInviteCode ? String(localized: "group.join.valid_format", bundle: .main) : String(localized: "group.join.invalid_format", bundle: .main))
                                 .font(.caption2)
                                 .foregroundColor(isValidInviteCode ? .green : .red)
                         }
@@ -131,7 +131,7 @@ struct JoinGroupView: View {
                             Image(systemName: "person.badge.plus")
                         }
 
-                        Text(groupViewModel.isJoiningGroup ? "参加中..." : "グループに参加")
+                        Text(groupViewModel.isJoiningGroup ? String(localized: "group.join.joining", bundle: .main) : String(localized: "group.join.button", bundle: .main))
                             .fontWeight(.semibold)
                     }
                     .frame(maxWidth: .infinity)
@@ -146,7 +146,7 @@ struct JoinGroupView: View {
 
                 // Example Code Display
                 VStack(spacing: 8) {
-                    Text("招待コードの例")
+                    Text("group.join.example_label", bundle: .main)
                         .font(.caption)
                         .fontWeight(.medium)
                         .foregroundColor(.secondary)
@@ -170,15 +170,15 @@ struct JoinGroupView: View {
 
             // Info Section
             VStack(spacing: 8) {
-                Text("💡 ヒント")
+                Text("group.join.tips_title", bundle: .main)
                     .font(.caption)
                     .fontWeight(.medium)
                     .foregroundColor(.secondary)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    JoinGroupInfoRow(icon: "message", text: "招待コードは友達から直接受け取ってください")
-                    JoinGroupInfoRow(icon: "shield", text: "グループの管理者が参加を承認する場合があります")
-                    JoinGroupInfoRow(icon: "person.3", text: "参加後はグループの活動が見れるようになります")
+                    JoinGroupInfoRow(icon: "message", text: String(localized: "group.join.tip_receive", bundle: .main))
+                    JoinGroupInfoRow(icon: "shield", text: String(localized: "group.join.tip_approval", bundle: .main))
+                    JoinGroupInfoRow(icon: "person.3", text: String(localized: "group.join.tip_activities", bundle: .main))
                 }
                 .padding(.horizontal)
             }
