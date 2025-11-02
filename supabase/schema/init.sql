@@ -97,6 +97,106 @@ begin
 end;
 $$;
 
+-- ========================================
+-- Group Functions and Tables
+-- ========================================
+
+-- 1. 招待コード生成関数
+CREATE OR REPLACE FUNCTION "public"."generate_invite_code"()
+RETURNS TEXT AS $$
+DECLARE
+    chars TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    result TEXT := '';
+    i INTEGER;
+BEGIN
+    FOR i IN 1..8 LOOP
+        result := result || substr(chars, floor(random() * length(chars) + 1)::integer, 1);
+    END LOOP;
+    RETURN result;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 2. グループ作成時の自動処理関数
+CREATE OR REPLACE FUNCTION "public"."create_group_with_owner"(
+    p_name VARCHAR(100),
+    p_description TEXT DEFAULT NULL,
+    p_max_members INTEGER DEFAULT 50
+) RETURNS UUID AS $$
+DECLARE
+    new_group_id UUID;
+    current_user_id UUID;
+    invite_code TEXT;
+BEGIN
+    -- 現在のユーザーIDを取得
+    current_user_id := auth.uid();
+
+    IF current_user_id IS NULL THEN
+        RAISE EXCEPTION 'User must be authenticated';
+    END IF;
+
+    -- ユニークな招待コードを生成
+    LOOP
+        invite_code := generate_invite_code();
+        EXIT WHEN NOT EXISTS (SELECT 1 FROM groups WHERE groups.invite_code = invite_code);
+    END LOOP;
+
+    -- グループを作成
+    INSERT INTO groups (name, description, owner_id, invite_code, max_members)
+    VALUES (p_name, p_description, current_user_id, invite_code, p_max_members)
+    RETURNING id INTO new_group_id;
+
+    -- オーナーをメンバーとして追加
+    INSERT INTO group_members (group_id, user_id, role)
+    VALUES (new_group_id, current_user_id, 'owner');
+
+    RETURN new_group_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 3. グループ参加関数
+CREATE OR REPLACE FUNCTION "public"."join_group_by_invite_code"(p_invite_code VARCHAR(8))
+RETURNS UUID AS $$
+DECLARE
+    group_id_to_join UUID;
+    current_user_id UUID;
+    member_count INTEGER;
+    max_members INTEGER;
+BEGIN
+    -- 現在のユーザーIDを取得
+    current_user_id := auth.uid();
+
+    IF current_user_id IS NULL THEN
+        RAISE EXCEPTION 'User must be authenticated';
+    END IF;
+
+    -- グループを取得
+    SELECT id, max_members INTO group_id_to_join, max_members
+    FROM groups
+    WHERE groups.invite_code = p_invite_code;
+
+    IF group_id_to_join IS NULL THEN
+        RAISE EXCEPTION 'Invalid invite code';
+    END IF;
+
+    -- 既にメンバーかチェック
+    IF EXISTS (SELECT 1 FROM group_members WHERE group_id = group_id_to_join AND user_id = current_user_id) THEN
+        RAISE EXCEPTION 'User is already a member of this group';
+    END IF;
+
+    -- メンバー数上限チェック
+    SELECT COUNT(*) INTO member_count FROM group_members WHERE group_id = group_id_to_join;
+    IF member_count >= max_members THEN
+        RAISE EXCEPTION 'Group is full';
+    END IF;
+
+    -- メンバーとして追加
+    INSERT INTO group_members (group_id, user_id, role)
+    VALUES (group_id_to_join, current_user_id, 'member');
+
+    RETURN group_id_to_join;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 
 ALTER FUNCTION "public"."handle_new_user"() OWNER TO "postgres";
 
@@ -104,6 +204,44 @@ SET default_tablespace = '';
 
 SET default_table_access_method = "heap";
 
+
+-- ========================================
+-- Group Tables
+-- ========================================
+
+CREATE TABLE IF NOT EXISTS "public"."groups" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "name" character varying(100) NOT NULL,
+    "description" "text",
+    "icon_url" "text",
+    "owner_id" "uuid" NOT NULL,
+    "invite_code" character varying(8) NOT NULL,
+    "max_members" integer DEFAULT 50 NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+ALTER TABLE "public"."groups" OWNER TO "postgres";
+
+CREATE TABLE IF NOT EXISTS "public"."group_members" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "group_id" "uuid" NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "role" character varying(20) DEFAULT 'member'::character varying NOT NULL,
+    "joined_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "group_members_role_check" CHECK ((("role")::"text" = ANY ((ARRAY['owner'::character varying, 'admin'::character varying, 'member'::character varying])::"text"[])))
+);
+
+ALTER TABLE "public"."group_members" OWNER TO "postgres";
+
+-- Indexes for groups
+CREATE INDEX IF NOT EXISTS "idx_groups_owner_id" ON "public"."groups" USING "btree" ("owner_id");
+CREATE INDEX IF NOT EXISTS "idx_groups_invite_code" ON "public"."groups" USING "btree" ("invite_code");
+
+-- Indexes for group_members
+CREATE INDEX IF NOT EXISTS "idx_group_members_group_id" ON "public"."group_members" USING "btree" ("group_id");
+CREATE INDEX IF NOT EXISTS "idx_group_members_user_id" ON "public"."group_members" USING "btree" ("user_id");
+CREATE INDEX IF NOT EXISTS "idx_group_members_role" ON "public"."group_members" USING "btree" ("role");
 
 CREATE TABLE IF NOT EXISTS "public"."missions" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
@@ -259,6 +397,26 @@ ALTER TABLE ONLY "public"."users"
 
 
 
+ALTER TABLE ONLY "public"."groups"
+    ADD CONSTRAINT "groups_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."groups"
+    ADD CONSTRAINT "groups_invite_code_unique" UNIQUE ("invite_code");
+
+
+
+ALTER TABLE ONLY "public"."group_members"
+    ADD CONSTRAINT "group_members_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."group_members"
+    ADD CONSTRAINT "group_members_group_user_unique" UNIQUE ("group_id", "user_id");
+
+
+
 ALTER TABLE ONLY "public"."missions"
     ADD CONSTRAINT "missions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
@@ -286,6 +444,21 @@ ALTER TABLE ONLY "public"."user_shelter_badges"
 
 ALTER TABLE ONLY "public"."user_shelter_badges"
     ADD CONSTRAINT "user_shelter_badges_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."groups"
+    ADD CONSTRAINT "groups_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."group_members"
+    ADD CONSTRAINT "group_members_group_id_fkey" FOREIGN KEY ("group_id") REFERENCES "public"."groups"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."group_members"
+    ADD CONSTRAINT "group_members_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
 
 
 
@@ -317,6 +490,52 @@ CREATE POLICY "all access" ON "public"."mission_results" USING (true) WITH CHECK
 
 
 
+CREATE POLICY "Groups are viewable by members" ON "public"."groups"
+    FOR SELECT USING ((EXISTS ( SELECT 1
+   FROM "public"."group_members"
+  WHERE (("group_members"."group_id" = "groups"."id") AND ("group_members"."user_id" = "auth"."uid"())))));
+
+
+
+CREATE POLICY "Groups are updatable by owner" ON "public"."groups"
+    FOR UPDATE USING (("owner_id" = "auth"."uid"()));
+
+
+
+CREATE POLICY "Groups are deletable by owner" ON "public"."groups"
+    FOR DELETE USING (("owner_id" = "auth"."uid"()));
+
+
+
+CREATE POLICY "Authenticated users can create groups" ON "public"."groups"
+    FOR INSERT WITH CHECK (("auth"."uid"() IS NOT NULL));
+
+
+
+CREATE POLICY "Group members are viewable by group members" ON "public"."group_members"
+    FOR SELECT USING ((EXISTS ( SELECT 1
+   FROM "public"."group_members" gm
+  WHERE (("gm"."group_id" = "group_members"."group_id") AND ("gm"."user_id" = "auth"."uid"())))));
+
+
+
+CREATE POLICY "Authenticated users can join groups" ON "public"."group_members"
+    FOR INSERT WITH CHECK (("auth"."uid"() IS NOT NULL));
+
+
+
+CREATE POLICY "Users can update their own membership" ON "public"."group_members"
+    FOR UPDATE USING (("user_id" = "auth"."uid"()));
+
+
+
+CREATE POLICY "Members can leave or be removed by admin" ON "public"."group_members"
+    FOR DELETE USING ((("user_id" = "auth"."uid"()) OR (EXISTS ( SELECT 1
+   FROM "public"."group_members" gm
+  WHERE (("gm"."group_id" = "group_members"."group_id") AND ("gm"."user_id" = "auth"."uid"()) AND ("gm"."role" = ANY (ARRAY['owner'::character varying, 'admin'::character varying])))))));
+
+
+
 ALTER TABLE "public"."missions" ENABLE ROW LEVEL SECURITY;
 
 
@@ -336,6 +555,12 @@ ALTER TABLE "public"."users" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."mission_results" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."groups" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."group_members" ENABLE ROW LEVEL SECURITY;
 
 
 
@@ -506,6 +731,24 @@ GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."generate_invite_code"() TO "anon";
+GRANT ALL ON FUNCTION "public"."generate_invite_code"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."generate_invite_code"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."create_group_with_owner"(character varying, text, integer) TO "anon";
+GRANT ALL ON FUNCTION "public"."create_group_with_owner"(character varying, text, integer) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."create_group_with_owner"(character varying, text, integer) TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."join_group_by_invite_code"(character varying) TO "anon";
+GRANT ALL ON FUNCTION "public"."join_group_by_invite_code"(character varying) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."join_group_by_invite_code"(character varying) TO "service_role";
+
+
+
 
 
 
@@ -560,6 +803,18 @@ GRANT ALL ON TABLE "public"."users" TO "service_role";
 GRANT ALL ON TABLE "public"."mission_results" TO "anon";
 GRANT ALL ON TABLE "public"."mission_results" TO "authenticated";
 GRANT ALL ON TABLE "public"."mission_results" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."groups" TO "anon";
+GRANT ALL ON TABLE "public"."groups" TO "authenticated";
+GRANT ALL ON TABLE "public"."groups" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."group_members" TO "anon";
+GRANT ALL ON TABLE "public"."group_members" TO "authenticated";
+GRANT ALL ON TABLE "public"."group_members" TO "service_role";
 
 
 

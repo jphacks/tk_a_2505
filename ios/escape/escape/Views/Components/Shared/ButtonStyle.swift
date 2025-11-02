@@ -26,7 +26,7 @@ struct PrimaryButton: View {
 
     var body: some View {
         Button(action: action) {
-            Group {
+            SwiftUI.Group {
                 if isLoading {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))

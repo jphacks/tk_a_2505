@@ -12,7 +12,9 @@ struct HomeView: View {
     @Binding var selectedTab: Tab
     @State private var missionViewModel = MissionViewModel()
     @State private var homeViewModel = HomeViewModel()
+    @State private var groupViewModel = GroupViewModel()
     @State private var showingMissionDetail = false
+    @State private var showingGroupBottomSheet = false
     @Environment(\.missionStateService) var missionStateService // need when you want to listen to the mission state changes
 
     var body: some View {
@@ -27,6 +29,18 @@ struct HomeView: View {
                             .foregroundColor(Color("brandOrange"))
 
                         Spacer()
+
+                        // グループアイコンボタン
+                        Button(action: {
+                            showingGroupBottomSheet = true
+                        }) {
+                            Image(systemName: "person.3.fill")
+                                .font(.title2)
+                                .foregroundColor(Color("brandOrange"))
+                                .frame(width: 44, height: 44)
+                                .background(Color("brandOrange").opacity(0.1))
+                                .clipShape(Circle())
+                        }
                     }
                     .padding(.horizontal)
 
@@ -80,10 +94,16 @@ struct HomeView: View {
                     isPresented: $showingMissionDetail
                 )
             }
+            .sheet(isPresented: $showingGroupBottomSheet) {
+                GroupBottomSheetView(groupViewModel: groupViewModel)
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
+            }
             .onAppear {
                 loadCurrentMission()
                 Task {
                     await homeViewModel.loadUserBadges()
+                    await groupViewModel.loadUserGroups()
                 }
             }
             .onChange(of: missionStateService.currentMission) { _, _ in
