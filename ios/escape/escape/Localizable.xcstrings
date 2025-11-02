@@ -249,6 +249,23 @@
         }
       }
     },
+    "auth.email_password": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email + Password"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メール + パスワード"
+          }
+        }
+      }
+    },
     "auth.error": {
       "extractionState": "manual",
       "localizations": {
@@ -279,6 +296,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "マジックリンク"
+          }
+        }
+      }
+    },
+    "auth.magic_link_description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We'll send you a secure link to your email. Click it to sign in instantly—no password needed!"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安全なリンクをメールでお送りします。クリックするだけですぐにサインインできます。パスワードは不要です！"
           }
         }
       }
@@ -1694,6 +1728,57 @@
         }
       }
     },
+    "maintenance_mode_info": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thank you for your patience"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ご不便をおかけして申し訳ございません"
+          }
+        }
+      }
+    },
+    "maintenance_mode_message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We're currently performing scheduled maintenance to improve your experience. Please check back soon!"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現在、メンテナンスを実施しております。しばらくしてから再度お試しください。"
+          }
+        }
+      }
+    },
+    "maintenance_mode_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Under Maintenance"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メンテナンス中"
+          }
+        }
+      }
+    },
     "map.danger_zone.alert_message": {
       "extractionState": "manual",
       "localizations": {
@@ -3057,8 +3142,59 @@
         }
       }
     },
-    "×%@": {},
-    "🏆 Final Score": {}
+    "update_now": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update Now"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今すぐアップデート"
+          }
+        }
+      }
+    },
+    "update_required_message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A new version of the app is available. Please update to continue using HiNan!"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新しいバージョンが利用可能です。HiNan!を引き続きご利用いただくには、アップデートをお願いします。"
+          }
+        }
+      }
+    },
+    "update_required_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update Required"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アップデートが必要です"
+          }
+        }
+      }
+    },
+    "歩数: %lld 歩": {},
+    "避難地域: %@": {}
   },
   "version": "1.1"
 }

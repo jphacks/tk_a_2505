@@ -50,6 +50,15 @@ struct AuthView: View {
                     }
                 )
 
+                // Magic link description (only show when magic link is selected)
+                if !viewModel.usePasswordAuth {
+                    Text("auth.magic_link_description")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 4)
+                }
+
                 // Form fields
                 AuthFormFields(
                     email: $viewModel.email,
