@@ -141,7 +141,7 @@ jobs:
         path: |
           ios/escape/build/output/escape.ipa
           ios/escape/build/Payload/
-        retention-days: 30
+        retention-days: 10
         if-no-files-found: warn
 
     - name: Upload Build Logs (on failure)
