@@ -38,16 +38,11 @@ jobs:
           echo "Creating Config.xcconfig from example..."
           if [ -f Config.xcconfig.example ]; then
             cp Config.xcconfig.example Config.xcconfig
-            # Replace placeholder team ID with empty string for unsigned builds
-            sed -i '' 's/DEVELOPMENT_TEAM = YOUR_TEAM_ID_HERE/DEVELOPMENT_TEAM = /' Config.xcconfig || true
           else
             # Create a basic config file if example doesn't exist
             cat > Config.xcconfig << EOF
         // Configuration file for build settings
         PRODUCT_BUNDLE_IDENTIFIER = com.tk-a-2505.hinan
-        DEVELOPMENT_TEAM =
-        SUPABASE_URL = \${SUPABASE_URL}
-        SUPABASE_ANON_KEY = \${SUPABASE_ANON_KEY}
         EOF
           fi
         fi
