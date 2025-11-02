@@ -72,11 +72,6 @@ class MissionViewModel {
         try await missionService.updateMissionStatus(missionId: missionId, status: status)
     }
 
-    /// Updates mission steps and distances
-    func updateMissionProgress(missionId: UUID, steps: Int64?, distances: Double?) async throws {
-        try await missionService.updateMissionProgress(missionId: missionId, steps: steps, distances: distances)
-    }
-
     /// Checks if user has an active mission with status 'have' created today
     /// Returns the active mission if found, nil otherwise
     func fetchActiveMission(userId: UUID) async -> Mission? {

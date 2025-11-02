@@ -47,10 +47,7 @@ class MissionStateService {
             title: mission.title,
             overview: mission.overview,
             disasterType: mission.disasterType,
-            evacuationRegion: mission.evacuationRegion,
             status: newState,
-            steps: mission.steps,
-            distances: mission.distances,
             createdAt: mission.createdAt
         )
     }
@@ -73,16 +70,6 @@ class MissionStateService {
     /// Get mission overview
     var missionOverview: String? {
         currentMission?.overview
-    }
-
-    /// Get mission steps
-    var missionSteps: Int64? {
-        currentMission?.steps
-    }
-
-    /// Get mission distance
-    var missionDistance: Double? {
-        currentMission?.distances
     }
 }
 

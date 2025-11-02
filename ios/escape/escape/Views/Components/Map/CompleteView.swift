@@ -10,6 +10,7 @@ import SwiftUI
 
 struct CompleteView: View {
     let shelter: Shelter
+    let missionResult: MissionResult?
     @Environment(\.dismiss) var dismiss
     @Environment(\.missionStateService) var missionStateService
 
@@ -125,27 +126,42 @@ struct CompleteView: View {
                                     }
                                 }
 
-                                if let steps = mission.steps {
-                                    HStack {
-                                        Image(systemName: "figure.walk")
-                                            .foregroundColor(.orange)
-                                        Text("Steps")
-                                            .foregroundColor(.secondary)
-                                        Spacer()
-                                        Text("\(steps)")
-                                            .fontWeight(.medium)
+                                if let result = missionResult {
+                                    if let steps = result.steps {
+                                        HStack {
+                                            Image(systemName: "figure.walk")
+                                                .foregroundColor(.orange)
+                                            Text("Steps")
+                                                .foregroundColor(.secondary)
+                                            Spacer()
+                                            Text("\(steps)")
+                                                .fontWeight(.medium)
+                                        }
                                     }
-                                }
 
-                                if let distance = mission.distances {
-                                    HStack {
-                                        Image(systemName: "map")
-                                            .foregroundColor(.blue)
-                                        Text("Distance")
-                                            .foregroundColor(.secondary)
-                                        Spacer()
-                                        Text(String(format: "%.2f km", distance / 1000))
-                                            .fontWeight(.medium)
+                                    if let distance = result.actualDistanceMeters {
+                                        HStack {
+                                            Image(systemName: "map")
+                                                .foregroundColor(.blue)
+                                            Text("Distance")
+                                                .foregroundColor(.secondary)
+                                            Spacer()
+                                            Text(String(format: "%.2f km", distance / 1000))
+                                                .fontWeight(.medium)
+                                        }
+                                    }
+
+                                    if let points = result.finalPoints {
+                                        HStack {
+                                            Image(systemName: "star.fill")
+                                                .foregroundColor(.yellow)
+                                            Text("Points Earned")
+                                                .foregroundColor(.secondary)
+                                            Spacer()
+                                            Text("\(points)")
+                                                .fontWeight(.bold)
+                                                .foregroundColor(.orange)
+                                        }
                                     }
                                 }
                             }
@@ -246,28 +262,31 @@ struct FlowLayout: Layout {
 }
 
 #Preview {
-    CompleteView(shelter: Shelter(
-        id: "1",
-        number: 1,
-        commonId: "test",
-        name: "Tokyo Community Center",
-        address: "1-1-1 Shibuya, Tokyo",
-        municipality: "Shibuya",
-        isShelter: true,
-        isFlood: true,
-        isLandslide: false,
-        isStormSurge: false,
-        isEarthquake: true,
-        isTsunami: false,
-        isFire: true,
-        isInlandFlood: false,
-        isVolcano: false,
-        isSameAddressAsShelter: false,
-        otherMunicipalNotes: nil,
-        acceptedPeople: nil,
-        latitude: 35.6586,
-        longitude: 139.7454,
-        remarks: nil,
-        lastUpdated: Date()
-    ))
+    CompleteView(
+        shelter: Shelter(
+            id: "1",
+            number: 1,
+            commonId: "test",
+            name: "Tokyo Community Center",
+            address: "1-1-1 Shibuya, Tokyo",
+            municipality: "Shibuya",
+            isShelter: true,
+            isFlood: true,
+            isLandslide: false,
+            isStormSurge: false,
+            isEarthquake: true,
+            isTsunami: false,
+            isFire: true,
+            isInlandFlood: false,
+            isVolcano: false,
+            isSameAddressAsShelter: false,
+            otherMunicipalNotes: nil,
+            acceptedPeople: nil,
+            latitude: 35.6586,
+            longitude: 139.7454,
+            remarks: nil,
+            lastUpdated: Date()
+        ),
+        missionResult: nil
+    )
 }

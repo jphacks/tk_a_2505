@@ -20,6 +20,7 @@ class MissionResultViewModel {
     var showDescriptionInput = false
     var userDescription = ""
     var acquiredBadge: Badge?
+    var missionResult: MissionResult?
 
     // MARK: - Dependencies
 
@@ -27,19 +28,24 @@ class MissionResultViewModel {
     private let badgeService: BadgeSupabase
     private let shelterService: ShelterSupabase
     private let authService: AuthSupabase
+    private let missionResultService: MissionResultSupabase
 
     // MARK: - Initialization
 
     init(
         badgeViewModel: BadgeViewModel,
+        initialMissionResult: MissionResult? = nil,
         badgeService: BadgeSupabase = BadgeSupabase(),
         shelterService: ShelterSupabase = ShelterSupabase(),
-        authService: AuthSupabase = AuthSupabase()
+        authService: AuthSupabase = AuthSupabase(),
+        missionResultService: MissionResultSupabase = MissionResultSupabase()
     ) {
         self.badgeViewModel = badgeViewModel
+        missionResult = initialMissionResult
         self.badgeService = badgeService
         self.shelterService = shelterService
         self.authService = authService
+        self.missionResultService = missionResultService
     }
 
     // MARK: - Actions

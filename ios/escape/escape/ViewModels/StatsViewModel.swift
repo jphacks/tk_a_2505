@@ -12,39 +12,37 @@ import Foundation
 class StatsViewModel {
     var isLoading = false
     var errorMessage: String?
-    var recentMissions: [Mission] = []
+    var recentMissionResults: [MissionResult] = []
 
     // MARK: - Dependencies
 
-    private let missionService: MissionSupabase
+    private let missionResultService: MissionResultSupabase
 
     // MARK: - Initialization
 
-    init(missionService: MissionSupabase = MissionSupabase()) {
-        self.missionService = missionService
+    init(missionResultService: MissionResultSupabase = MissionResultSupabase()) {
+        self.missionResultService = missionResultService
     }
 
     // MARK: - Computed Statistics
 
     /// Count of completed missions
     var completedMissionsCount: Int {
-        recentMissions.filter { $0.status == .completed }.count
+        recentMissionResults.count
     }
 
-    /// Total distance from all completed missions (in km)
+    /// Total distance from all completed missions (in meters, converted to km)
     var totalDistance: Double {
-        recentMissions
-            .filter { $0.status == .completed }
-            .compactMap { $0.distances }
-            .reduce(0, +)
+        recentMissionResults
+            .compactMap { $0.actualDistanceMeters }
+            .reduce(0, +) / 1000.0 // Convert meters to km
     }
 
     /// Total steps from all completed missions
     var totalSteps: Int {
-        recentMissions
-            .filter { $0.status == .completed }
-            .compactMap { mission in
-                if let steps = mission.steps {
+        recentMissionResults
+            .compactMap { result in
+                if let steps = result.steps {
                     return Int(steps)
                 }
                 return nil
@@ -54,30 +52,31 @@ class StatsViewModel {
 
     // MARK: - Data Fetching
 
-    /// Fetches recent missions for a user from Supabase (only completed missions)
+    /// Fetches recent mission results for a user from Supabase
     /// - Parameters:
     ///   - userId: The user's UUID
-    ///   - limit: Maximum number of missions to fetch (default: 30)
+    ///   - limit: Maximum number of mission results to fetch (default: 30)
     func fetchRecentMissions(userId: UUID, limit: Int = 30) async {
         isLoading = true
         errorMessage = nil
 
         do {
-            recentMissions = try await missionService.fetchRecentCompletedMissions(userId: userId, limit: limit)
+            recentMissionResults = try await missionResultService.fetchRecentMissionResults(userId: userId, limit: limit)
 
+            print("✅ Fetched \(recentMissionResults.count) mission result(s)")
             print("   Total steps: \(totalSteps)")
             print("   Total distance: \(String(format: "%.2f", totalDistance))km")
 
         } catch {
-            errorMessage = "Failed to fetch missions: \(error.localizedDescription)"
-            print("❌ Error fetching missions for stats: \(error)")
-            recentMissions = []
+            errorMessage = "Failed to fetch mission results: \(error.localizedDescription)"
+            print("❌ Error fetching mission results for stats: \(error)")
+            recentMissionResults = []
         }
 
         isLoading = false
     }
 
-    /// Fetches missions within a specific date range (only completed missions)
+    /// Fetches mission results within a specific date range
     /// - Parameters:
     ///   - userId: The user's UUID
     ///   - startDate: Start of the date range
@@ -87,18 +86,18 @@ class StatsViewModel {
         errorMessage = nil
 
         do {
-            recentMissions = try await missionService.fetchCompletedMissionsInDateRange(
+            recentMissionResults = try await missionResultService.fetchMissionResultsInDateRange(
                 userId: userId,
                 startDate: startDate,
                 endDate: endDate
             )
 
-            print("✅ Fetched \(recentMissions.count) completed mission(s) in date range")
+            print("✅ Fetched \(recentMissionResults.count) mission result(s) in date range")
 
         } catch {
-            errorMessage = "Failed to fetch missions: \(error.localizedDescription)"
-            print("❌ Error fetching missions in date range: \(error)")
-            recentMissions = []
+            errorMessage = "Failed to fetch mission results: \(error.localizedDescription)"
+            print("❌ Error fetching mission results in date range: \(error)")
+            recentMissionResults = []
         }
 
         isLoading = false
@@ -113,22 +112,22 @@ class StatsViewModel {
         await fetchMissionsInDateRange(userId: userId, startDate: startDate, endDate: now)
     }
 
-    /// Average steps per day for the current missions
+    /// Average steps per mission for the current results
     var averageSteps: Double {
-        guard !recentMissions.isEmpty else { return 0 }
-        return Double(totalSteps) / Double(recentMissions.count)
+        guard !recentMissionResults.isEmpty else { return 0 }
+        return Double(totalSteps) / Double(recentMissionResults.count)
     }
 
-    /// Average distance per day for the current missions
+    /// Average distance per mission for the current results (in km)
     var averageDistance: Double {
-        guard !recentMissions.isEmpty else { return 0 }
-        return totalDistance / Double(recentMissions.count)
+        guard !recentMissionResults.isEmpty else { return 0 }
+        return totalDistance / Double(recentMissionResults.count)
     }
 
     /// Resets the controller state
     func reset() {
         isLoading = false
         errorMessage = nil
-        recentMissions = []
+        recentMissionResults = []
     }
 }

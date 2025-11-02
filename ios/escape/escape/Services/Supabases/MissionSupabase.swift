@@ -187,25 +187,6 @@ class MissionSupabase {
             .execute()
     }
 
-    /// Updates mission steps and distances
-    /// - Parameters:
-    ///   - missionId: The mission UUID
-    ///   - steps: New step count
-    ///   - distances: New distance value
-    /// - Throws: Database error if update fails
-    func updateMissionProgress(missionId: UUID, steps: Int64?, distances: Double?) async throws {
-        struct ProgressUpdate: Encodable {
-            let steps: Int64?
-            let distances: Double?
-        }
-
-        try await supabase
-            .from("missions")
-            .update(ProgressUpdate(steps: steps, distances: distances))
-            .eq("id", value: missionId.uuidString.lowercased())
-            .execute()
-    }
-
     // MARK: - Stats-Related Queries
 
     /// Fetches recent completed missions for a user from Supabase

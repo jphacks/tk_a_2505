@@ -77,7 +77,7 @@ struct StatsView: View {
                         .frame(width: 80)
 
                         // 右側3/4: チャート表示
-                        MissionChartView(missions: statsViewModel.recentMissions)
+                        MissionChartView(missionResults: statsViewModel.recentMissionResults)
                             .frame(maxWidth: .infinity)
                             .frame(height: 120)
                     }
@@ -89,7 +89,7 @@ struct StatsView: View {
             }
         }
         .sheet(isPresented: $showingStatsDetail) {
-            StatsDetailView(missions: statsViewModel.recentMissions)
+            StatsDetailView(missionResults: statsViewModel.recentMissionResults)
         }
         .onAppear {
             loadRecentMissions()
@@ -166,10 +166,10 @@ struct CompactStatItemView: View {
 // MARK: - ミッションチャートビュー
 
 struct MissionChartView: View {
-    let missions: [Mission]
+    let missionResults: [MissionResult]
 
     var body: some View {
-        if missions.isEmpty {
+        if missionResults.isEmpty {
             VStack {
                 Image(systemName: "chart.line.uptrend.xyaxis")
                     .font(.title2)
@@ -180,27 +180,27 @@ struct MissionChartView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            Chart(missions) { mission in
-                let date = mission.createdAt
+            Chart(missionResults) { result in
+                let date = result.createdAt
 
                 // 歩数の棒グラフ
                 BarMark(
                     x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
-                    y: .value(String(localized: "chart.steps_label", table: "Localizable"), mission.steps ?? 0)
+                    y: .value(String(localized: "chart.steps_label", table: "Localizable"), result.steps ?? 0)
                 )
                 .foregroundStyle(Color("brandMediumBlue").opacity(0.7))
 
-                // 距離の折れ線グラフ（スケール調整のため1000倍）
+                // 距離の折れ線グラフ（actualDistanceMeters is already in meters）
                 LineMark(
                     x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
-                    y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
+                    y: .value(String(localized: "chart.distance_label", table: "Localizable"), result.actualDistanceMeters ?? 0)
                 )
                 .foregroundStyle(Color("brandOrange"))
                 .lineStyle(StrokeStyle(lineWidth: 2))
 
                 PointMark(
                     x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
-                    y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
+                    y: .value(String(localized: "chart.distance_label", table: "Localizable"), result.actualDistanceMeters ?? 0)
                 )
                 .foregroundStyle(Color("brandOrange"))
             }
@@ -260,35 +260,35 @@ enum StatsPeriod: String, CaseIterable {
 }
 
 struct StatsDetailView: View {
-    let missions: [Mission]
+    let missionResults: [MissionResult]
     @Environment(\.dismiss) private var dismiss
     @State private var selectedPeriod: StatsPeriod = .week
     @State private var detailStatsViewModel = StatsViewModel()
     @State private var userId: UUID?
 
-    // Filter missions based on selected period
-    private var filteredMissions: [Mission] {
+    // Filter mission results based on selected period
+    private var filteredMissionResults: [MissionResult] {
         let calendar = Calendar.current
         let now = Date()
         let startDate = calendar.date(byAdding: .day, value: -selectedPeriod.days, to: now) ?? now
 
-        return missions.filter { mission in
-            mission.createdAt >= startDate && mission.createdAt <= now
+        return missionResults.filter { result in
+            result.createdAt >= startDate && result.createdAt <= now
         }
     }
 
-    // Calculate average steps for filtered missions
+    // Calculate average steps for filtered mission results
     private var averageSteps: Int {
-        guard !filteredMissions.isEmpty else { return 0 }
-        let total = filteredMissions.compactMap { $0.steps }.reduce(0, +)
-        return Int(Double(total) / Double(filteredMissions.count))
+        guard !filteredMissionResults.isEmpty else { return 0 }
+        let total = filteredMissionResults.compactMap { $0.steps }.reduce(0, +)
+        return Int(Double(total) / Double(filteredMissionResults.count))
     }
 
-    // Calculate average distance for filtered missions
+    // Calculate average distance for filtered mission results (in km)
     private var averageDistance: Double {
-        guard !filteredMissions.isEmpty else { return 0 }
-        let total = filteredMissions.compactMap { $0.distances }.reduce(0, +)
-        return total / Double(filteredMissions.count)
+        guard !filteredMissionResults.isEmpty else { return 0 }
+        let total = filteredMissionResults.compactMap { $0.actualDistanceMeters }.reduce(0, +)
+        return (total / Double(filteredMissionResults.count)) / 1000.0 // Convert to km
     }
 
     var body: some View {
@@ -300,17 +300,17 @@ struct StatsDetailView: View {
                         selectedPeriod: $selectedPeriod,
                         averageSteps: averageSteps,
                         averageDistance: averageDistance,
-                        missionCount: filteredMissions.count
+                        missionCount: filteredMissionResults.count
                     )
 
                     // Detail Chart Section
                     DetailChartSection(
-                        filteredMissions: filteredMissions,
+                        filteredMissionResults: filteredMissionResults,
                         selectedPeriod: selectedPeriod
                     )
 
                     // Mission History Section
-                    MissionHistorySection(filteredMissions: filteredMissions)
+                    MissionHistorySection(filteredMissionResults: filteredMissionResults)
                 }
                 .padding()
             }
@@ -389,7 +389,7 @@ struct PeriodPickerSection: View {
 // MARK: - Detail Chart Section Component
 
 struct DetailChartSection: View {
-    let filteredMissions: [Mission]
+    let filteredMissionResults: [MissionResult]
     let selectedPeriod: StatsPeriod
 
     var body: some View {
@@ -398,7 +398,7 @@ struct DetailChartSection: View {
                 .font(.headline)
                 .padding(.horizontal)
 
-            if filteredMissions.isEmpty {
+            if filteredMissionResults.isEmpty {
                 emptyChartView
             } else {
                 missionChart
@@ -423,27 +423,27 @@ struct DetailChartSection: View {
     }
 
     private var missionChart: some View {
-        Chart(filteredMissions, id: \.id) { mission in
-            let date = mission.createdAt
+        Chart(filteredMissionResults, id: \.id) { result in
+            let date = result.createdAt
             let barWidth: CGFloat = selectedPeriod == .day ? 60 : selectedPeriod == .week ? 30 : 15
 
             BarMark(
                 x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
-                y: .value(String(localized: "chart.steps_label", table: "Localizable"), mission.steps ?? 0),
+                y: .value(String(localized: "chart.steps_label", table: "Localizable"), result.steps ?? 0),
                 width: .fixed(barWidth)
             )
             .foregroundStyle(Color("brandMediumBlue").opacity(0.7))
 
             LineMark(
                 x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
-                y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
+                y: .value(String(localized: "chart.distance_label", table: "Localizable"), result.actualDistanceMeters ?? 0)
             )
             .foregroundStyle(Color("brandOrange"))
             .lineStyle(StrokeStyle(lineWidth: 3))
 
             PointMark(
                 x: .value(String(localized: "chart.date_label", table: "Localizable"), date),
-                y: .value(String(localized: "chart.distance_label", table: "Localizable"), (mission.distances ?? 0) * 1000)
+                y: .value(String(localized: "chart.distance_label", table: "Localizable"), result.actualDistanceMeters ?? 0)
             )
             .foregroundStyle(Color("brandOrange"))
             .symbolSize(50)
@@ -482,7 +482,7 @@ struct DetailChartSection: View {
 // MARK: - Mission History Section Component
 
 struct MissionHistorySection: View {
-    let filteredMissions: [Mission]
+    let filteredMissionResults: [MissionResult]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -490,7 +490,7 @@ struct MissionHistorySection: View {
                 .font(.headline)
                 .padding(.horizontal)
 
-            if filteredMissions.isEmpty {
+            if filteredMissionResults.isEmpty {
                 emptyHistoryView
             } else {
                 missionList
@@ -513,8 +513,8 @@ struct MissionHistorySection: View {
     }
 
     private var missionList: some View {
-        ForEach(filteredMissions) { mission in
-            MissionHistoryRow(mission: mission)
+        ForEach(filteredMissionResults) { result in
+            MissionHistoryRow(missionResult: result)
         }
     }
 }
@@ -522,20 +522,23 @@ struct MissionHistorySection: View {
 // MARK: - Mission History Row Component
 
 struct MissionHistoryRow: View {
-    let mission: Mission
+    let missionResult: MissionResult
 
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(mission.title ?? "")
+                Text("Mission Completed")
                     .font(.subheadline)
                     .fontWeight(.medium)
 
-                Text(mission.overview ?? "")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                if let points = missionResult.finalPoints {
+                    Text("\(points) points")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                        .fontWeight(.semibold)
+                }
 
-                Text(mission.createdAt.formatted(date: .abbreviated, time: .omitted))
+                Text(missionResult.createdAt.formatted(date: .abbreviated, time: .omitted))
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -543,11 +546,11 @@ struct MissionHistoryRow: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 4) {
-                Text("\(mission.steps ?? 0)" + String(localized: "home.stats.steps_unit", table: "Localizable"))
+                Text("\(missionResult.steps ?? 0)" + String(localized: "home.stats.steps_unit", table: "Localizable"))
                     .font(.caption)
                     .foregroundColor(Color("brandMediumBlue"))
 
-                Text(String(format: "%.1f", mission.distances ?? 0) + String(localized: "home.stats.distance_unit", table: "Localizable"))
+                Text(String(format: "%.1f", (missionResult.actualDistanceMeters ?? 0) / 1000) + String(localized: "home.stats.distance_unit", table: "Localizable"))
                     .font(.caption)
                     .foregroundColor(Color("brandOrange"))
             }

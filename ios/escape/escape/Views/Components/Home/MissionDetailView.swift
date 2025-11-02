@@ -98,39 +98,6 @@ struct MissionDetailView: View {
                                             .font(.body)
                                             .foregroundColor(.white.opacity(0.9))
                                     }
-
-                                    if let evacuationRegion = mission.evacuationRegion {
-                                        HStack {
-                                            Image(systemName: "location")
-                                                .foregroundColor(.white.opacity(0.8))
-
-                                            Text("避難地域: \(evacuationRegion)")
-                                                .font(.body)
-                                                .foregroundColor(.white.opacity(0.9))
-                                        }
-                                    }
-
-                                    if let steps = mission.steps {
-                                        HStack {
-                                            Image(systemName: "figure.walk")
-                                                .foregroundColor(.white.opacity(0.8))
-
-                                            Text("歩数: \(steps) 歩")
-                                                .font(.body)
-                                                .foregroundColor(.white.opacity(0.9))
-                                        }
-                                    }
-
-                                    if let distance = mission.distances {
-                                        HStack {
-                                            Image(systemName: "ruler")
-                                                .foregroundColor(.white.opacity(0.8))
-
-                                            Text(String(format: "距離: %.1f km", distance))
-                                                .font(.body)
-                                                .foregroundColor(.white.opacity(0.9))
-                                        }
-                                    }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(20)
@@ -241,10 +208,7 @@ struct MissionDetailView: View {
             title: "震度6強の地震発生！避難所へ緊急避難せよ",
             overview: "AI解析により、マグニチュード7.2の大地震が発生したシナリオが生成されました。建物の倒壊や火災の危険があります。最寄りの避難所まで安全なルートで避難してください。",
             disasterType: .earthquake,
-            evacuationRegion: "文京区",
             status: .active,
-            steps: 2500,
-            distances: 1.2,
             createdAt: Date()
         ),
         selectedTab: .constant(.home),

@@ -27,9 +27,7 @@ class MissionGeneratorViewModel {
 
     func generateMission(
         context: String? = nil,
-        disasterTypeHint: DisasterType? = nil,
-        steps: Int64? = nil,
-        distances: Double? = nil
+        disasterTypeHint: DisasterType? = nil
     ) async {
         isGenerating = true
         errorMessage = nil
@@ -38,9 +36,7 @@ class MissionGeneratorViewModel {
         do {
             let mission = try await missionGenerator.generateMission(
                 context: context,
-                disasterTypeHint: disasterTypeHint,
-                steps: steps,
-                distances: distances
+                disasterTypeHint: disasterTypeHint
             )
 
             generatedMission = mission
@@ -62,16 +58,8 @@ class MissionGeneratorViewModel {
         await generateMission()
     }
 
-    func generateMissionWithActivityData(
-        context: String,
-        steps: Int64,
-        distances: Double
-    ) async {
-        await generateMission(
-            context: context,
-            steps: steps,
-            distances: distances
-        )
+    func generateMissionWithContext(_ context: String) async {
+        await generateMission(context: context)
     }
 
     func reset() {
