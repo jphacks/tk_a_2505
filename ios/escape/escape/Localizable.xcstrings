@@ -244,7 +244,6 @@
       }
     },
     "auth.email_password": {
-      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -295,7 +294,6 @@
       }
     },
     "auth.magic_link_description": {
-      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -664,6 +662,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "対応する災害"
+          }
+        }
+      }
+    },
+    "badge_share_message": {
+      "comment": "Share message format used when the user earns a badge",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I just earned the %@ badge in HiNan!"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HiNan!で%@バッジを獲得しました！"
           }
         }
       }
@@ -1723,7 +1739,6 @@
       }
     },
     "maintenance_mode_info": {
-      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -1750,14 +1765,13 @@
         },
         "ja": {
           "stringUnit": {
-            "state": "translated",
+            "state": "needs_review",
             "value": "現在、メンテナンスを実施しております。しばらくしてから再度お試しください。"
           }
         }
       }
     },
     "maintenance_mode_title": {
-      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -2397,7 +2411,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "バッジが生成されました！"
+            "value": "バッジを作成しました！"
           }
         }
       }
@@ -2792,6 +2806,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "OK"
+          }
+        }
+      }
+    },
+    "result.share_button": {
+      "comment": "Title for the share button shown on the mission result screen",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共有する"
           }
         }
       }
