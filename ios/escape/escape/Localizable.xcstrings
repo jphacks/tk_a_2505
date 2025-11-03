@@ -243,7 +243,22 @@
         }
       }
     },
-    "auth.email_password": {},
+    "auth.email_password": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email + Password"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メール + パスワード"
+          }
+        }
+      }
+    },
     "auth.error": {
       "extractionState": "manual",
       "localizations": {
@@ -278,7 +293,22 @@
         }
       }
     },
-    "auth.magic_link_description": {},
+    "auth.magic_link_description": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We'll send you a secure link to your email. Click it to sign in instantly—no password needed!"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安全なリンクをメールでお送りします。クリックするだけですぐにサインインできます。パスワードは不要です！"
+          }
+        }
+      }
+    },
     "auth.need_account": {
       "extractionState": "manual",
       "localizations": {
@@ -1708,8 +1738,55 @@
         }
       }
     },
-    "maintenance_mode_info": {},
-    "maintenance_mode_title": {},
+    "maintenance_mode_info": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thank you for your patience"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ご不便をおかけして申し訳ございません"
+          }
+        }
+      }
+    },
+    "maintenance_mode_message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We're currently performing scheduled maintenance to improve your experience. Please check back soon!"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "現在、メンテナンスを実施しております。しばらくしてから再度お試しください。"
+          }
+        }
+      }
+    },
+    "maintenance_mode_title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Under Maintenance"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メンテナンス中"
+          }
+        }
+      }
+    },
     "map.danger_zone.alert_message": {
       "extractionState": "manual",
       "localizations": {

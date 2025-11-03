@@ -33,5 +33,3 @@ supabase/supabase
 
 web/.next
 web/out
-ios/escape/escape.xcodeproj/project.pbxproj
-ios/escape/escape/Supabase.swift
