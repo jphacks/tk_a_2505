@@ -9,18 +9,10 @@ import CoreLocation
 import MapKit
 import SwiftUI
 
-// MARK: - Zombie Model
-
-struct Zombie: Identifiable {
-    let id = UUID()
-    var coordinate: CLLocationCoordinate2D
-    var angle: Double // Direction of movement
-    var speed: Double // Speed in meters per second
-}
-
 struct MapView: View {
     @StateObject private var locationManager = LocationService()
     @State private var mapViewModel = MapViewModel()
+    @State private var zombieService = ZombieService()
     @State private var position: MapCameraPosition = .userLocation(
         followsHeading: true,
         fallback: .automatic
@@ -32,8 +24,11 @@ struct MapView: View {
     @State private var showPinDetailsSheet = false
     @State private var showCompleteView = false
     @State private var showZombieAlert = false
-    @State private var zombies: [Zombie] = []
-    @State private var hitByZombieIds: Set<UUID> = []
+    @State private var showShelterInfo = false
+    @State private var nearestShelter: Shelter?
+    @State private var shelterCheckTimer: Timer?
+    @State private var isViewActive = false
+    @State private var selectedShelter: Shelter?
 
     @Environment(\.missionStateService) var missionStateService // need when you want to listen to the mission state changes
 
@@ -48,28 +43,16 @@ struct MapView: View {
                 permissionDeniedView
             }
         }
-        .alert(
-            String(localized: "map.shelter.reached_title", bundle: .main),
-            isPresented: $showShelterReachedAlert,
-            presenting: reachedShelter
-        ) { _ in
-            Button(
-                String(localized: "map.shelter.ok_button", bundle: .main),
-                role: .cancel
-            ) {
-                showCompleteView = true
-            }
-        } message: { shelter in
-            Text(
-                String(
-                    format: NSLocalizedString(
-                        "map.shelter.reached_message",
-                        bundle: .main,
-                        comment: ""
-                    ),
-                    shelter.name
+        .overlay {
+            if showShelterReachedAlert, let shelter = reachedShelter {
+                ShelterReachedAlertView(
+                    isPresented: $showShelterReachedAlert,
+                    shelterName: shelter.name,
+                    onDismiss: {
+                        showCompleteView = true
+                    }
                 )
-            )
+            }
         }
         .alert(
             String(localized: "map.danger_zone.alert_title", bundle: .main),
@@ -88,20 +71,27 @@ struct MapView: View {
                 )
             )
         }
-        .alert(
-            String(localized: "map.zombie.alert_title", bundle: .main),
-            isPresented: $showZombieAlert
-        ) {
-            Button(
-                String(localized: "map.shelter.ok_button", bundle: .main),
-                role: .cancel
-            ) {}
-        } message: {
-            Text(String(localized: "map.zombie.alert_message", bundle: .main))
+        .overlay {
+            if showZombieAlert {
+                ZombieHitAlertView(isPresented: $showZombieAlert)
+            }
         }
         .sheet(isPresented: $showPinDetailsSheet) {
             pinDetailsSheet
                 .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showShelterInfo) {
+            // Show info for either selected shelter (from tap) or nearest shelter (from proximity)
+            if let shelter = selectedShelter ?? nearestShelter {
+                ShelterInfoSheet(shelter: shelter)
+                    .presentationDetents([.medium])
+            }
+        }
+        .onChange(of: showShelterInfo) { _, newValue in
+            // Clear selected shelter when sheet is dismissed
+            if !newValue {
+                selectedShelter = nil
+            }
         }
         .fullScreenCover(isPresented: $showCompleteView) {
             if let shelter = reachedShelter,
@@ -115,11 +105,27 @@ struct MapView: View {
             }
         }
         .onAppear {
+            isViewActive = true
+
             if locationManager.authorizationStatus == .notDetermined {
                 // Will show permission request view first
             } else if locationManager.authorizationStatus == .authorized {
                 locationManager.requestLocationAuthorization()
             }
+
+            // Start Zen mode timer if no mission is active
+            if missionStateService.currentMission == nil {
+                missionStateService.updateGameMode(.zen)
+                startShelterProximityTimer()
+            }
+
+            if let location = locationManager.location {
+                handleNewLocation(location: location)
+            }
+        }
+        .onDisappear {
+            isViewActive = false
+            stopShelterProximityTimer()
         }
         .task {
             // Fetch shelters near user's location if available
@@ -144,11 +150,6 @@ struct MapView: View {
             // Set disaster type filter based on current mission
             updateShelterFilter()
         }
-        .onAppear {
-            if let location = locationManager.location {
-                handleNewLocation(location: location)
-            }
-        }
         .onChange(of: locationManager.location) { _, newValue in
             // Refresh shelters when location updates
             print("AAAA")
@@ -159,7 +160,19 @@ struct MapView: View {
         .onChange(of: missionStateService.currentMission) { oldValue, newValue in
             // Update shelter filter when mission changes
             print("BBBBB")
+
+            // If no mission, automatically set to Zen mode and start shelter checking
+            if newValue == nil {
+                missionStateService.updateGameMode(.zen)
+                startShelterProximityTimer()
+            } else {
+                stopShelterProximityTimer()
+            }
+
             updateShelterFilter()
+
+            // Update game mode in MapViewModel
+            mapViewModel.currentGameMode = missionStateService.currentGameMode
 
             // Initialize mission tracking when mission becomes active
             if let mission = newValue,
@@ -176,18 +189,22 @@ struct MapView: View {
             // Note: Don't reset tracking when status becomes .completed
             // Tracking data is needed for MissionResultView
 
-            // Spawn zombies if zombie mission started
+            // Spawn zombies if zombie mission started (but not in Zen mode)
             if let mission = newValue,
                mission.disasterType == .zombie,
-               mission.status == .active || mission.status == .inProgress
+               mission.status == .active || mission.status == .inProgress,
+               missionStateService.currentGameMode.hasZombies
             {
                 if let location = locationManager.location {
-                    spawnZombies(around: location.coordinate)
-                    startZombieMovement()
+                    zombieService.spawnZombies(around: location.coordinate)
+                    zombieService.startZombieMovement(
+                        userLocationProvider: { [weak locationManager] in locationManager?.location },
+                        onZombieHit: { showZombieAlert = true }
+                    )
                 }
             } else {
-                // Clear zombies if no zombie mission
-                zombies.removeAll()
+                // Clear zombies if no zombie mission or Zen mode
+                zombieService.clearZombies()
             }
         }
     }
@@ -233,6 +250,9 @@ struct MapView: View {
                     }
                 }
             }
+        } else if missionStateService.currentGameMode == .zen {
+            // In Zen mode, show info when close to any shelter
+            checkNearbyShelterId(userLocation: location)
         }
 
         // Check if user has entered any danger zone polygon
@@ -245,11 +265,74 @@ struct MapView: View {
         //                }
     }
 
+    private func checkNearbyShelterId(userLocation: CLLocation) {
+        // Only show shelter info if view is active (user is on map tab)
+        guard isViewActive else {
+            print("🧘 View not active, skipping shelter check")
+            return
+        }
+
+        // Find nearest shelter within 100 meters (increased for easier testing)
+        let detectionRadius = 100.0
+        let nearbyShelters = mapViewModel.filteredShelters.filter { shelter in
+            let shelterLocation = CLLocation(latitude: shelter.latitude, longitude: shelter.longitude)
+            let distance = userLocation.distance(from: shelterLocation)
+            return distance <= detectionRadius
+        }
+
+        print("🧘 Zen mode check: Found \(nearbyShelters.count) shelters within \(detectionRadius)m")
+        print("🧘 Total filtered shelters: \(mapViewModel.filteredShelters.count)")
+        print("🧘 User location: \(userLocation.coordinate.latitude), \(userLocation.coordinate.longitude)")
+        print("🧘 Game mode: \(missionStateService.currentGameMode.rawValue)")
+
+        if let closest = nearbyShelters.first {
+            print("🧘 Closest shelter: \(closest.name) at distance")
+            // Only show if it's a different shelter or first time
+            if nearestShelter?.id != closest.id {
+                nearestShelter = closest
+                showShelterInfo = true
+                print("🧘 Showing shelter info for: \(closest.name)")
+            }
+        } else {
+            nearestShelter = nil
+        }
+    }
+
+    // MARK: - Shelter Proximity Timer
+
+    private func startShelterProximityTimer() {
+        stopShelterProximityTimer()
+
+        // Check every 3 seconds for nearby shelters in Zen mode
+        shelterCheckTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { _ in
+            // Only check if in Zen mode and location is available
+            if missionStateService.currentGameMode == .zen,
+               let userLocation = locationManager.location
+            {
+                checkNearbyShelterId(userLocation: userLocation)
+            }
+        }
+
+        print("🧘 Started shelter proximity timer for Zen mode")
+    }
+
+    private func stopShelterProximityTimer() {
+        shelterCheckTimer?.invalidate()
+        shelterCheckTimer = nil
+        print("🧘 Stopped shelter proximity timer")
+    }
+
     // MARK: - Helper Methods
 
     /// Updates the shelter filter based on the current mission's disaster type
     private func updateShelterFilter() {
         mapViewModel.clearFilters()
+
+        // In Zen mode, show all shelters (no filtering)
+        if missionStateService.currentGameMode == .zen {
+            print("   🧘 Zen mode: Showing all shelters")
+            return
+        }
 
         // If there's an active or in-progress mission with a disaster type, filter shelters
         if let mission = missionStateService.currentMission {
@@ -261,126 +344,6 @@ struct MapView: View {
         } else {
             print("   ⚠️ No current mission")
         }
-    }
-
-    /// Spawn zombies around user location
-    private func spawnZombies(
-        around center: CLLocationCoordinate2D,
-        count: Int = 10
-    ) {
-        zombies.removeAll()
-        hitByZombieIds.removeAll()
-
-        for _ in 0 ..< count {
-            // Random distance from user (50m to 300m)
-            let distance = Double.random(in: 50 ... 300) // meters
-            let angle = Double.random(in: 0 ... (2 * .pi))
-
-            // Convert distance and angle to coordinate offset
-            let latOffset = (distance * cos(angle)) / 111_000 // 1 degree ≈ 111km
-            let lonOffset =
-                (distance * sin(angle))
-                    / (111_000 * cos(center.latitude * .pi / 180))
-
-            let zombieCoord = CLLocationCoordinate2D(
-                latitude: center.latitude + latOffset,
-                longitude: center.longitude + lonOffset
-            )
-
-            let zombie = Zombie(
-                coordinate: zombieCoord,
-                angle: Double.random(in: 0 ... (2 * .pi)),
-                speed: Double.random(in: 0.5 ... 2.0) // 0.5-2 m/s
-            )
-
-            zombies.append(zombie)
-        }
-
-        print("🧟 Spawned \(zombies.count) zombies!")
-    }
-
-    /// Start zombie movement timer
-    private func startZombieMovement() {
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-            // Stop if no zombie mission
-            guard let mission = missionStateService.currentMission,
-                  mission.disasterType == .zombie,
-                  mission.status == .active || mission.status == .inProgress
-            else {
-                timer.invalidate()
-                return
-            }
-
-            moveZombies()
-        }
-    }
-
-    /// Move zombies toward the user with some randomness
-    private func moveZombies() {
-        guard let userLocation = locationManager.location else { return }
-
-        for i in 0 ..< zombies.count {
-            // Calculate direction to user
-            let deltaLat =
-                userLocation.coordinate.latitude
-                    - zombies[i].coordinate.latitude
-            let deltaLon =
-                userLocation.coordinate.longitude
-                    - zombies[i].coordinate.longitude
-            let angleToUser = atan2(deltaLon, deltaLat)
-
-            // Check distance to user
-            let distanceToUser = calculateDistanceInMeters(
-                from: zombies[i].coordinate,
-                to: userLocation.coordinate
-            )
-
-            // If zombie is close to user (within 2 meters) and hasn't hit before
-            if distanceToUser <= 4, !hitByZombieIds.contains(zombies[i].id) {
-                hitByZombieIds.insert(zombies[i].id)
-                showZombieAlert = true
-                print("🧟 Zombie hit! Distance: \(distanceToUser)m")
-            }
-
-            // Mix following behavior with random movement
-            // 70% toward user, 30% random
-            let followStrength = 0.7
-            let randomAngle = Double.random(in: -0.5 ... 0.5) // Add some randomness
-            zombies[i].angle =
-                angleToUser * followStrength + zombies[i].angle
-                    * (1 - followStrength) + randomAngle
-
-            // Move zombie based on speed and angle
-            let distance = zombies[i].speed * 1.0 // 1 second interval
-            let latOffset = (distance * cos(zombies[i].angle)) / 111_000
-            let lonOffset =
-                (distance * sin(zombies[i].angle))
-                    / (111_000 * cos(zombies[i].coordinate.latitude * .pi / 180))
-
-            zombies[i].coordinate = CLLocationCoordinate2D(
-                latitude: zombies[i].coordinate.latitude + latOffset,
-                longitude: zombies[i].coordinate.longitude + lonOffset
-            )
-        }
-    }
-
-    /// Calculate distance between two coordinates in meters
-    private func calculateDistanceInMeters(
-        from: CLLocationCoordinate2D,
-        to: CLLocationCoordinate2D
-    ) -> Double {
-        let earthRadius = 6_371_000.0 // meters
-
-        let dLat = (to.latitude - from.latitude) * .pi / 180
-        let dLon = (to.longitude - from.longitude) * .pi / 180
-
-        let a =
-            sin(dLat / 2) * sin(dLat / 2) + cos(from.latitude * .pi / 180)
-                * cos(to.latitude * .pi / 180) * sin(dLon / 2) * sin(dLon / 2)
-
-        let c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-        return earthRadius * c
     }
 
     /// Mission details card shown on top left of map
@@ -444,57 +407,159 @@ struct MapView: View {
     }
 
     private var mapContent: some View {
-        Map(position: $position, interactionModes: .all) {
-            UserAnnotation(anchor: .center)
+        ZStack {
+            if missionStateService.currentGameMode.showsMap {
+                // Standard map view
+                Map(position: $position, interactionModes: .all) {
+                    UserAnnotation(anchor: .center)
 
-            // Display shelter annotations
-            ForEach(mapViewModel.filteredShelters) { shelter in
-                Marker(
-                    shelter.name,
-                    systemImage: shelter.isShelter == true
-                        ? "building.2.fill" : "mappin.circle.fill",
-                    coordinate: CLLocationCoordinate2D(
-                        latitude: shelter.latitude,
-                        longitude: shelter.longitude
-                    )
-                )
-                .tint(
-                    shelter.isShelter == true
-                        ? Color("brandRed") : Color("brandOrange")
-                )
-                .tag(shelter)
-            }
+                    // Display shelter annotations
+                    ForEach(mapViewModel.filteredShelters) { shelter in
+                        Annotation(shelter.name, coordinate: CLLocationCoordinate2D(
+                            latitude: shelter.latitude,
+                            longitude: shelter.longitude
+                        )) {
+                            Button(action: {
+                                // Only allow tapping in Zen mode (no active mission)
+                                if missionStateService.currentGameMode == .zen {
+                                    selectedShelter = shelter
+                                    showShelterInfo = true
+                                }
+                            }) {
+                                ZStack {
+                                    Circle()
+                                        .fill(shelter.isShelter == true ? Color("brandRed") : Color("brandOrange"))
+                                        .frame(width: 32, height: 32)
 
-            // Display geofence polygons if available
-            ForEach(mapViewModel.geofencePolygons.indices, id: \.self) {
-                index in
-                MapPolygon(coordinates: mapViewModel.geofencePolygons[index])
-                    .foregroundStyle(Color.red.opacity(0.25))
-                    .stroke(Color.red, lineWidth: 2)
-            }
+                                    Image(systemName: shelter.isShelter == true ? "building.2.fill" : "mappin.circle.fill")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.white)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
 
-            // Display zombies if zombie mission is active
-            ForEach(zombies) { zombie in
-                Annotation("", coordinate: zombie.coordinate) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.green.opacity(0.3))
-                            .frame(width: 36, height: 36)
+                    // Display geofence polygons if available
+                    ForEach(mapViewModel.geofencePolygons.indices, id: \.self) {
+                        index in
+                        MapPolygon(coordinates: mapViewModel.geofencePolygons[index])
+                            .foregroundStyle(Color.red.opacity(0.25))
+                            .stroke(Color.red, lineWidth: 2)
+                    }
 
-                        Image(systemName: "brain.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(.green)
-                            .shadow(color: .black.opacity(0.5), radius: 2)
+                    // Display zombies if zombie mission is active
+                    ForEach(zombieService.zombies) { zombie in
+                        Annotation("", coordinate: zombie.coordinate) {
+                            ZStack {
+                                // Pulsing outer ring
+                                Circle()
+                                    .fill(Color.red.opacity(0.2))
+                                    .frame(width: 44, height: 44)
+
+                                // Inner circle background
+                                Circle()
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [Color.red, Color.red.opacity(0.7)]),
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .frame(width: 36, height: 36)
+
+                                // Zombie icon
+                                Image(systemName: "figure.walk")
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .shadow(color: .black.opacity(0.3), radius: 1)
+                            }
+                        }
                     }
                 }
+                .mapStyle(.standard(elevation: .realistic))
+                .safeAreaPadding(.top)
+                .padding(.top)
+                .mapControls {
+                    MapUserLocationButton()
+                    MapCompass()
+                }
+            } else {
+                // Mapless mode - only show compass and distance info
+                VStack {
+                    Spacer()
+
+                    VStack(spacing: 32) {
+                        // Compass indicator
+                        VStack(spacing: 16) {
+                            ZStack {
+                                // Compass background circle
+                                Circle()
+                                    .stroke(Color("brandOrange").opacity(0.3), lineWidth: 3)
+                                    .frame(width: 120, height: 120)
+
+                                // Compass rose marks
+                                ForEach(0 ..< 4) { index in
+                                    Rectangle()
+                                        .fill(Color("brandOrange").opacity(0.5))
+                                        .frame(width: 2, height: 15)
+                                        .offset(y: -52.5)
+                                        .rotationEffect(.degrees(Double(index) * 90))
+                                }
+
+                                // North arrow that rotates based on heading
+                                Image(systemName: "location.north.fill")
+                                    .font(.system(size: 50))
+                                    .foregroundColor(Color("brandOrange"))
+                                    .rotationEffect(.degrees(locationManager.heading?.trueHeading ?? 0))
+                                    .animation(.easeInOut(duration: 0.3), value: locationManager.heading?.trueHeading)
+                            }
+
+                            // Show heading in degrees
+                            if let heading = locationManager.heading {
+                                Text("\(Int(heading.trueHeading))°")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(Color("brandOrange"))
+                            }
+
+                            Text("map.mapless.compass_hint", bundle: .main)
+                                .font(.subheadline)
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 32)
+                        }
+
+                        // Distance to nearest shelter
+                        if let nearestShelter = mapViewModel.filteredShelters.first,
+                           let userLocation = locationManager.location
+                        {
+                            let distance = CLLocation(
+                                latitude: nearestShelter.latitude,
+                                longitude: nearestShelter.longitude
+                            ).distance(from: userLocation)
+
+                            VStack(spacing: 8) {
+                                Text("map.mapless.nearest_shelter", bundle: .main)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+
+                                Text(String(format: "%.0f m", distance))
+                                    .font(.system(size: 48, weight: .bold, design: .rounded))
+                                    .foregroundColor(Color("brandRed"))
+                            }
+                            .padding()
+                            .background(.ultraThinMaterial)
+                            .cornerRadius(20)
+                        }
+                    }
+                    .padding(.horizontal, 32)
+
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(.systemBackground))
             }
-        }
-        .mapStyle(.standard(elevation: .realistic))
-        .safeAreaPadding(.top)
-        .padding(.top)
-        .mapControls {
-            MapUserLocationButton()
-            MapCompass()
         }
     }
 

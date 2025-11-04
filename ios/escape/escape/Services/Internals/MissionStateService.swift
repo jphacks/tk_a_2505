@@ -20,6 +20,9 @@ class MissionStateService {
         currentMission?.status ?? .noMission
     }
 
+    /// Current game mode
+    var currentGameMode: GameMode = .default
+
     /// Singleton instance for non-SwiftUI contexts
     static let shared = MissionStateService()
 
@@ -60,6 +63,12 @@ class MissionStateService {
     /// Resets mission state to default
     func resetMission() {
         currentMission = nil
+        currentGameMode = .default
+    }
+
+    /// Updates the current game mode
+    func updateGameMode(_ mode: GameMode) {
+        currentGameMode = mode
     }
 
     /// Get mission title

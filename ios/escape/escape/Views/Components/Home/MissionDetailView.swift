@@ -16,6 +16,7 @@ struct MissionDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.missionStateService) private var missionStateService
     @State private var isAnimating = false
+    @State private var selectedGameMode: GameMode = .default
 
     var body: some View {
         NavigationStack {
@@ -32,34 +33,59 @@ struct MissionDetailView: View {
                     ScrollView {
                         VStack(spacing: 24) {
                             // ヘッダーセクション
-                            VStack(spacing: 16) {
-                                HStack {
+                            VStack(spacing: 20) {
+                                // アイコン
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.white.opacity(0.2))
+                                        .frame(width: 80, height: 80)
+
                                     Image(systemName: mission.disasterType?.emergencyIcon ?? "exclamationmark.triangle.fill")
-                                        .font(.system(size: 60))
+                                        .font(.system(size: 40))
                                         .foregroundColor(.white)
                                         .scaleEffect(isAnimating ? 1.1 : 1.0)
                                         .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
-
-                                    Spacer()
-
-                                    VStack(alignment: .trailing, spacing: 8) {}
                                 }
+                                .frame(maxWidth: .infinity, alignment: .leading)
 
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text(mission.disasterType?.localizedName ?? "Disaster")
-                                        .font(.title3)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(.white.opacity(0.9))
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(Color.white.opacity(0.25))
-                                        .cornerRadius(12)
-
+                                // タイトルとタイプ
+                                VStack(alignment: .leading, spacing: 12) {
                                     Text(mission.title ?? "")
-                                        .font(.largeTitle)
+                                        .font(.title)
                                         .fontWeight(.bold)
                                         .foregroundColor(.white)
                                         .multilineTextAlignment(.leading)
+                                        .fixedSize(horizontal: false, vertical: true)
+
+                                    HStack(spacing: 8) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: mission.disasterType?.iconName ?? "exclamationmark.triangle")
+                                                .font(.system(size: 11))
+                                            Text(mission.disasterType?.localizedName ?? "Disaster")
+                                                .font(.caption)
+                                                .fontWeight(.semibold)
+                                        }
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 5)
+                                        .background(Color.white.opacity(0.25))
+                                        .cornerRadius(6)
+
+                                        if isMissionActive {
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "figure.run")
+                                                    .font(.system(size: 10))
+                                                Text("In Progress")
+                                                    .font(.caption)
+                                                    .fontWeight(.semibold)
+                                            }
+                                            .foregroundColor(.white)
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 5)
+                                            .background(Color.green.opacity(0.4))
+                                            .cornerRadius(6)
+                                        }
+                                    }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             }
@@ -67,47 +93,99 @@ struct MissionDetailView: View {
                             .padding(.top, 20)
 
                             // 詳細情報セクション
-                            VStack(spacing: 20) {
+                            VStack(spacing: 16) {
                                 // 説明文
                                 VStack(alignment: .leading, spacing: 12) {
-                                    Text("home.mission.overview", tableName: "Localizable")
-                                        .font(.headline)
-                                        .foregroundColor(.white)
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "doc.text.fill")
+                                            .font(.subheadline)
+                                        Text("home.mission.overview", tableName: "Localizable")
+                                            .font(.headline)
+                                    }
+                                    .foregroundColor(.white)
 
                                     Text(mission.overview ?? "")
                                         .font(.body)
-                                        .foregroundColor(.white.opacity(0.9))
-                                        .lineSpacing(4)
+                                        .foregroundColor(.white.opacity(0.95))
+                                        .lineSpacing(6)
+                                        .fixedSize(horizontal: false, vertical: true)
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(20)
-                                .background(Color.white.opacity(0.15))
-                                .cornerRadius(16)
-
-                                // ミッション情報
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("home.mission.info", tableName: "Localizable")
-                                        .font(.headline)
-                                        .foregroundColor(.white)
-
-                                    HStack {
-                                        Image(systemName: "calendar")
-                                            .foregroundColor(.white.opacity(0.8))
-
-                                        Text(String(localized: "home.mission.date_format", table: "Localizable").replacingOccurrences(of: "%@", with: dateFormatter.string(from: mission.createdAt)))
-                                            .font(.body)
-                                            .foregroundColor(.white.opacity(0.9))
-                                    }
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(20)
-                                .background(Color.white.opacity(0.1))
-                                .cornerRadius(16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(Color.white.opacity(0.2))
+                                        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                                )
                             }
                             .padding(.horizontal, 24)
 
+                            // ゲームモード選択（ミッションが未開始の場合のみ）
+                            if !isMissionActive {
+                                VStack(alignment: .leading, spacing: 16) {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "gamecontroller.fill")
+                                            .font(.subheadline)
+                                        Text("home.mission.mode_select", tableName: "Localizable")
+                                            .font(.headline)
+                                    }
+                                    .foregroundColor(.white)
+
+                                    VStack(spacing: 12) {
+                                        ForEach([GameMode.default, GameMode.mapless], id: \.self) { mode in
+                                            Button(action: {
+                                                selectedGameMode = mode
+                                            }) {
+                                                HStack(alignment: .top, spacing: 12) {
+                                                    // モードアイコン
+                                                    ZStack {
+                                                        RoundedRectangle(cornerRadius: 8)
+                                                            .fill(Color.white.opacity(selectedGameMode == mode ? 0.3 : 0.2))
+                                                            .frame(width: 44, height: 44)
+                                                        Image(systemName: mode == .default ? "map.fill" : "location.north.fill")
+                                                            .font(.system(size: 20))
+                                                            .foregroundColor(.white)
+                                                    }
+
+                                                    VStack(alignment: .leading, spacing: 6) {
+                                                        Text(mode.localizedName)
+                                                            .font(.subheadline)
+                                                            .fontWeight(.bold)
+                                                        Text(mode.localizedDescription)
+                                                            .font(.caption)
+                                                            .foregroundColor(.white.opacity(0.85))
+                                                            .multilineTextAlignment(.leading)
+                                                            .fixedSize(horizontal: false, vertical: true)
+                                                    }
+
+                                                    Spacer()
+
+                                                    // チェックマーク
+                                                    Image(systemName: selectedGameMode == mode ? "checkmark.circle.fill" : "circle")
+                                                        .font(.title3)
+                                                        .foregroundColor(.white)
+                                                }
+                                                .foregroundColor(.white)
+                                                .padding(16)
+                                                .background(
+                                                    RoundedRectangle(cornerRadius: 14)
+                                                        .fill(selectedGameMode == mode ? Color.white.opacity(0.25) : Color.white.opacity(0.12))
+                                                        .overlay(
+                                                            RoundedRectangle(cornerRadius: 14)
+                                                                .stroke(Color.white.opacity(selectedGameMode == mode ? 0.4 : 0.0), lineWidth: 2)
+                                                        )
+                                                )
+                                            }
+                                            .buttonStyle(.plain)
+                                        }
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 24)
+                            }
+
                             // アクションボタン
-                            VStack(spacing: 16) {
+                            VStack(spacing: 12) {
                                 Button(action: {
                                     if isMissionActive {
                                         cancelMission()
@@ -115,19 +193,34 @@ struct MissionDetailView: View {
                                         startMission()
                                     }
                                 }) {
-                                    HStack {
+                                    HStack(spacing: 12) {
                                         Image(systemName: isMissionActive ? "xmark.circle.fill" : "play.circle.fill")
                                             .font(.title2)
 
                                         Text(isMissionActive ? String(localized: "home.mission.cancel", table: "Localizable") : String(localized: "home.mission.start", table: "Localizable"))
-                                            .font(.headline)
+                                            .font(.title3)
                                             .fontWeight(.bold)
                                     }
-                                    .foregroundColor(isMissionActive ? .red : (mission.disasterType?.color ?? Color("brandOrange")))
+                                    .foregroundColor(isMissionActive ? Color.white : (mission.disasterType?.color ?? Color("brandOrange")))
                                     .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 16)
-                                    .background(Color.white)
-                                    .cornerRadius(16)
+                                    .padding(.vertical, 18)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .fill(isMissionActive ? Color.red : Color.white.opacity(0.95))
+                                            .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(Color.white.opacity(0.3), lineWidth: isMissionActive ? 0 : 1)
+                                    )
+                                }
+                                .buttonStyle(.plain)
+
+                                if !isMissionActive {
+                                    Text("Tap to begin your mission")
+                                        .font(.caption)
+                                        .foregroundColor(.white.opacity(0.7))
+                                        .frame(maxWidth: .infinity)
                                 }
                             }
                             .padding(.horizontal, 24)
@@ -175,8 +268,10 @@ struct MissionDetailView: View {
 
         // Update global mission state
         missionStateService.updateMission(mission)
+        missionStateService.updateGameMode(selectedGameMode)
 
         print("🚀 Mission started: \(mission.title ?? "Unknown")")
+        print("🎮 Game mode: \(selectedGameMode.rawValue)")
         print("📍 Navigating to map...")
 
         // Dismiss the sheet
