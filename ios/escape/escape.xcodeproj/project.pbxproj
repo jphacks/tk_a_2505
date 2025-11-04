@@ -444,7 +444,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = escape/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "HiNan!";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "このアプリは、地図上にあなたの現在位置を表示し、近くの避難所を見つけるために位置情報を使用します。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -480,7 +479,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = escape/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "HiNan!";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "このアプリは、地図上にあなたの現在位置を表示し、近くの避難所を見つけるために位置情報を使用します。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
