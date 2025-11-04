@@ -55,4 +55,10 @@ class SettingsViewModel {
     func signOut() async throws {
         try await authService.signOut()
     }
+
+    func deleteAccount() async throws {
+        try await userService.deleteAccount()
+        // Sign out to clear local session after account deletion
+        try await authService.signOut()
+    }
 }
