@@ -27,6 +27,7 @@ class MapViewModel {
     var accumulatedDistance: Double = 0.0
     var previousLocation: CLLocation?
     var createdMissionResult: MissionResult?
+    var currentGameMode: GameMode = .default
 
     // MARK: - Dependencies
 
@@ -323,6 +324,12 @@ class MapViewModel {
         currentLocation: CLLocation?,
         onComplete: @escaping (Shelter) -> Void
     ) async {
+        // In Zen mode, don't create mission results or track score
+        if currentGameMode == .zen {
+            print("🧘 Zen mode: Shelter reached without tracking")
+            onComplete(shelter)
+            return
+        }
         // Ensure we have a start location
         var startLocation = missionStartLocation
         if startLocation == nil {

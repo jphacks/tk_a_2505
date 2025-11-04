@@ -71,7 +71,7 @@ extension ShelterBadge {
 
     /// Determines the appropriate icon based on badge name
     /// This can be customized based on your badge naming conventions
-    private func determineIcon() -> String {
+    func determineIcon() -> String {
         let lowerName = badgeName.lowercased()
 
         // Map badge names to SF Symbols
@@ -97,7 +97,7 @@ extension ShelterBadge {
     }
 
     /// Determines the appropriate color based on badge characteristics
-    private func determineColor() -> Color {
+    func determineColor() -> Color {
         let lowerName = badgeName.lowercased()
 
         // Map badge names to brand colors
