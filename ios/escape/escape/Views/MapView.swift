@@ -34,6 +34,7 @@ struct MapView: View {
     @State private var showZombieAlert = false
     @State private var zombies: [Zombie] = []
     @State private var hitByZombieIds: Set<UUID> = []
+
     @Environment(\.missionStateService) var missionStateService // need when you want to listen to the mission state changes
 
     var body: some View {
@@ -106,7 +107,11 @@ struct MapView: View {
             if let shelter = reachedShelter,
                let currentMission = missionStateService.currentMission
             {
-                MissionResultView(mission: currentMission, shelter: shelter)
+                MissionResultView(
+                    mission: currentMission,
+                    shelter: shelter,
+                    missionResult: mapViewModel.createdMissionResult
+                )
             }
         }
         .onAppear {
@@ -151,10 +156,25 @@ struct MapView: View {
                 handleNewLocation(location: location)
             }
         }
-        .onChange(of: missionStateService.currentMission) { _, newValue in
+        .onChange(of: missionStateService.currentMission) { oldValue, newValue in
             // Update shelter filter when mission changes
             print("BBBBB")
             updateShelterFilter()
+
+            // Initialize mission tracking when mission becomes active
+            if let mission = newValue,
+               mission.status == .active || mission.status == .inProgress
+            {
+                // Only initialize if we're starting a NEW mission (not just state change)
+                if oldValue?.id != newValue?.id {
+                    mapViewModel.startMissionTracking(currentLocation: locationManager.location)
+                }
+            } else if newValue == nil {
+                // Mission was reset/removed - clean up tracking
+                mapViewModel.resetMissionTracking()
+            }
+            // Note: Don't reset tracking when status becomes .completed
+            // Tracking data is needed for MissionResultView
 
             // Spawn zombies if zombie mission started
             if let mission = newValue,
@@ -173,6 +193,13 @@ struct MapView: View {
     }
 
     private func handleNewLocation(location: CLLocation) {
+        // Track distance during active mission
+        if let mission = missionStateService.currentMission,
+           mission.status == .active || mission.status == .inProgress
+        {
+            mapViewModel.updateLocationTracking(newLocation: location)
+        }
+
         Task {
             // TODO: radius
             await mapViewModel.fetchNearbyShelters(
@@ -185,20 +212,26 @@ struct MapView: View {
         // Check if user has reached any shelter
         // TODO: CHANGE THE NUMBER FOR RADIUS
         print("HERE!!")
-        if missionStateService.currentMission != nil {
+        if let mission = missionStateService.currentMission,
+           mission.status == .active || mission.status == .inProgress
+        {
             if let shelter = mapViewModel.checkShelterProximity(
                 userLatitude: location.coordinate.latitude,
                 userLongitude: location.coordinate.longitude,
                 radiusMeters: 30
             ) {
-                reachedShelter = shelter
-                showShelterReachedAlert = true
-
-                // ミッションを完了状態に更新
-                print("🎯 Shelter reached! Updating mission state to completed")
-                print("📝 Current mission before update: \(missionStateService.currentMission?.status.rawValue ?? "nil")")
-                missionStateService.updateMissionState(.completed)
-                print("✅ Mission state after update: \(missionStateService.currentMission?.status.rawValue ?? "nil")")
+                Task {
+                    await mapViewModel.handleShelterReached(
+                        mission: mission,
+                        shelter: shelter,
+                        currentLocation: location
+                    ) { completedShelter in
+                        // UI updates after mission completion
+                        reachedShelter = completedShelter
+                        showShelterReachedAlert = true
+                        missionStateService.updateMissionState(.completed)
+                    }
+                }
             }
         }
 
@@ -381,37 +414,14 @@ struct MapView: View {
                     .lineLimit(2)
             }
 
-            // Evacuation region
-            if let region = mission.evacuationRegion {
-                HStack(spacing: 4) {
-                    Image(systemName: "location.fill")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-
-                    Text(region)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                }
-            }
-
-            // Mission stats (if available)
-            if let steps = mission.steps, let distance = mission.distances {
+            // Current tracking stats (in-progress mission)
+            if mapViewModel.accumulatedDistance > 0 {
                 HStack(spacing: 16) {
-                    // Steps
-                    HStack(spacing: 4) {
-                        Image(systemName: "figure.walk")
-                            .font(.caption2)
-                        Text("\(steps)")
-                            .font(.caption2)
-                            .fontWeight(.medium)
-                    }
-
-                    // Distance
+                    // Distance tracked
                     HStack(spacing: 4) {
                         Image(systemName: "map")
                             .font(.caption2)
-                        Text(String(format: "%.1f km", distance / 1000))
+                        Text(String(format: "%.2f km", mapViewModel.accumulatedDistance / 1000))
                             .font(.caption2)
                             .fontWeight(.medium)
                     }
@@ -427,7 +437,13 @@ struct MapView: View {
     }
 
     private var mapView: some View {
-        // Map layer
+        mapContent
+            .overlay(alignment: .trailing) {
+                mapOverlayContent
+            }
+    }
+
+    private var mapContent: some View {
         Map(position: $position, interactionModes: .all) {
             UserAnnotation(anchor: .center)
 
@@ -480,51 +496,56 @@ struct MapView: View {
             MapUserLocationButton()
             MapCompass()
         }
+    }
 
-        .overlay(alignment: .trailing) {
-            VStack {
-                if mapViewModel.isLoading {
-                    ProgressView()
-                        .padding(8)
-                        .background(Color(.systemBackground))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .shadow(radius: 2)
-                }
-
-                if let mission = missionStateService.currentMission {
-                    EmergencyOverlay(
-                        disasterType: mission.disasterType ?? .earthquake,
-                        evacuationRegion: mission.evacuationRegion
-                            ?? "Unknown Region",
-                        status: .active,
-                        onTap: {
-                            // TODO: Add action when tapped
-                            print("Emergency overlay tapped")
-                        }
-                    )
-                    .transition(.move(edge: .leading).combined(with: .opacity))
-                    .animation(
-                        .spring(response: 0.5, dampingFraction: 0.8),
-                        value: missionStateService.currentMissionState
-                    )
-                }
-
-                // Pin details button
-                Button(action: {
-                    showPinDetailsSheet = true
-                }) {
-                    Image(systemName: "info.circle.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(.primary)
-                        .frame(width: 50, height: 50)
-                        .background(.regularMaterial)
-                        .clipShape(Circle())
-                        .shadow(radius: 4)
-                }
-                .padding(.bottom, 16)
+    private var mapOverlayContent: some View {
+        VStack {
+            if mapViewModel.isLoading {
+                ProgressView()
+                    .padding(8)
+                    .background(Color(.systemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .shadow(radius: 2)
             }
-            .padding(.trailing)
+
+            if let mission = missionStateService.currentMission {
+                emergencyOverlayView(for: mission)
+            }
+
+            pinDetailsButton
         }
+        .padding(.trailing)
+    }
+
+    private func emergencyOverlayView(for mission: Mission) -> some View {
+        EmergencyOverlay(
+            disasterType: mission.disasterType ?? .earthquake,
+            evacuationRegion: "Mission Area",
+            status: .active,
+            onTap: {
+                print("Emergency overlay tapped")
+            }
+        )
+        .transition(.move(edge: .leading).combined(with: .opacity))
+        .animation(
+            .spring(response: 0.5, dampingFraction: 0.8),
+            value: missionStateService.currentMissionState
+        )
+    }
+
+    private var pinDetailsButton: some View {
+        Button(action: {
+            showPinDetailsSheet = true
+        }) {
+            Image(systemName: "info.circle.fill")
+                .font(.system(size: 24))
+                .foregroundColor(.primary)
+                .frame(width: 50, height: 50)
+                .background(.regularMaterial)
+                .clipShape(Circle())
+                .shadow(radius: 4)
+        }
+        .padding(.bottom, 16)
     }
 
     private var permissionRequestView: some View {

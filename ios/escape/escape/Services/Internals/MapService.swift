@@ -10,6 +10,15 @@ import MapKit
 
 /// Service for map-related business logic (proximity checks, geofencing, distance calculations)
 class MapService {
+    // MARK: - Distance Calculation
+
+    /// Calculate straight-line distance between two coordinates (in meters)
+    func calculateDistance(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D) -> Double {
+        let fromLocation = CLLocation(latitude: from.latitude, longitude: from.longitude)
+        let toLocation = CLLocation(latitude: to.latitude, longitude: to.longitude)
+        return fromLocation.distance(from: toLocation) // Returns distance in meters
+    }
+
     // MARK: - Proximity Checking
 
     /// Check if user has reached any shelters within a specified radius (in meters)

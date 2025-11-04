@@ -26,6 +26,7 @@ class MissionResultViewModel {
     var showDescriptionInput = false
     var userDescription = ""
     var acquiredBadge: Badge?
+    var missionResult: MissionResult?
     // Prepare the text and optional image link we want to share when a badge is unlocked.
     var sharePayload: BadgeSharePayload? {
         guard let badge = acquiredBadge else { return nil }
@@ -36,6 +37,7 @@ class MissionResultViewModel {
             imageURL: badge.imageUrl.flatMap { URL(string: $0) }
         )
     }
+
     // Cache the raw image data once we download the badge artwork for sharing.
     var shareImageData: Data?
     // Cache a snapshot image (as data) so we can show it in the share sheet preview.
@@ -47,25 +49,46 @@ class MissionResultViewModel {
     private let badgeService: BadgeSupabase
     private let shelterService: ShelterSupabase
     private let authService: AuthSupabase
+    private let missionResultService: MissionResultSupabase
+    private let missionService: MissionSupabase
+    private let missionId: UUID
 
     // MARK: - Initialization
 
     init(
         badgeViewModel: BadgeViewModel,
+        missionId: UUID,
+        initialMissionResult: MissionResult? = nil,
         badgeService: BadgeSupabase = BadgeSupabase(),
         shelterService: ShelterSupabase = ShelterSupabase(),
-        authService: AuthSupabase = AuthSupabase()
+        authService: AuthSupabase = AuthSupabase(),
+        missionResultService: MissionResultSupabase = MissionResultSupabase(),
+        missionService: MissionSupabase = MissionSupabase()
     ) {
         self.badgeViewModel = badgeViewModel
+        self.missionId = missionId
+        missionResult = initialMissionResult
         self.badgeService = badgeService
         self.shelterService = shelterService
         self.authService = authService
+        self.missionResultService = missionResultService
+        self.missionService = missionService
     }
 
     // MARK: - Actions
 
     func handleMissionCompletion(shelter: Shelter) async {
         do {
+            // Step 0: Mark mission as completed in database
+            print("📝 Marking mission \(missionId) as completed...")
+            do {
+                try await missionService.updateMissionStatus(missionId: missionId, status: .completed)
+                print("✅ Mission status updated to 'done'")
+            } catch {
+                print("❌ Failed to update mission status: \(error)")
+                // Don't block the badge generation if status update fails
+            }
+
             isGeneratingBadge = true
 
             // Convert shelter.id (String) to UUID
@@ -75,7 +98,7 @@ class MissionResultViewModel {
                 return
             }
 
-            // Step 0: Verify shelter exists in database using ShelterSupabase
+            // Step 1: Verify shelter exists in database using ShelterSupabase
             let shelterExists = try await shelterService.verifyShelterExists(shelterUUID: shelterUUID)
             if !shelterExists {
                 errorMessage = "Shelter not found in database. Please use a real shelter from the database."
@@ -83,7 +106,7 @@ class MissionResultViewModel {
                 return
             }
 
-            // Step 1: Check if badge exists for this shelter in shelter_badges table
+            // Step 2: Check if badge exists for this shelter in shelter_badges table
             let existingBadge = try await badgeService.getBadgeForShelter(shelterId: shelterUUID)
 
             if let badge = existingBadge {
@@ -197,6 +220,7 @@ class MissionResultViewModel {
     }
 
     // MARK: - Helper Methods
+
     // Download the badge artwork so the share sheet can include the actual image.
     func loadShareImageData() async {
         guard shareImageData == nil,

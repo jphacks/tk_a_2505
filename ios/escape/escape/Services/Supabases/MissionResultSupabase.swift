@@ -103,6 +103,103 @@ class MissionResultSupabase {
         return response
     }
 
+    /// Creates a new mission result with calculated score components
+    /// - Parameters:
+    ///   - missionId: The mission UUID
+    ///   - userId: The user UUID
+    ///   - shelterId: The shelter UUID
+    ///   - startLatitude: Starting location latitude
+    ///   - startLongitude: Starting location longitude
+    ///   - endLatitude: Ending location latitude
+    ///   - endLongitude: Ending location longitude
+    ///   - actualDistanceMeters: Actual distance traveled in meters
+    ///   - optimalDistanceMeters: Optimal distance in meters
+    ///   - steps: Step count
+    ///   - scoreComponents: Calculated score components
+    /// - Returns: The created MissionResult
+    /// - Throws: Database error if creation fails
+    func createMissionResultWithScore(
+        missionId: UUID,
+        userId: UUID,
+        shelterId: UUID,
+        startLatitude: Double,
+        startLongitude: Double,
+        endLatitude: Double,
+        endLongitude: Double,
+        actualDistanceMeters: Double,
+        optimalDistanceMeters: Double,
+        steps: Int64?,
+        scoreComponents: MissionScoreCalculator.ScoreComponents
+    ) async throws -> MissionResult {
+        print("💾 Creating mission result with score for mission: \(missionId)")
+
+        struct MissionResultPayload: Encodable {
+            let missionId: String
+            let userId: String
+            let shelterId: String
+            let startLatitude: Double
+            let startLongitude: Double
+            let endLatitude: Double
+            let endLongitude: Double
+            let actualDistanceMeters: Double
+            let optimalDistanceMeters: Double
+            let steps: Int64?
+            let basePoints: Int64
+            let distancePoints: Int64
+            let bonusPoints: Int64
+            let routeEfficiencyMultiplier: Double
+            let finalPoints: Int64
+
+            enum CodingKeys: String, CodingKey {
+                case missionId = "mission_id"
+                case userId = "user_id"
+                case shelterId = "shelter_id"
+                case startLatitude = "start_latitude"
+                case startLongitude = "start_longitude"
+                case endLatitude = "end_latitude"
+                case endLongitude = "end_longitude"
+                case actualDistanceMeters = "actual_distance_meters"
+                case optimalDistanceMeters = "optimal_distance_meters"
+                case steps
+                case basePoints = "base_points"
+                case distancePoints = "distance_points"
+                case bonusPoints = "bonus_points"
+                case routeEfficiencyMultiplier = "route_efficiency_multiplier"
+                case finalPoints = "final_points"
+            }
+        }
+
+        let payload = MissionResultPayload(
+            missionId: missionId.uuidString.lowercased(),
+            userId: userId.uuidString.lowercased(),
+            shelterId: shelterId.uuidString.lowercased(),
+            startLatitude: startLatitude,
+            startLongitude: startLongitude,
+            endLatitude: endLatitude,
+            endLongitude: endLongitude,
+            actualDistanceMeters: actualDistanceMeters,
+            optimalDistanceMeters: optimalDistanceMeters,
+            steps: steps,
+            basePoints: scoreComponents.basePoints,
+            distancePoints: scoreComponents.distancePoints,
+            bonusPoints: scoreComponents.bonusPoints,
+            routeEfficiencyMultiplier: scoreComponents.routeEfficiencyMultiplier,
+            finalPoints: scoreComponents.finalPoints
+        )
+
+        let response: MissionResult = try await supabase
+            .from("mission_results")
+            .insert(payload)
+            .select()
+            .single()
+            .execute()
+            .value
+
+        print("✅ Successfully created mission result with score: \(scoreComponents.finalPoints) points")
+
+        return response
+    }
+
     // MARK: - Statistics & Analytics
 
     /// Fetches recent mission results for a user from Supabase
