@@ -244,7 +244,7 @@ struct EmptyGroupsView: View {
 // MARK: - Group Card View
 
 struct GroupCardView: View {
-    let group: GroupWithDetails
+    let group: TeamWithDetails
     @Bindable var groupViewModel: GroupViewModel
     @State private var showingGroupDetail = false
 
@@ -268,12 +268,12 @@ struct GroupCardView: View {
 
                 // Group Info
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(group.group.name)
+                    Text(group.team.name)
                         .font(.headline)
                         .foregroundColor(.primary)
                         .lineLimit(1)
 
-                    if let description = group.group.description {
+                    if let description = group.team.description {
                         Text(description)
                             .font(.caption)
                             .foregroundColor(.secondary)

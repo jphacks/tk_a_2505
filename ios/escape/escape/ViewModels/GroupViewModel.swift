@@ -12,14 +12,14 @@ import Foundation
 class GroupViewModel {
     // MARK: - Dependencies
 
-    private let groupSupabase: GroupSupabase
+    private let groupSupabase: TeamSupabase
     private let userSupabase: UserSupabase
 
     // MARK: - Published State
 
-    var userGroups: [GroupWithDetails] = []
-    var selectedGroup: GroupWithDetails?
-    var groupMembers: [GroupMemberWithUser] = []
+    var userGroups: [TeamWithDetails] = []
+    var selectedGroup: TeamWithDetails?
+    var groupMembers: [TeamMemberWithUser] = []
     var isLoading = false
     var isCreatingGroup = false
     var isJoiningGroup = false
@@ -33,7 +33,7 @@ class GroupViewModel {
 
     // MARK: - Initialization
 
-    init(groupSupabase: GroupSupabase = GroupSupabase(), userSupabase: UserSupabase = UserSupabase()) {
+    init(groupSupabase: TeamSupabase = TeamSupabase(), userSupabase: UserSupabase = UserSupabase()) {
         self.groupSupabase = groupSupabase
         self.userSupabase = userSupabase
     }
@@ -46,7 +46,7 @@ class GroupViewModel {
         errorMessage = nil
 
         do {
-            userGroups = try await groupSupabase.fetchUserGroups()
+            userGroups = try await groupSupabase.fetchUserTeams()
         } catch {
             errorMessage = "グループの読み込みに失敗しました: \(error.localizedDescription)"
             print("❌ Failed to load user groups: \(error)")
@@ -66,12 +66,12 @@ class GroupViewModel {
         errorMessage = nil
 
         do {
-            let request = CreateGroupRequest(
+            let request = CreateTeamRequest(
                 name: createGroupName.trimmingCharacters(in: .whitespacesAndNewlines),
                 description: createGroupDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : createGroupDescription.trimmingCharacters(in: .whitespacesAndNewlines)
             )
 
-            let groupId = try await groupSupabase.createGroup(request)
+            let groupId = try await groupSupabase.createTeam(request)
             print("✅ Created group with ID: \(groupId)")
 
             // Clear form
@@ -100,7 +100,7 @@ class GroupViewModel {
         errorMessage = nil
 
         do {
-            let groupId = try await groupSupabase.joinGroup(inviteCode: joinGroupInviteCode.trimmingCharacters(in: .whitespacesAndNewlines))
+            let groupId = try await groupSupabase.joinTeam(inviteCode: joinGroupInviteCode.trimmingCharacters(in: .whitespacesAndNewlines))
             print("✅ Joined group with ID: \(groupId)")
 
             // Clear form
@@ -110,7 +110,7 @@ class GroupViewModel {
             await loadUserGroups()
 
         } catch {
-            if let groupError = error as? GroupError {
+            if let groupError = error as? TeamError {
                 errorMessage = groupError.localizedDescription
             } else {
                 errorMessage = "グループへの参加に失敗しました: \(error.localizedDescription)"
@@ -122,7 +122,7 @@ class GroupViewModel {
     }
 
     /// Selects a group and loads its members
-    func selectGroup(_ group: GroupWithDetails) async {
+    func selectGroup(_ group: TeamWithDetails) async {
         selectedGroup = group
         await loadGroupMembers(groupId: group.id)
     }
@@ -133,7 +133,7 @@ class GroupViewModel {
         errorMessage = nil
 
         do {
-            groupMembers = try await groupSupabase.fetchGroupMembers(groupId: groupId)
+            groupMembers = try await groupSupabase.fetchTeamMembers(groupId: groupId)
         } catch {
             errorMessage = "メンバーの読み込みに失敗しました: \(error.localizedDescription)"
             print("❌ Failed to load group members: \(error)")
@@ -150,8 +150,8 @@ class GroupViewModel {
         errorMessage = nil
 
         do {
-            try await groupSupabase.leaveGroup(groupId: group.id)
-            print("✅ Left group: \(group.group.name)")
+            try await groupSupabase.leaveTeam(groupId: group.id)
+            print("✅ Left group: \(group.team.name)")
 
             // Clear selection and reload groups
             selectedGroup = nil
@@ -167,7 +167,7 @@ class GroupViewModel {
     }
 
     /// Removes a member from the group (admin/owner only)
-    func removeMember(_ member: GroupMemberWithUser) async {
+    func removeMember(_ member: TeamMemberWithUser) async {
         guard let group = selectedGroup else { return }
 
         isLoading = true
@@ -189,7 +189,7 @@ class GroupViewModel {
     }
 
     /// Updates a member's role (owner only)
-    func updateMemberRole(_ member: GroupMemberWithUser, newRole: MemberRole) async {
+    func updateMemberRole(_ member: TeamMemberWithUser, newRole: MemberRole) async {
         guard let group = selectedGroup else { return }
 
         isLoading = true
@@ -222,14 +222,14 @@ class GroupViewModel {
         errorMessage = nil
 
         do {
-            let request = UpdateGroupRequest(
+            let request = UpdateTeamRequest(
                 name: name,
                 description: description,
                 maxMembers: nil
             )
 
-            try await groupSupabase.updateGroup(groupId: group.id, request: request)
-            print("✅ Updated group: \(group.group.name)")
+            try await groupSupabase.updateTeam(groupId: group.id, request: request)
+            print("✅ Updated group: \(group.team.name)")
 
             // Reload groups to reflect changes
             await loadUserGroups()
@@ -250,8 +250,8 @@ class GroupViewModel {
         errorMessage = nil
 
         do {
-            try await groupSupabase.deleteGroup(groupId: group.id)
-            print("✅ Deleted group: \(group.group.name)")
+            try await groupSupabase.deleteTeam(groupId: group.id)
+            print("✅ Deleted group: \(group.team.name)")
 
             // Clear selection and reload groups
             selectedGroup = nil
@@ -286,8 +286,8 @@ class GroupViewModel {
     }
 
     /// Gets a formatted member count string
-    func memberCountText(for group: GroupWithDetails) -> String {
-        return "\(group.memberCount)/\(group.group.maxMembers)人"
+    func memberCountText(for group: TeamWithDetails) -> String {
+        return "\(group.memberCount)/\(group.team.maxMembers)人"
     }
 
     /// Validates if invite code format is correct

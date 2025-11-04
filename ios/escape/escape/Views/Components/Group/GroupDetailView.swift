@@ -90,7 +90,7 @@ struct GroupDetailView: View {
 // MARK: - Group Header View
 
 struct GroupHeaderView: View {
-    let group: GroupWithDetails
+    let group: TeamWithDetails
 
     var body: some View {
         VStack(spacing: 16) {
@@ -106,12 +106,12 @@ struct GroupHeaderView: View {
 
             // Group Info
             VStack(spacing: 8) {
-                Text(group.group.name)
+                Text(group.team.name)
                     .font(.title2)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
 
-                if let description = group.group.description {
+                if let description = group.team.description {
                     Text(description)
                         .font(.body)
                         .foregroundColor(.secondary)
@@ -120,7 +120,7 @@ struct GroupHeaderView: View {
 
                 // Member Count and Role
                 HStack(spacing: 16) {
-                    Label("\(group.memberCount)/\(group.group.maxMembers)", systemImage: "person.3")
+                    Label("\(group.memberCount)/\(group.team.maxMembers)", systemImage: "person.3")
                         .font(.caption)
                         .foregroundColor(.secondary)
 
@@ -146,7 +146,7 @@ struct GroupHeaderView: View {
 // MARK: - Group Action Buttons View
 
 struct GroupActionButtonsView: View {
-    let group: GroupWithDetails
+    let group: TeamWithDetails
     @Bindable var groupViewModel: GroupViewModel
     @Binding var showingInviteCode: Bool
     @Binding var showingLeaveAlert: Bool
@@ -268,7 +268,7 @@ struct GroupMembersView: View {
 // MARK: - Member Row View
 
 struct MemberRowView: View {
-    let member: GroupMemberWithUser
+    let member: TeamMemberWithUser
     @Bindable var groupViewModel: GroupViewModel
     @State private var showingRoleMenu = false
 
@@ -349,7 +349,7 @@ struct MemberRowView: View {
 // MARK: - Group Stats View (Placeholder)
 
 struct GroupStatsView: View {
-    let group: GroupWithDetails
+    let group: TeamWithDetails
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -398,7 +398,7 @@ struct StatRowView: View {
 // MARK: - Invite Code View
 
 struct InviteCodeView: View {
-    let group: GroupWithDetails
+    let group: TeamWithDetails
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -422,7 +422,7 @@ struct InviteCodeView: View {
 
                 // Invite Code Display
                 VStack(spacing: 16) {
-                    Text(group.group.inviteCode)
+                    Text(group.team.inviteCode)
                         .font(.system(size: 32, weight: .bold, design: .monospaced))
                         .foregroundColor(Color("brandOrange"))
                         .padding()
@@ -430,7 +430,7 @@ struct InviteCodeView: View {
                         .cornerRadius(12)
 
                     Button(action: {
-                        UIPasteboard.general.string = group.group.inviteCode
+                        UIPasteboard.general.string = group.team.inviteCode
                     }) {
                         HStack {
                             Image(systemName: "doc.on.clipboard")

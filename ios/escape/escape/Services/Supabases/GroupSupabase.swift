@@ -8,22 +8,22 @@
 import Foundation
 import Supabase
 
-class GroupSupabase {
-    // MARK: - Group Operations
+class TeamSupabase {
+    // MARK: - Team Operations
 
     /// Creates a new group using the database function
-    /// - Parameter request: CreateGroupRequest with group details
+    /// - Parameter request: CreateTeamRequest with group details
     /// - Returns: The created group ID
     /// - Throws: Database error if creation fails
-    func createGroup(_ request: CreateGroupRequest) async throws -> UUID {
+    func createTeam(_ request: CreateTeamRequest) async throws -> UUID {
         // rpc関数のパラメータを適切な型で構築
-        struct CreateGroupParams: Encodable {
+        struct CreateTeamParams: Encodable {
             let group_name: String
             let group_description: String?
             let max_members_count: Int
         }
 
-        let params = CreateGroupParams(
+        let params = CreateTeamParams(
             group_name: request.name,
             group_description: request.description,
             max_members_count: 50
@@ -40,25 +40,25 @@ class GroupSupabase {
     /// Fetches all groups that the current user is a member of
     /// - Returns: Array of groups with member count
     /// - Throws: Database error if fetch fails
-    func fetchUserGroups() async throws -> [GroupWithDetails] {
+    func fetchUserTeams() async throws -> [TeamWithDetails] {
         let currentUser = try await supabase.auth.session.user
 
         // First get the groups the user is a member of
-        let memberGroups: [GroupMember] = try await supabase
+        let memberTeams: [TeamMember] = try await supabase
             .from("group_members")
             .select()
             .eq("user_id", value: currentUser.id)
             .execute()
             .value
 
-        let groupIds = memberGroups.map { $0.groupId }
+        let groupIds = memberTeams.map { $0.groupId }
 
         guard !groupIds.isEmpty else {
             return []
         }
 
         // Fetch the group details
-        let groups: [Group] = try await supabase
+        let groups: [Team] = try await supabase
             .from("groups")
             .select()
             .in("id", values: groupIds)
@@ -66,14 +66,14 @@ class GroupSupabase {
             .value
 
         // Get member counts for each group
-        var groupsWithDetails: [GroupWithDetails] = []
+        var groupsWithDetails: [TeamWithDetails] = []
 
         for group in groups {
             let memberCount = try await fetchMemberCount(groupId: group.id)
-            let currentUserMember = memberGroups.first { $0.groupId == group.id }
+            let currentUserMember = memberTeams.first { $0.groupId == group.id }
 
-            let groupWithDetails = GroupWithDetails(
-                group: group,
+            let groupWithDetails = TeamWithDetails(
+                team: group,
                 memberCount: memberCount,
                 isCurrentUserMember: true,
                 currentUserRole: currentUserMember?.role
@@ -87,10 +87,10 @@ class GroupSupabase {
 
     /// Fetches a specific group by ID
     /// - Parameter groupId: The group UUID
-    /// - Returns: Group object if found
+    /// - Returns: Team object if found
     /// - Throws: Database error if fetch fails
-    func fetchGroup(by groupId: UUID) async throws -> Group? {
-        let groups: [Group] = try await supabase
+    func fetchTeam(by groupId: UUID) async throws -> Team? {
+        let groups: [Team] = try await supabase
             .from("groups")
             .select()
             .eq("id", value: groupId)
@@ -104,10 +104,10 @@ class GroupSupabase {
     /// Updates group information
     /// - Parameters:
     ///   - groupId: The group UUID
-    ///   - request: UpdateGroupRequest with new information
+    ///   - request: UpdateTeamRequest with new information
     /// - Throws: Database error if update fails
-    func updateGroup(groupId: UUID, request: UpdateGroupRequest) async throws {
-        struct GroupUpdate: Encodable {
+    func updateTeam(groupId: UUID, request: UpdateTeamRequest) async throws {
+        struct TeamUpdate: Encodable {
             let name: String?
             let description: String?
             let maxMembers: Int?
@@ -121,7 +121,7 @@ class GroupSupabase {
             }
         }
 
-        let updateData = GroupUpdate(
+        let updateData = TeamUpdate(
             name: request.name,
             description: request.description,
             maxMembers: request.maxMembers,
@@ -138,14 +138,14 @@ class GroupSupabase {
     /// Deletes a group
     /// - Parameter groupId: The group UUID
     /// - Throws: Database error if deletion fails
-    func deleteGroup(groupId: UUID) async throws {
+    func deleteTeam(groupId: UUID) async throws {
         print("🗑️ Attempting to delete group with ID: \(groupId)")
 
         // First, verify the group exists and the user is the owner
         let currentUser = try await supabase.auth.session.user
         print("🗑️ Current user ID: \(currentUser.id)")
 
-        let groups: [Group] = try await supabase
+        let groups: [Team] = try await supabase
             .from("groups")
             .select()
             .eq("id", value: groupId)
@@ -156,7 +156,7 @@ class GroupSupabase {
         print("🗑️ Found \(groups.count) groups to delete")
 
         if groups.isEmpty {
-            throw GroupError.insufficientPermissions
+            throw TeamError.insufficientPermissions
         }
 
         // Delete the group (RLS policy will handle ownership verification)
@@ -169,34 +169,34 @@ class GroupSupabase {
         print("🗑️ Delete result: \(result)")
 
         // Verify deletion
-        let remainingGroups: [Group] = try await supabase
+        let remainingTeams: [Team] = try await supabase
             .from("groups")
             .select()
             .eq("id", value: groupId)
             .execute()
             .value
 
-        print("🗑️ Remaining groups after deletion: \(remainingGroups.count)")
+        print("🗑️ Remaining groups after deletion: \(remainingTeams.count)")
 
-        if !remainingGroups.isEmpty {
-            throw GroupError.deletionFailed
+        if !remainingTeams.isEmpty {
+            throw TeamError.deletionFailed
         }
 
-        print("✅ Group deletion completed successfully")
+        print("✅ Team deletion completed successfully")
     }
 
-    // MARK: - Group Member Operations
+    // MARK: - Team Member Operations
 
     /// Joins a group using invite code
     /// - Parameter inviteCode: 8-character invite code
     /// - Returns: The group ID that was joined
     /// - Throws: Database error if join fails
-    func joinGroup(inviteCode: String) async throws -> UUID {
-        struct JoinGroupParams: Encodable {
+    func joinTeam(inviteCode: String) async throws -> UUID {
+        struct JoinTeamParams: Encodable {
             let p_invite_code: String
         }
 
-        let params = JoinGroupParams(p_invite_code: inviteCode)
+        let params = JoinTeamParams(p_invite_code: inviteCode)
 
         let response: UUID = try await supabase
             .rpc("join_group_by_invite_code", params: params)
@@ -210,9 +210,9 @@ class GroupSupabase {
     /// - Parameter groupId: The group UUID
     /// - Returns: Array of group members with user details
     /// - Throws: Database error if fetch fails
-    func fetchGroupMembers(groupId: UUID) async throws -> [GroupMemberWithUser] {
+    func fetchTeamMembers(groupId: UUID) async throws -> [TeamMemberWithUser] {
         // First, get all group members
-        let members: [GroupMember] = try await supabase
+        let members: [TeamMember] = try await supabase
             .from("group_members")
             .select()
             .eq("group_id", value: groupId)
@@ -235,9 +235,9 @@ class GroupSupabase {
         let userDict = Dictionary(uniqueKeysWithValues: users.map { ($0.id, $0) })
 
         // Combine members with their user information
-        let membersWithUsers: [GroupMemberWithUser] = members.compactMap { member in
+        let membersWithUsers: [TeamMemberWithUser] = members.compactMap { member in
             guard let user = userDict[member.userId] else { return nil }
-            return GroupMemberWithUser(member: member, user: user)
+            return TeamMemberWithUser(member: member, user: user)
         }
 
         return membersWithUsers
@@ -260,7 +260,7 @@ class GroupSupabase {
     /// Leaves a group (removes current user)
     /// - Parameter groupId: The group UUID
     /// - Throws: Database error if leaving fails
-    func leaveGroup(groupId: UUID) async throws {
+    func leaveTeam(groupId: UUID) async throws {
         let currentUser = try await supabase.auth.session.user
 
         try await supabase
@@ -293,7 +293,7 @@ class GroupSupabase {
     /// - Returns: Number of members in the group
     /// - Throws: Database error if fetch fails
     private func fetchMemberCount(groupId: UUID) async throws -> Int {
-        let members: [GroupMember] = try await supabase
+        let members: [TeamMember] = try await supabase
             .from("group_members")
             .select()
             .eq("group_id", value: groupId)
@@ -309,7 +309,7 @@ class GroupSupabase {
     func isCurrentUserMember(of groupId: UUID) async throws -> Bool {
         let currentUser = try await supabase.auth.session.user
 
-        let members: [GroupMember] = try await supabase
+        let members: [TeamMember] = try await supabase
             .from("group_members")
             .select()
             .eq("group_id", value: groupId)
@@ -327,7 +327,7 @@ class GroupSupabase {
     func getCurrentUserRole(in groupId: UUID) async throws -> MemberRole? {
         let currentUser = try await supabase.auth.session.user
 
-        let members: [GroupMember] = try await supabase
+        let members: [TeamMember] = try await supabase
             .from("group_members")
             .select()
             .eq("group_id", value: groupId)
@@ -342,20 +342,20 @@ class GroupSupabase {
 
 // MARK: - Error Handling Extension
 
-extension GroupSupabase {
-    /// Converts Supabase errors to GroupError
+extension TeamSupabase {
+    /// Converts Supabase errors to TeamError
     private func handleError(_ error: Error) -> Error {
-        // Convert specific Supabase errors to GroupError
+        // Convert specific Supabase errors to TeamError
         let errorMessage = error.localizedDescription.lowercased()
 
         if errorMessage.contains("invalid invite code") {
-            return GroupError.invalidInviteCode
+            return TeamError.invalidInviteCode
         } else if errorMessage.contains("group is full") {
-            return GroupError.groupFull
+            return TeamError.groupFull
         } else if errorMessage.contains("already a member") {
-            return GroupError.alreadyMember
+            return TeamError.alreadyMember
         } else if errorMessage.contains("user must be authenticated") {
-            return GroupError.insufficientPermissions
+            return TeamError.insufficientPermissions
         }
 
         return error

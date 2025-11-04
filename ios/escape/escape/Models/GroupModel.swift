@@ -9,8 +9,8 @@ import Foundation
 
 // MARK: - Group Model
 
-/// Represents a group from the database
-struct Group: Codable, Identifiable, Equatable {
+/// Represents a team from the database
+struct Team: Codable, Identifiable, Equatable {
     let id: UUID
     let name: String
     let description: String?
@@ -63,8 +63,8 @@ enum MemberRole: String, Codable, CaseIterable {
     }
 }
 
-/// Represents a group member from the database
-struct GroupMember: Codable, Identifiable, Equatable {
+/// Represents a team member from the database
+struct TeamMember: Codable, Identifiable, Equatable {
     let id: UUID
     let groupId: UUID
     let userId: UUID
@@ -82,7 +82,7 @@ struct GroupMember: Codable, Identifiable, Equatable {
 
 // MARK: - Helper Extensions
 
-extension Group {
+extension Team {
     /// Returns true if the current user is the owner of this group
     var isCurrentUserOwner: Bool {
         // This would need to be set based on current user context
@@ -110,8 +110,8 @@ extension Group {
 
 // MARK: - Request Models
 
-/// Request model for creating a new group
-struct CreateGroupRequest: Codable {
+/// Request model for creating a new team
+struct CreateTeamRequest: Codable {
     let name: String
     let description: String?
 
@@ -121,8 +121,8 @@ struct CreateGroupRequest: Codable {
     }
 }
 
-/// Request model for updating group information
-struct UpdateGroupRequest: Codable {
+/// Request model for updating team information
+struct UpdateTeamRequest: Codable {
     let name: String?
     let description: String?
     let maxMembers: Int?
@@ -136,21 +136,21 @@ struct UpdateGroupRequest: Codable {
 
 // MARK: - Response Models
 
-/// Extended group model with additional information
-struct GroupWithDetails: Codable, Identifiable {
-    let group: Group
+/// Extended team model with additional information
+struct TeamWithDetails: Codable, Identifiable {
+    let team: Team
     let memberCount: Int
     let isCurrentUserMember: Bool
     let currentUserRole: MemberRole?
 
     var id: UUID {
-        group.id
+        team.id
     }
 }
 
-/// Response model for group member with user information
-struct GroupMemberWithUser: Codable, Identifiable {
-    let member: GroupMember
+/// Response model for team member with user information
+struct TeamMemberWithUser: Codable, Identifiable {
+    let member: TeamMember
     let user: User
 
     var id: UUID {
@@ -168,7 +168,7 @@ struct GroupMemberWithUser: Codable, Identifiable {
 
 // MARK: - Error Types
 
-enum GroupError: LocalizedError {
+enum TeamError: LocalizedError {
     case invalidInviteCode
     case groupFull
     case alreadyMember
