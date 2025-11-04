@@ -45,11 +45,11 @@ enum MemberRole: String, Codable, CaseIterable {
     var displayName: String {
         switch self {
         case .owner:
-            return "オーナー"
+            return String(localized: "role.owner")
         case .admin:
-            return "管理者"
+            return String(localized: "role.admin")
         case .member:
-            return "メンバー"
+            return String(localized: "role.member")
         }
     }
 
@@ -181,21 +181,21 @@ enum GroupError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidInviteCode:
-            return "招待コードが無効です"
+            return String(localized: "group.error.invalid_invite_code")
         case .groupFull:
-            return "グループの人数が上限に達しています"
+            return String(localized: "group.error.group_full")
         case .alreadyMember:
-            return "既にこのグループのメンバーです"
+            return String(localized: "group.error.already_member")
         case .notMember:
-            return "このグループのメンバーではありません"
+            return String(localized: "group.error.not_member")
         case .insufficientPermissions:
-            return "この操作を行う権限がありません"
+            return String(localized: "group.error.insufficient_permissions")
         case .groupNotFound:
-            return "グループが見つかりません"
+            return String(localized: "group.error.group_not_found")
         case .creationFailed:
-            return "グループの作成に失敗しました"
+            return String(localized: "group.error.creation_failed")
         case .deletionFailed:
-            return "グループの削除に失敗しました"
+            return String(localized: "group.error.deletion_failed")
         }
     }
 }
