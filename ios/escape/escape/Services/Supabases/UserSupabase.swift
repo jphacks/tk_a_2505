@@ -49,13 +49,15 @@ class UserSupabase {
     func updateUserProfile(name: String, profileBadgeId: UUID?) async throws {
         let currentUser = try await supabase.auth.session.user
 
-        var updateData: [String: Any] = ["name": name]
-
-        if let badgeId = profileBadgeId {
-            updateData["profile_badge_id"] = badgeId.uuidString
-        } else {
-            updateData["profile_badge_id"] = nil
+        struct UpdateData: Encodable {
+            let name: String
+            let profile_badge_id: String?
         }
+
+        let updateData = UpdateData(
+            name: name,
+            profile_badge_id: profileBadgeId?.uuidString
+        )
 
         try await supabase
             .from("users")
@@ -70,13 +72,13 @@ class UserSupabase {
     func updateProfileBadge(profileBadgeId: UUID?) async throws {
         let currentUser = try await supabase.auth.session.user
 
-        var updateData: [String: Any] = [:]
-
-        if let badgeId = profileBadgeId {
-            updateData["profile_badge_id"] = badgeId.uuidString
-        } else {
-            updateData["profile_badge_id"] = nil
+        struct UpdateBadgeData: Encodable {
+            let profile_badge_id: String?
         }
+
+        let updateData = UpdateBadgeData(
+            profile_badge_id: profileBadgeId?.uuidString
+        )
 
         try await supabase
             .from("users")
