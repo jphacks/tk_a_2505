@@ -180,11 +180,20 @@ struct ShelterInfoSheet: View {
                     Divider()
 
                     // Badge section
-                    if let badge = shelterBadge {
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("Shelter Badge")
-                                .font(.headline)
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("map.shelter_info.badge_title", bundle: .main)
+                            .font(.headline)
 
+                        if isLoadingBadge {
+                            HStack {
+                                ProgressView()
+                                Text("map.shelter_info.loading_badge", bundle: .main)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                        } else if let badge = shelterBadge {
                             HStack(spacing: 16) {
                                 // Badge image or placeholder
                                 if let imageUrl = badge.getImageUrl() {
@@ -202,20 +211,15 @@ struct ShelterInfoSheet: View {
                                     .frame(width: 80, height: 80)
                                     .cornerRadius(12)
                                 } else {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(badge.determineColor().opacity(0.2))
-                                            .frame(width: 80, height: 80)
-
-                                        Image(systemName: badge.determineIcon())
-                                            .font(.system(size: 36))
-                                            .foregroundColor(badge.determineColor())
-                                    }
+                                    Image(systemName: badge.determineIcon())
+                                        .font(.system(size: 36))
+                                        .foregroundColor(badge.determineColor())
+                                        .frame(width: 80, height: 80)
                                 }
 
                                 VStack(alignment: .leading, spacing: 8) {
                                     HStack {
-                                        Text(hasUserBadge ? "Collected!" : "Not collected yet")
+                                        Text(hasUserBadge ? "map.shelter_info.badge_collected" : "map.shelter_info.badge_not_collected", bundle: .main)
                                             .font(.subheadline)
                                             .fontWeight(.semibold)
                                             .foregroundColor(hasUserBadge ? .green : .orange)
@@ -226,75 +230,95 @@ struct ShelterInfoSheet: View {
                                         }
                                     }
 
-                                    Text("Complete a mission at this shelter to collect the badge")
+                                    Text("map.shelter_info.badge_hint", bundle: .main)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        } else {
+                            // No badge exists yet - show call to action
+                            HStack(spacing: 16) {
+                                Image(systemName: "star.circle.fill")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(Color("brandOrange"))
+                                    .frame(width: 80, height: 80)
+
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("map.shelter_info.no_badge_title", bundle: .main)
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.primary)
+
+                                    Text("map.shelter_info.no_badge_message", bundle: .main)
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
                             }
                         }
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(12)
-                    } else if isLoadingBadge {
-                        HStack {
-                            ProgressView()
-                            Text("Loading badge info...")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
                     }
+                    .padding()
 
                     Divider()
 
                     // Disaster capabilities
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Disaster Coverage")
+                        Text("map.pin_details.disaster_coverage", bundle: .main)
                             .font(.headline)
 
                         VStack(spacing: 12) {
                             CapabilityRow(
-                                icon: "building.2",
-                                title: "Earthquake",
-                                isSupported: shelter.isEarthquake ?? false
+                                icon: "building.2.crop.circle",
+                                titleKey: "home.disaster.earthquake",
+                                isSupported: shelter.isShelter == true ? true : (shelter.isEarthquake ?? false)
                             )
 
                             CapabilityRow(
                                 icon: "water.waves",
-                                title: "Tsunami",
-                                isSupported: shelter.isTsunami ?? false
+                                titleKey: "home.disaster.tsunami",
+                                isSupported: shelter.isShelter == true ? true : (shelter.isTsunami ?? false)
                             )
 
                             CapabilityRow(
-                                icon: "drop",
-                                title: "Flood",
-                                isSupported: shelter.isFlood ?? false
+                                icon: "drop.fill",
+                                titleKey: "home.disaster.flood",
+                                isSupported: shelter.isShelter == true ? true : (shelter.isFlood ?? false)
                             )
 
                             CapabilityRow(
-                                icon: "flame",
-                                title: "Fire",
-                                isSupported: shelter.isFire ?? false
+                                icon: "flame.fill",
+                                titleKey: "home.disaster.fire",
+                                isSupported: shelter.isShelter == true ? true : (shelter.isFire ?? false)
                             )
 
                             CapabilityRow(
-                                icon: "mountain.2",
-                                title: "Landslide",
-                                isSupported: shelter.isLandslide ?? false
+                                icon: "mountain.2.fill",
+                                titleKey: "home.disaster.landslide",
+                                isSupported: shelter.isShelter == true ? true : (shelter.isLandslide ?? false)
                             )
 
                             CapabilityRow(
-                                icon: "triangle.fill",
-                                title: "Volcano",
-                                isSupported: shelter.isVolcano ?? false
+                                icon: "mountain.2.fill",
+                                titleKey: "home.disaster.volcano",
+                                isSupported: shelter.isShelter == true ? true : (shelter.isVolcano ?? false)
+                            )
+
+                            CapabilityRow(
+                                icon: "tornado",
+                                titleKey: "home.disaster.storm_surge",
+                                isSupported: shelter.isShelter == true ? true : (shelter.isStormSurge ?? false)
+                            )
+
+                            CapabilityRow(
+                                icon: "cloud.rain.fill",
+                                titleKey: "home.disaster.inland_flood",
+                                isSupported: shelter.isShelter == true ? true : (shelter.isInlandFlood ?? false)
                             )
                         }
                     }
 
                     // Location info
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Location")
+                        Text("badge.location", bundle: .main)
                             .font(.headline)
 
                         HStack {
@@ -308,7 +332,7 @@ struct ShelterInfoSheet: View {
                 }
                 .padding()
             }
-            .navigationTitle("Shelter Information")
+            .navigationTitle(String(localized: "map.shelter_info.title", bundle: .main))
             .navigationBarTitleDisplayMode(.inline)
             .task {
                 await fetchBadgeInfo()
@@ -351,23 +375,23 @@ struct ShelterInfoSheet: View {
 
 struct CapabilityRow: View {
     let icon: String
-    let title: String
+    let titleKey: String
     let isSupported: Bool
 
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .font(.title3)
-                .foregroundColor(isSupported ? .green : .secondary)
+                .font(.body)
+                .foregroundColor(.primary)
                 .frame(width: 30)
 
-            Text(title)
+            Text(verbatim: NSLocalizedString(titleKey, bundle: .main, comment: ""))
                 .font(.body)
 
             Spacer()
 
-            Image(systemName: isSupported ? "checkmark.circle.fill" : "xmark.circle")
-                .foregroundColor(isSupported ? .green : .secondary)
+            Image(systemName: isSupported ? "checkmark.circle.fill" : "xmark.circle.fill")
+                .foregroundColor(isSupported ? .green : .red)
         }
         .padding(.vertical, 4)
     }
