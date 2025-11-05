@@ -41,6 +41,50 @@ class UserSupabase {
             .execute()
     }
 
+    /// Updates the current user's profile with name and profile badge
+    /// - Parameters:
+    ///   - name: New name for the user
+    ///   - profileBadgeId: UUID of the badge to use as profile photo (optional)
+    /// - Throws: Database error if update fails
+    func updateUserProfile(name: String, profileBadgeId: UUID?) async throws {
+        let currentUser = try await supabase.auth.session.user
+
+        var updateData: [String: Any] = ["name": name]
+
+        if let badgeId = profileBadgeId {
+            updateData["profile_badge_id"] = badgeId.uuidString
+        } else {
+            updateData["profile_badge_id"] = nil
+        }
+
+        try await supabase
+            .from("users")
+            .update(updateData)
+            .eq("id", value: currentUser.id)
+            .execute()
+    }
+
+    /// Updates only the profile badge for the current user
+    /// - Parameter profileBadgeId: UUID of the badge to use as profile photo (nil to clear)
+    /// - Throws: Database error if update fails
+    func updateProfileBadge(profileBadgeId: UUID?) async throws {
+        let currentUser = try await supabase.auth.session.user
+
+        var updateData: [String: Any] = [:]
+
+        if let badgeId = profileBadgeId {
+            updateData["profile_badge_id"] = badgeId.uuidString
+        } else {
+            updateData["profile_badge_id"] = nil
+        }
+
+        try await supabase
+            .from("users")
+            .update(updateData)
+            .eq("id", value: currentUser.id)
+            .execute()
+    }
+
     /// Fetches a user by their ID
     /// - Parameter userId: The user's UUID
     /// - Returns: User object, or nil if not found

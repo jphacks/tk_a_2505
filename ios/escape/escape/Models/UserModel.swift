@@ -11,11 +11,13 @@ struct User: Codable, Identifiable {
     let id: UUID
     let createdAt: Date
     let name: String?
+    let profileBadgeId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case id
         case createdAt = "created_at"
         case name
+        case profileBadgeId = "profile_badge_id"
     }
 }
 
