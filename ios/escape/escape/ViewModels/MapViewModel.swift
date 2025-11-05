@@ -21,19 +21,39 @@ class MapViewModel {
     var geofencePolygons: [[CLLocationCoordinate2D]] = []
     var enteredPolygons: Set<Int> = [] // Track which polygons user has entered
 
+    // Mission tracking properties
+    var missionStartLocation: CLLocationCoordinate2D?
+    var missionStartTime: Date?
+    var accumulatedDistance: Double = 0.0
+    var previousLocation: CLLocation?
+    var createdMissionResult: MissionResult?
+    var currentGameMode: GameMode = .default
+
     // MARK: - Dependencies
 
     private let shelterService: ShelterSupabase
     private let mapService: MapService
+    private let missionResultService: MissionResultSupabase
+    private let authService: AuthSupabase
+    private let pointService: PointSupabase
+    private let missionService: MissionSupabase
 
     // MARK: - Initialization
 
     init(
         shelterService: ShelterSupabase = ShelterSupabase(),
-        mapService: MapService = MapService()
+        mapService: MapService = MapService(),
+        missionResultService: MissionResultSupabase = MissionResultSupabase(),
+        authService: AuthSupabase = AuthSupabase(),
+        pointService: PointSupabase = PointSupabase(),
+        missionService: MissionSupabase = MissionSupabase()
     ) {
         self.shelterService = shelterService
         self.mapService = mapService
+        self.missionResultService = missionResultService
+        self.authService = authService
+        self.pointService = pointService
+        self.missionService = missionService
     }
 
     /// Filtered shelters based on selected disaster types
@@ -175,5 +195,252 @@ class MapViewModel {
     /// Reset entered polygons tracking
     func resetEnteredPolygons() {
         enteredPolygons.removeAll()
+    }
+
+    // MARK: - Mission Result Creation
+
+    /// Create mission result when user completes a mission
+    /// - Parameters:
+    ///   - mission: The completed mission
+    ///   - shelter: The reached shelter
+    ///   - startLocation: Starting location coordinates
+    ///   - actualDistance: Actual distance traveled in meters
+    ///   - steps: Step count
+    ///   - isNewBadgeCreated: Whether user created a new badge
+    /// - Returns: The created MissionResult
+    func createMissionResult(
+        mission: Mission,
+        shelter: Shelter,
+        startLocation: CLLocationCoordinate2D,
+        actualDistance: Double,
+        steps: Int64?,
+        isNewBadgeCreated: Bool
+    ) async throws -> MissionResult {
+        print("🎯 Creating mission result...")
+
+        // Calculate optimal distance (straight line)
+        let endLocation = CLLocationCoordinate2D(
+            latitude: shelter.latitude,
+            longitude: shelter.longitude
+        )
+        let optimalDistance = mapService.calculateDistance(
+            from: startLocation,
+            to: endLocation
+        )
+
+        print("📏 Actual distance: \(actualDistance)m")
+        print("📏 Optimal distance: \(optimalDistance)m")
+
+        // Calculate score
+        let scoreComponents = MissionScoreCalculator.calculateScore(
+            actualDistanceMeters: actualDistance,
+            optimalDistanceMeters: optimalDistance,
+            isNewBadgeCreated: isNewBadgeCreated
+        )
+
+        print("🏆 Score breakdown:")
+        print("   Base: \(scoreComponents.basePoints)")
+        print("   Distance: \(scoreComponents.distancePoints)")
+        print("   Bonus: \(scoreComponents.bonusPoints)")
+        print("   Efficiency: \(scoreComponents.routeEfficiencyMultiplier)")
+        print("   FINAL: \(scoreComponents.finalPoints)")
+
+        // Get current user ID
+        let currentUserId = try await authService.getCurrentUserId()
+
+        // Convert shelter.id to UUID
+        guard let shelterUUID = UUID(uuidString: shelter.id) else {
+            throw MissionResultError.invalidShelterId
+        }
+
+        // Save mission result to database
+        let result = try await missionResultService.createMissionResultWithScore(
+            missionId: mission.id,
+            userId: currentUserId,
+            shelterId: shelterUUID,
+            startLatitude: startLocation.latitude,
+            startLongitude: startLocation.longitude,
+            endLatitude: endLocation.latitude,
+            endLongitude: endLocation.longitude,
+            actualDistanceMeters: actualDistance,
+            optimalDistanceMeters: optimalDistance,
+            steps: steps,
+            scoreComponents: scoreComponents
+        )
+
+        print("✅ Mission result created with ID: \(result.id)")
+        print("   Final score: \(result.finalPoints ?? 0) points")
+
+        return result
+    }
+
+    enum MissionResultError: LocalizedError {
+        case invalidShelterId
+        case noStartLocation
+
+        var errorDescription: String? {
+            switch self {
+            case .invalidShelterId:
+                return "Invalid shelter ID format"
+            case .noStartLocation:
+                return "No start location available"
+            }
+        }
+    }
+
+    // MARK: - Mission Tracking
+
+    /// Starts tracking a mission when it becomes active
+    func startMissionTracking(currentLocation: CLLocation?) {
+        guard let location = currentLocation else {
+            print("⚠️ Cannot start mission tracking: no location available")
+            return
+        }
+
+        missionStartLocation = location.coordinate
+        missionStartTime = Date()
+        accumulatedDistance = 0.0
+        previousLocation = location
+        print("🎯 Mission tracking started at: \(location.coordinate)")
+    }
+
+    /// Updates location tracking during an active mission
+    func updateLocationTracking(newLocation: CLLocation) {
+        if let previous = previousLocation {
+            let distance = newLocation.distance(from: previous)
+            accumulatedDistance += distance
+            print("📍 Distance increment: \(String(format: "%.2f", distance))m")
+            print("📍 Total accumulated distance: \(String(format: "%.2f", accumulatedDistance))m")
+        } else {
+            print("📍 First location update for this mission")
+        }
+        previousLocation = newLocation
+    }
+
+    /// Handles mission completion when user reaches a shelter
+    func handleShelterReached(
+        mission: Mission,
+        shelter: Shelter,
+        currentLocation: CLLocation?,
+        onComplete: @escaping (Shelter) -> Void
+    ) async {
+        // In Zen mode, don't create mission results or track score
+        if currentGameMode == .zen {
+            print("🧘 Zen mode: Shelter reached without tracking")
+            onComplete(shelter)
+            return
+        }
+        // Ensure we have a start location
+        var startLocation = missionStartLocation
+        if startLocation == nil {
+            print("⚠️ No start location recorded, using current location")
+            if let current = currentLocation {
+                startLocation = current.coordinate
+                missionStartLocation = current.coordinate
+            } else {
+                print("❌ Cannot create mission result: no location available")
+                return
+            }
+        }
+
+        guard let finalStartLocation = startLocation else {
+            print("❌ Cannot create mission result: no start location")
+            return
+        }
+
+        print("🎯 Shelter reached! Creating mission result...")
+        print("📊 Mission stats:")
+        print("   Start location: \(finalStartLocation)")
+        print("   Accumulated distance: \(String(format: "%.2f", accumulatedDistance))m")
+
+        do {
+            // Estimate steps based on distance (roughly 1400 steps per km)
+            let estimatedSteps: Int64? = accumulatedDistance > 0
+                ? Int64((accumulatedDistance / 1000.0) * 1400.0)
+                : nil
+
+            print("   Estimated steps: \(estimatedSteps ?? 0)")
+
+            // Calculate optimal distance
+            let endLocation = CLLocationCoordinate2D(
+                latitude: shelter.latitude,
+                longitude: shelter.longitude
+            )
+            let optimalDistance = mapService.calculateDistance(
+                from: finalStartLocation,
+                to: endLocation
+            )
+
+            print("📏 Actual distance: \(accumulatedDistance)m")
+            print("📏 Optimal distance: \(optimalDistance)m")
+
+            // Calculate score
+            let scoreComponents = MissionScoreCalculator.calculateScore(
+                actualDistanceMeters: accumulatedDistance,
+                optimalDistanceMeters: optimalDistance,
+                isNewBadgeCreated: false // Will be updated after badge generation
+            )
+
+            print("🏆 Score breakdown:")
+            print("   Base: \(scoreComponents.basePoints)")
+            print("   Distance: \(scoreComponents.distancePoints)")
+            print("   Bonus: \(scoreComponents.bonusPoints)")
+            print("   Efficiency: \(scoreComponents.routeEfficiencyMultiplier)")
+            print("   FINAL: \(scoreComponents.finalPoints)")
+
+            // Get current user ID
+            let currentUserId = try await authService.getCurrentUserId()
+
+            // Convert shelter.id to UUID
+            guard let shelterUUID = UUID(uuidString: shelter.id) else {
+                throw MissionResultError.invalidShelterId
+            }
+
+            // Save mission result to database
+            let result = try await missionResultService.createMissionResultWithScore(
+                missionId: mission.id,
+                userId: currentUserId,
+                shelterId: shelterUUID,
+                startLatitude: finalStartLocation.latitude,
+                startLongitude: finalStartLocation.longitude,
+                endLatitude: endLocation.latitude,
+                endLongitude: endLocation.longitude,
+                actualDistanceMeters: accumulatedDistance,
+                optimalDistanceMeters: optimalDistance,
+                steps: estimatedSteps,
+                scoreComponents: scoreComponents
+            )
+
+            // Store result for display
+            createdMissionResult = result
+
+            // Update mission status to completed
+            try await missionService.updateMissionStatus(
+                missionId: mission.id,
+                status: .completed
+            )
+
+            print("✅ Mission result created successfully!")
+            print("   Final score: \(result.finalPoints ?? 0) points")
+
+            // Notify view to show completion UI
+            onComplete(shelter)
+
+        } catch {
+            print("❌ Error creating mission result: \(error)")
+            errorMessage = "Failed to complete mission: \(error.localizedDescription)"
+            // Still notify view to show alert
+            onComplete(shelter)
+        }
+    }
+
+    /// Resets mission tracking when mission ends
+    func resetMissionTracking() {
+        missionStartLocation = nil
+        missionStartTime = nil
+        accumulatedDistance = 0.0
+        previousLocation = nil
+        createdMissionResult = nil
+        print("🔄 Mission tracking reset")
     }
 }

@@ -46,7 +46,10 @@ struct MissionCardView: View {
                 Spacer()
             }
 
-            if let mission = mission, let disasterType = mission.disasterType {
+            if let mission = mission,
+               let disasterType = mission.disasterType,
+               mission.status != .completed
+            {
                 Button(action: onTap) {
                     ZStack {
                         // グラデーション背景

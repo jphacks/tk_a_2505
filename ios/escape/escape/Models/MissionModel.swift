@@ -22,10 +22,7 @@ struct Mission: Codable, Identifiable, Equatable {
     let title: String?
     let overview: String?
     let disasterType: DisasterType?
-    let evacuationRegion: String?
     let status: MissionState
-    let steps: Int64?
-    let distances: Double?
     let createdAt: Date
 
     enum CodingKeys: String, CodingKey {
@@ -34,10 +31,7 @@ struct Mission: Codable, Identifiable, Equatable {
         case title
         case overview
         case disasterType = "disaster_type"
-        case evacuationRegion = "evacuation_region"
         case status
-        case steps
-        case distances
         case createdAt = "created_at"
     }
 }

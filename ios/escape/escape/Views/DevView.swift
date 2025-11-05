@@ -238,45 +238,13 @@ struct DevView: View {
                                     .cornerRadius(4)
                             }
 
-                            // Region
-                            if let region = mission.evacuationRegion {
-                                HStack {
-                                    Text("Region:")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                    Spacer()
-                                    Text(region)
-                                        .font(.caption)
-                                }
-                            }
-
                             Divider()
 
-                            // Stats
-                            HStack(spacing: 20) {
-                                if let steps = mission.steps {
-                                    VStack(spacing: 2) {
-                                        Text("\(steps)")
-                                            .font(.body)
-                                            .fontWeight(.semibold)
-                                        Text("Steps")
-                                            .font(.caption2)
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-
-                                if let distances = mission.distances {
-                                    VStack(spacing: 2) {
-                                        Text(String(format: "%.1f km", distances / 1000))
-                                            .font(.body)
-                                            .fontWeight(.semibold)
-                                        Text("Distance")
-                                            .font(.caption2)
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                            }
-                            .frame(maxWidth: .infinity)
+                            // Note: Stats (steps, distances) are now in mission_results table
+                            Text("View mission results for detailed stats")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .frame(maxWidth: .infinity)
 
                             Divider()
 
@@ -648,10 +616,7 @@ struct DevView: View {
             title: "地震避難訓練",
             overview: "マグニチュード7.3の地震が発生しました。最寄りの避難所へ安全に避難してください。",
             disasterType: .earthquake,
-            evacuationRegion: "東京都文京区",
             status: .completed,
-            steps: 1234,
-            distances: 850.0,
             createdAt: Date()
         )
     }

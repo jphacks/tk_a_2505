@@ -15,7 +15,7 @@ struct Point: Codable, Identifiable {
 
     enum CodingKeys: String, CodingKey {
         case id
-        case userId
+        case userId = "user_id"
         case point
         case createdAt = "created_at"
     }
@@ -47,5 +47,23 @@ extension Point {
         } else {
             return "\(value)"
         }
+    }
+}
+
+// MARK: - Ranking Models
+
+struct RankingEntry: Identifiable, Equatable {
+    let id: UUID
+    let rank: Int
+    let userId: UUID
+    let userName: String?
+    let totalPoints: Int64
+
+    var displayName: String {
+        userName ?? "Anonymous User"
+    }
+
+    var formattedPoints: String {
+        NumberFormatter.localizedString(from: NSNumber(value: totalPoints), number: .decimal)
     }
 }

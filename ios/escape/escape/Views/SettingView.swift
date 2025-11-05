@@ -10,6 +10,7 @@ import SwiftUI
 struct SettingView: View {
     @State private var viewModel = SettingsViewModel()
     @State private var showLogoutConfirmation = false
+    @State private var showDeleteAccountConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -84,6 +85,15 @@ struct SettingView: View {
                             Text("profile.sign_out")
                         }
                     }
+
+                    Button(role: .destructive) {
+                        showDeleteAccountConfirmation = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "trash")
+                            Text("setting.delete_account")
+                        }
+                    }
                 } header: {
                     Text("setting.account_section")
                 }
@@ -96,6 +106,16 @@ struct SettingView: View {
                     Button("setting.cancel", role: .cancel) {}
                 } message: {
                     Text("setting.logout_message")
+                }
+                .confirmationDialog("setting.delete_account_confirmation", isPresented: $showDeleteAccountConfirmation) {
+                    Button("setting.delete_account", role: .destructive) {
+                        Task {
+                            try? await viewModel.deleteAccount()
+                        }
+                    }
+                    Button("setting.cancel", role: .cancel) {}
+                } message: {
+                    Text("setting.delete_account_message")
                 }
             }
             .navigationTitle("nav.setting")

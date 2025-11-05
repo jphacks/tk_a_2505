@@ -20,12 +20,14 @@ class LocationService: NSObject, ObservableObject, CLLocationManagerDelegate {
     let locationManager = CLLocationManager()
     @Published var authorizationStatus: LocationAuthorizationStatus = .notDetermined
     @Published var location: CLLocation?
+    @Published var heading: CLHeading?
 
     override init() {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.distanceFilter = 1
+        locationManager.headingFilter = 5 // Update heading every 5 degrees
 
         // Set initial authorization status
         updateAuthorizationStatus()
@@ -96,6 +98,10 @@ class LocationService: NSObject, ObservableObject, CLLocationManagerDelegate {
         guard let newLocation = locations.last else { return }
         location = newLocation
         print("Location updated: \(newLocation.coordinate.latitude), \(newLocation.coordinate.longitude)")
+    }
+
+    func locationManager(_: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+        heading = newHeading
     }
 
     func locationManager(_: CLLocationManager, didFailWithError error: Error) {

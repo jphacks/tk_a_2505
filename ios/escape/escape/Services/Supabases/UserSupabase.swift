@@ -55,4 +55,16 @@ class UserSupabase {
 
         return users.first
     }
+
+    /// Deletes the current user's account and all associated data
+    /// - Throws: Database error if deletion fails
+    func deleteAccount() async throws {
+        let currentUser = try await supabase.auth.session.user
+
+        // Call the Supabase RPC function to delete the user account
+        // This function should be created in Supabase to handle both:
+        // 1. Deleting user data from the users table
+        // 2. Deleting the auth user via auth.users (requires service role)
+        try await supabase.rpc("delete_user_account").execute()
+    }
 }

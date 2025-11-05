@@ -17,14 +17,10 @@ class MissionGenerator {
     struct MissionRequest: Codable {
         let context: String?
         let disasterTypeHint: String?
-        let steps: Int64?
-        let distances: Double?
 
         enum CodingKeys: String, CodingKey {
             case context
             case disasterTypeHint = "disaster_type_hint"
-            case steps
-            case distances
         }
     }
 
@@ -45,21 +41,15 @@ class MissionGenerator {
     /// - Parameters:
     ///   - context: Optional context for mission generation
     ///   - disasterTypeHint: Optional disaster type hint to focus on
-    ///   - steps: Optional step count to associate with the mission
-    ///   - distances: Optional distance to associate with the mission
     /// - Returns: The generated Mission object
     func generateMission(
         context: String? = nil,
-        disasterTypeHint: DisasterType? = nil,
-        steps: Int64? = nil,
-        distances: Double? = nil
+        disasterTypeHint: DisasterType? = nil
     ) async throws -> Mission {
         // Prepare the request body
         let requestBody = MissionRequest(
             context: context,
-            disasterTypeHint: disasterTypeHint?.rawValue,
-            steps: steps,
-            distances: distances
+            disasterTypeHint: disasterTypeHint?.rawValue
         )
 
         // Call the edge function and decode directly
@@ -78,17 +68,9 @@ class MissionGenerator {
         return try await generateMission(disasterTypeHint: disasterType)
     }
 
-    /// Generates a mission with context and activity data
-    func generateMissionWithActivityData(
-        context: String,
-        steps: Int64,
-        distances: Double
-    ) async throws -> Mission {
-        return try await generateMission(
-            context: context,
-            steps: steps,
-            distances: distances
-        )
+    /// Generates a mission with context
+    func generateMissionWithContext(_ context: String) async throws -> Mission {
+        return try await generateMission(context: context)
     }
 
     /// Generates a random mission (no parameters)
