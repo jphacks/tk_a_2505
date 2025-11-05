@@ -27,6 +27,8 @@ class MissionResultViewModel {
     var userDescription = ""
     var acquiredBadge: Badge?
     var missionResult: MissionResult?
+    var currentUserPoints: Int64 = 0
+    var currentUserRank: Int?
     // Prepare the text and optional image link we want to share when a badge is unlocked.
     var sharePayload: BadgeSharePayload? {
         guard let badge = acquiredBadge else { return nil }
@@ -51,6 +53,7 @@ class MissionResultViewModel {
     private let authService: AuthSupabase
     private let missionResultService: MissionResultSupabase
     private let missionService: MissionSupabase
+    private let pointService: PointSupabase
     private let missionId: UUID
 
     // MARK: - Initialization
@@ -63,7 +66,8 @@ class MissionResultViewModel {
         shelterService: ShelterSupabase = ShelterSupabase(),
         authService: AuthSupabase = AuthSupabase(),
         missionResultService: MissionResultSupabase = MissionResultSupabase(),
-        missionService: MissionSupabase = MissionSupabase()
+        missionService: MissionSupabase = MissionSupabase(),
+        pointService: PointSupabase = PointSupabase()
     ) {
         self.badgeViewModel = badgeViewModel
         self.missionId = missionId
@@ -73,6 +77,7 @@ class MissionResultViewModel {
         self.authService = authService
         self.missionResultService = missionResultService
         self.missionService = missionService
+        self.pointService = pointService
     }
 
     // MARK: - Actions
@@ -125,6 +130,23 @@ class MissionResultViewModel {
                 isFirstVisitor = true
                 showDescriptionInput = true
                 isGeneratingBadge = false
+            }
+
+            // Step 3: Refresh user's total points and rank after mission completion
+            // This should happen after mission result is created (which happens before this view is shown)
+            print("💰 Refreshing user total points and rank...")
+            do {
+                let currentUserId = try await authService.getCurrentUserId()
+                let updatedPoints = try await pointService.refreshUserPoints(userId: currentUserId)
+                currentUserPoints = updatedPoints.point ?? 0
+                print("✅ User points refreshed: \(currentUserPoints)")
+
+                // Get user's national ranking
+                currentUserRank = try await pointService.getUserNationalRank(userId: currentUserId)
+                print("🏆 User rank: \(currentUserRank ?? 0)")
+            } catch {
+                print("⚠️ Failed to refresh points/rank: \(error)")
+                // Don't block UI if points refresh fails
             }
 
         } catch {
