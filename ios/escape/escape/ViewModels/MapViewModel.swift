@@ -414,15 +414,6 @@ class MapViewModel {
             // Store result for display
             createdMissionResult = result
 
-            // Add point record to database
-            if let finalPoints = result.finalPoints {
-                _ = try await pointService.addPointRecord(
-                    userId: currentUserId,
-                    points: finalPoints
-                )
-                print("💰 Added \(finalPoints) points to user account")
-            }
-
             // Update mission status to completed
             try await missionService.updateMissionStatus(
                 missionId: mission.id,

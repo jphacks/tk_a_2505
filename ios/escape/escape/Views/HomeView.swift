@@ -12,6 +12,7 @@ struct HomeView: View {
     @Binding var selectedTab: Tab
     @State private var missionViewModel = MissionViewModel()
     @State private var homeViewModel = HomeViewModel()
+    @State private var pointViewModel = PointViewModel()
     @State private var showingMissionDetail = false
     @Environment(\.missionStateService) var missionStateService // need when you want to listen to the mission state changes
 
@@ -64,6 +65,10 @@ struct HomeView: View {
 
                     // バッジコレクション セクション
                     BadgeCollectionView(badges: homeViewModel.userBadges, stats: homeViewModel.badgeStats)
+                        .padding(.horizontal)
+
+                    // ランキング セクション
+                    RankingCardView(pointViewModel: $pointViewModel)
                         .padding(.horizontal)
 
                     // 統計情報

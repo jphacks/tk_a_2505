@@ -14,6 +14,8 @@ class PointViewModel {
     var errorMessage: String?
     var totalPoints: Int64 = 0
     var recentPointRecords: [Point] = []
+    var nationalRanking: [RankingEntry] = []
+    var userNationalRank: Int?
 
     // MARK: - Dependencies
 
@@ -97,11 +99,47 @@ class PointViewModel {
         isLoading = false
     }
 
+    /// Fetches national leaderboard
+    /// - Parameter limit: Number of top users to fetch
+    func fetchNationalLeaderboard(limit: Int = 100) async {
+        isLoading = true
+        errorMessage = nil
+
+        do {
+            nationalRanking = try await pointService.getNationalLeaderboard(limit: limit)
+            print("✅ Fetched \(nationalRanking.count) ranking entries")
+        } catch {
+            errorMessage = "Failed to fetch leaderboard: \(error.localizedDescription)"
+            print("❌ Error fetching leaderboard: \(error)")
+        }
+
+        isLoading = false
+    }
+
+    /// Fetches user's national rank
+    func fetchUserNationalRank() async {
+        do {
+            let userId = try await authService.getCurrentUserId()
+            userNationalRank = try await pointService.getUserNationalRank(userId: userId)
+            print("✅ User rank: \(userNationalRank ?? 0)")
+        } catch {
+            print("❌ Error fetching user rank: \(error)")
+        }
+    }
+
+    /// Fetches both total points and national rank
+    func fetchUserStats() async {
+        await fetchTotalPoints()
+        await fetchUserNationalRank()
+    }
+
     /// Resets the view model state
     func reset() {
         isLoading = false
         errorMessage = nil
         totalPoints = 0
         recentPointRecords = []
+        nationalRanking = []
+        userNationalRank = nil
     }
 }

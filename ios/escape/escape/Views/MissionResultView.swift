@@ -99,7 +99,11 @@ struct MissionResultView: View {
 
                         // Animated Score Display
                         if let result = viewModel.missionResult {
-                            AnimatedScoreBreakdownView(missionResult: result)
+                            AnimatedScoreBreakdownView(
+                                missionResult: result,
+                                totalPoints: viewModel.currentUserPoints,
+                                nationalRank: viewModel.currentUserRank
+                            )
                         }
                     }
 
@@ -179,6 +183,8 @@ struct MissionResultView: View {
 
 struct AnimatedScoreBreakdownView: View {
     let missionResult: MissionResult
+    let totalPoints: Int64
+    let nationalRank: Int?
 
     @State private var animateScore = false
     @State private var showBreakdown = false
@@ -188,6 +194,7 @@ struct AnimatedScoreBreakdownView: View {
     @State private var multiplierScale: CGFloat = 0
     @State private var finalScoreValue: Int = 0
     @State private var showConfetti = false
+    @State private var showTotalPoints = false
 
     private let maxBarWidth: CGFloat = 280
 
@@ -287,6 +294,91 @@ struct AnimatedScoreBreakdownView: View {
                             RoundedRectangle(cornerRadius: 12)
                                 .fill(Color("brandPeach").opacity(0.1))
                         )
+
+                        // Total Points and National Rank
+                        if showTotalPoints {
+                            Divider()
+                                .padding(.vertical, 4)
+
+                            VStack(spacing: 12) {
+                                // Total Points Row
+                                HStack(spacing: 8) {
+                                    Image(systemName: "star.fill")
+                                        .font(.title2)
+                                        .foregroundStyle(
+                                            LinearGradient(
+                                                colors: [Color("brandOrange"), Color("brandRed")],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+
+                                    Text("result.your_total_points")
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+
+                                    Spacer()
+
+                                    Text("\(totalPoints)")
+                                        .font(.system(size: 24, weight: .heavy, design: .rounded))
+                                        .foregroundStyle(
+                                            LinearGradient(
+                                                colors: [Color("brandOrange"), Color("brandRed")],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                }
+
+                                // National Rank Row
+                                if let rank = nationalRank {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "trophy.fill")
+                                            .font(.title2)
+                                            .foregroundColor(Color("brandMediumBlue"))
+
+                                        Text("result.national_rank")
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+
+                                        Spacer()
+
+                                        Text(String(format: NSLocalizedString("result.rank_format", comment: ""), rank))
+                                            .font(.system(size: 24, weight: .heavy, design: .rounded))
+                                            .foregroundColor(Color("brandMediumBlue"))
+                                    }
+                                }
+                            }
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [
+                                                Color("brandOrange").opacity(0.08),
+                                                Color("brandRed").opacity(0.08),
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(
+                                        LinearGradient(
+                                            colors: [
+                                                Color("brandOrange").opacity(0.3),
+                                                Color("brandRed").opacity(0.3),
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1.5
+                                    )
+                            )
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                        }
                     }
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
@@ -383,6 +475,13 @@ struct AnimatedScoreBreakdownView: View {
 
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7).delay(0.1)) {
                 multiplierScale = 1.0
+            }
+        }
+
+        // Show total points and rank after multiplier
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                showTotalPoints = true
             }
         }
 
