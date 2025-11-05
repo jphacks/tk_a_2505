@@ -195,7 +195,8 @@ ALTER TABLE "public"."user_shelter_badges" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."users" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "name" "text"
+    "name" "text",
+    "profile_badge_id" "uuid"
 );
 
 
@@ -256,6 +257,11 @@ ALTER TABLE ONLY "public"."user_shelter_badges"
 
 ALTER TABLE ONLY "public"."users"
     ADD CONSTRAINT "users_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."users"
+    ADD CONSTRAINT "users_profile_badge_id_fkey" FOREIGN KEY ("profile_badge_id") REFERENCES "public"."shelter_badges"("id") ON DELETE SET NULL;
 
 
 
