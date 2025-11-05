@@ -104,6 +104,12 @@ struct MapView: View {
                 )
             }
         }
+        .onChange(of: showCompleteView) { _, newValue in
+            // When complete view is dismissed, switch back to zen mode if in mapless mode
+            if !newValue && missionStateService.currentGameMode == .mapless {
+                missionStateService.updateGameMode(.zen)
+            }
+        }
         .onAppear {
             isViewActive = true
 
@@ -549,8 +555,6 @@ struct MapView: View {
                                     .foregroundColor(Color("brandRed"))
                             }
                             .padding()
-                            .background(.ultraThinMaterial)
-                            .cornerRadius(20)
                         }
                     }
                     .padding(.horizontal, 32)
