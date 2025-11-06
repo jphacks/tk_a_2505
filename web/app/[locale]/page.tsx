@@ -14,7 +14,7 @@ export default async function Home({ params }: Props) {
   const t = await getTranslations("homepage");
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-black">
+    <main className="min-h-screen bg-linear-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-black">
       {/* Hero Section */}
       <section className="mx-auto max-w-7xl px-4 pb-16 pt-24 sm:px-6 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
