@@ -153,6 +153,9 @@ struct MapView: View {
                 // await mapController.fetchShelters()
             }
 
+            // Fetch user's unlocked badges to display on map markers
+            await mapViewModel.fetchUnlockedBadges()
+
             // Set disaster type filter based on current mission
             updateShelterFilter()
         }
@@ -432,14 +435,61 @@ struct MapView: View {
                                     showShelterInfo = true
                                 }
                             }) {
-                                ZStack {
-                                    Circle()
-                                        .fill(shelter.isShelter == true ? Color("brandRed") : Color("brandOrange"))
-                                        .frame(width: 32, height: 32)
+                                // Check if user has unlocked this shelter's badge
+                                if let unlockedBadge = mapViewModel.getBadgeForShelter(shelter.id),
+                                   let imageUrl = unlockedBadge.getImageUrl() {
+                                    // Display badge image for unlocked shelters
+                                    ZStack {
+                                        // Badge image
+                                        AsyncImage(url: URL(string: imageUrl)) { phase in
+                                            switch phase {
+                                            case .empty:
+                                                // Loading state
+                                                Circle()
+                                                    .fill(Color.gray.opacity(0.3))
+                                                    .frame(width: 40, height: 40)
+                                                    .overlay {
+                                                        ProgressView()
+                                                            .tint(.white)
+                                                    }
+                                            case .success(let image):
+                                                // Successfully loaded badge image
+                                                image
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fill)
+                                                    .frame(width: 40, height: 40)
+                                                    .clipShape(Circle())
+                                                    .overlay {
+                                                        Circle()
+                                                            .strokeBorder(Color.white, lineWidth: 2)
+                                                    }
+                                                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                                            case .failure:
+                                                // Failed to load - show default icon
+                                                Circle()
+                                                    .fill(shelter.isShelter == true ? Color("brandRed") : Color("brandOrange"))
+                                                    .frame(width: 40, height: 40)
+                                                    .overlay {
+                                                        Image(systemName: shelter.isShelter == true ? "building.2.fill" : "mappin.circle.fill")
+                                                            .font(.system(size: 18))
+                                                            .foregroundColor(.white)
+                                                    }
+                                            @unknown default:
+                                                EmptyView()
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    // Default icon for shelters without unlocked badges
+                                    ZStack {
+                                        Circle()
+                                            .fill(shelter.isShelter == true ? Color("brandRed") : Color("brandOrange"))
+                                            .frame(width: 32, height: 32)
 
-                                    Image(systemName: shelter.isShelter == true ? "building.2.fill" : "mappin.circle.fill")
-                                        .font(.system(size: 16))
-                                        .foregroundColor(.white)
+                                        Image(systemName: shelter.isShelter == true ? "building.2.fill" : "mappin.circle.fill")
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.white)
+                                    }
                                 }
                             }
                             .buttonStyle(.plain)
