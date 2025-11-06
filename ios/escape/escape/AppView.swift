@@ -15,11 +15,13 @@ struct AppView: View {
     @State private var appConfigViewModel = AppConfigViewModel()
 
     var body: some View {
-        Group {
+        SwiftUI.Group {
             if appConfigViewModel.isCheckingConfig {
                 ProgressView()
-                    .task {
-                        await appConfigViewModel.checkAppConfig()
+                    .onAppear {
+                        Task {
+                            await appConfigViewModel.checkAppConfig()
+                        }
                     }
             } else if appConfigViewModel.isMaintenanceMode {
                 MaintenanceView(message: appConfigViewModel.appConfig?.getMaintenanceMessage())
@@ -33,7 +35,7 @@ struct AppView: View {
     }
 
     private var normalAppView: some View {
-        Group {
+        SwiftUI.Group {
             if isCheckingAuth {
                 ProgressView()
             } else if isAuthenticated {
@@ -42,16 +44,18 @@ struct AppView: View {
                 AuthView()
             }
         }
-        .task {
-            for await state in supabase.auth.authStateChanges {
-                if [.initialSession, .signedIn, .signedOut].contains(state.event) {
-                    isAuthenticated = state.session != nil
-                    isCheckingAuth = false
+        .onAppear {
+            Task {
+                for await state in supabase.auth.authStateChanges {
+                    if [.initialSession, .signedIn, .signedOut].contains(state.event) {
+                        isAuthenticated = state.session != nil
+                        isCheckingAuth = false
 
-                    // When user is authenticated, ensure they have an active mission
-                    if isAuthenticated, let session = state.session {
-                        Task {
-                            await missionViewModel.ensureUserHasActiveMission(userId: session.user.id)
+                        // When user is authenticated, ensure they have an active mission
+                        if isAuthenticated, let session = state.session {
+                            Task {
+                                await missionViewModel.ensureUserHasActiveMission(userId: session.user.id)
+                            }
                         }
                     }
                 }

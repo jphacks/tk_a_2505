@@ -11,7 +11,7 @@ struct AuthView: View {
     @State private var viewModel = AuthViewModel()
 
     var body: some View {
-        Group {
+        SwiftUI.Group {
             if let result = viewModel.result {
                 // Result screen
                 resultView(result: result)
