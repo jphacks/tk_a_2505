@@ -29,6 +29,11 @@ class MapViewModel {
     var createdMissionResult: MissionResult?
     var currentGameMode: GameMode = .default
 
+    // Badge properties - maps shelter IDs (String) to their unlocked badges
+    // Only contains badges that the current user has unlocked
+    var unlockedShelterBadges: [String: ShelterBadge] = [:]
+    var isBadgesLoading = false
+
     // MARK: - Dependencies
 
     private let shelterService: ShelterSupabase
@@ -37,6 +42,7 @@ class MapViewModel {
     private let authService: AuthSupabase
     private let pointService: PointSupabase
     private let missionService: MissionSupabase
+    private let badgeService: BadgeSupabase
 
     // MARK: - Initialization
 
@@ -46,7 +52,8 @@ class MapViewModel {
         missionResultService: MissionResultSupabase = MissionResultSupabase(),
         authService: AuthSupabase = AuthSupabase(),
         pointService: PointSupabase = PointSupabase(),
-        missionService: MissionSupabase = MissionSupabase()
+        missionService: MissionSupabase = MissionSupabase(),
+        badgeService: BadgeSupabase = BadgeSupabase()
     ) {
         self.shelterService = shelterService
         self.mapService = mapService
@@ -54,6 +61,7 @@ class MapViewModel {
         self.authService = authService
         self.pointService = pointService
         self.missionService = missionService
+        self.badgeService = badgeService
     }
 
     /// Filtered shelters based on selected disaster types
@@ -113,6 +121,58 @@ class MapViewModel {
             debugPrint("Error fetching nearby shelters: \(error)")
             errorMessage = "Failed to load nearby shelters. Please try again."
         }
+    }
+
+    // MARK: - Badge Fetching
+
+    /// Fetches user's unlocked badges and maps them to shelter IDs
+    /// This allows the map to display badge icons only for shelters the user has unlocked
+    func fetchUnlockedBadges() async {
+        isBadgesLoading = true
+        defer { isBadgesLoading = false }
+
+        do {
+            print("🎖️ Fetching user's unlocked badges for map display...")
+
+            // Use the existing service method that fetches user's collected badges with full details
+            // This includes: user_shelter_badges + shelter_badges + shelters (with joins)
+            let collectedBadges = try await badgeService.getUserCollectedBadgesWithDetails()
+            print("   Found \(collectedBadges.count) unlocked badges for user")
+
+            // Build a dictionary mapping shelter ID (String) -> ShelterBadge
+            var badgeMap: [String: ShelterBadge] = [:]
+
+            for userBadgeData in collectedBadges {
+                let shelterIdString = userBadgeData.shelterInfo.id
+                let shelterBadge = userBadgeData.shelterBadgeInfo
+
+                badgeMap[shelterIdString] = shelterBadge
+                print("   ✅ Mapped badge '\(shelterBadge.badgeName)' to shelter: \(userBadgeData.shelterInfo.name)")
+            }
+
+            // Update the map with unlocked badges
+            unlockedShelterBadges = badgeMap
+            print("🎖️ Successfully loaded \(badgeMap.count) unlocked shelter badges for map")
+
+        } catch {
+            debugPrint("❌ Error fetching unlocked badges: \(error)")
+            // Don't set errorMessage here since this is a non-critical feature
+            // Shelters will just show default icons if badges fail to load
+        }
+    }
+
+    /// Checks if a shelter has an unlocked badge for the current user
+    /// - Parameter shelterId: The shelter ID (String)
+    /// - Returns: The unlocked badge if it exists, nil otherwise
+    func getBadgeForShelter(_ shelterId: String) -> ShelterBadge? {
+        return unlockedShelterBadges[shelterId]
+    }
+
+    /// Checks if a shelter has an unlocked badge
+    /// - Parameter shelterId: The shelter ID (String)
+    /// - Returns: True if the user has unlocked this shelter's badge
+    func hasBadgeForShelter(_ shelterId: String) -> Bool {
+        return unlockedShelterBadges[shelterId] != nil
     }
 
     // MARK: - Filter Management

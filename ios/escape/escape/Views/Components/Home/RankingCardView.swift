@@ -9,6 +9,7 @@ import SwiftUI
 
 struct RankingCardView: View {
     @Binding var pointViewModel: PointViewModel
+    @State private var groupViewModel = GroupViewModel()
     @State private var selectedTab: RankingTab = .national
     @State private var showingRankingDetail = false
 
@@ -19,6 +20,14 @@ struct RankingCardView: View {
 
     var body: some View {
         Button {
+            // Pre-load data before showing sheet to avoid empty state
+            Task {
+                if selectedTab == .team && groupViewModel.hasAnyGroup {
+                    if let groupId = groupViewModel.primaryGroup?.team.id {
+                        await pointViewModel.fetchTeamStats(groupId: groupId)
+                    }
+                }
+            }
             showingRankingDetail = true
         } label: {
             VStack(alignment: .leading, spacing: 12) {
@@ -71,24 +80,12 @@ struct RankingCardView: View {
                 // Content
                 TabView(selection: $selectedTab) {
                     // National Ranking Preview
-                    NationalRankingPreview(pointViewModel: $pointViewModel)
+                    NationalRankingPreview(pointViewModel: pointViewModel)
                         .tag(RankingTab.national)
 
-                    // Team Ranking Preview (TODO)
-                    VStack(spacing: 8) {
-                        Text("ranking.team_coming_soon")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.secondary)
-
-                        Text("ranking.team_description")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 100)
-                    .tag(RankingTab.team)
+                    // Team Ranking Preview
+                    TeamRankingPreview(pointViewModel: pointViewModel, groupViewModel: groupViewModel)
+                        .tag(RankingTab.team)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .frame(height: 100)
@@ -102,10 +99,20 @@ struct RankingCardView: View {
         }
         .buttonStyle(.plain)
         .sheet(isPresented: $showingRankingDetail) {
-            RankingView(selectedTab: selectedTab)
+            RankingView(selectedTab: selectedTab, pointViewModel: pointViewModel, groupViewModel: groupViewModel)
         }
         .task {
-            await pointViewModel.fetchUserStats()
+            // Pre-load all ranking data
+            async let userStatsFetch = pointViewModel.fetchUserStats()
+            async let groupsFetch = groupViewModel.loadUserGroups()
+
+            await userStatsFetch
+            await groupsFetch
+
+            // Load team stats if user has a group
+            if let groupId = groupViewModel.primaryGroup?.team.id {
+                await pointViewModel.fetchTeamStats(groupId: groupId)
+            }
         }
     }
 }
@@ -154,7 +161,7 @@ private struct TabButton: View {
 // MARK: - National Ranking Preview
 
 private struct NationalRankingPreview: View {
-    @Binding var pointViewModel: PointViewModel
+    let pointViewModel: PointViewModel
 
     var body: some View {
         VStack(spacing: 0) {
@@ -166,7 +173,7 @@ private struct NationalRankingPreview: View {
                             .font(.caption2)
                             .foregroundColor(.secondary)
 
-                        Text(String(format: NSLocalizedString("result.rank_format", comment: ""), rank))
+                        Text(String(format: NSLocalizedString("ranking.national_rank_format", comment: ""), rank))
                             .font(.title3)
                             .fontWeight(.heavy)
                             .foregroundStyle(
@@ -201,53 +208,67 @@ private struct NationalRankingPreview: View {
     }
 }
 
-// MARK: - Ranking Row Preview
+// MARK: - Team Ranking Preview
 
-private struct RankingRowPreview: View {
-    let entry: RankingEntry
+private struct TeamRankingPreview: View {
+    let pointViewModel: PointViewModel
+    let groupViewModel: GroupViewModel
 
     var body: some View {
-        HStack(spacing: 12) {
-            // Rank Medal
-            ZStack {
-                Circle()
-                    .fill(rankColor.opacity(0.2))
-                    .frame(width: 32, height: 32)
+        VStack(spacing: 0) {
+            if !groupViewModel.hasAnyGroup {
+                // No team placeholder
+                VStack(spacing: 8) {
+                    Text("ranking.no_team_preview")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
 
-                Text("\(entry.rank)")
-                    .font(.caption)
-                    .fontWeight(.bold)
-                    .foregroundColor(rankColor)
+                    Text("ranking.join_team_to_compete")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+            } else if let rank = pointViewModel.userTeamRank, let team = groupViewModel.primaryGroup {
+                // User's team stats
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("ranking.your_team_rank")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+
+                        Text(String(format: NSLocalizedString("ranking.team_rank_format", comment: ""), rank))
+                            .font(.title3)
+                            .fontWeight(.heavy)
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [Color("brandMediumBlue"), Color("brandOrange")],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                    }
+
+                    Spacer()
+
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(team.team.name)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+
+                        Text("\(team.memberCount) " + NSLocalizedString("ranking.members", comment: ""))
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(Color("brandMediumBlue"))
+                    }
+                }
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color("brandMediumBlue").opacity(0.1))
+                )
             }
-
-            // Username
-            Text(entry.displayName)
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .lineLimit(1)
-
-            Spacer()
-
-            // Points
-            Text(entry.formattedPoints)
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundColor(.secondary)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(.secondarySystemBackground))
-        )
-    }
-
-    private var rankColor: Color {
-        switch entry.rank {
-        case 1: return Color.yellow
-        case 2: return Color.gray
-        case 3: return Color.orange
-        default: return Color("brandMediumBlue")
         }
     }
 }

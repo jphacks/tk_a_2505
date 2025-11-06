@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct NationalRankingView: View {
-    @Binding var pointViewModel: PointViewModel
+    let pointViewModel: PointViewModel
     @State private var animateEntries = false
     @State private var showSparkles = false
     @State private var currentUserId: UUID?
+    @State private var isLoadingNational = false
 
     var body: some View {
         ZStack {
@@ -27,7 +28,7 @@ struct NationalRankingView: View {
             )
             .ignoresSafeArea()
 
-            if pointViewModel.isLoading {
+            if isLoadingNational {
                 LoadingView()
             } else if let error = pointViewModel.errorMessage {
                 ErrorView(message: error) {
@@ -40,14 +41,21 @@ struct NationalRankingView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 12) {
-                        // Top 3 Podium
-                        TopThreePodium(rankings: Array(pointViewModel.nationalRanking.prefix(3)))
-                            .padding(.top, 8)
-                            .padding(.horizontal)
+                        // Top 3 Podium (only if they're in the ranking)
+                        let topThree = pointViewModel.nationalRanking.filter { $0.rank >= 1 && $0.rank <= 3 }
+                        if !topThree.isEmpty {
+                            TopThreePodium(rankings: topThree)
+                                .padding(.top, 8)
+                                .padding(.horizontal)
+                        }
 
-                        // Remaining Rankings
+                        // All Rankings (including separators)
                         ForEach(Array(pointViewModel.nationalRanking.enumerated()), id: \.element.id) { index, entry in
-                            if index >= 3 {
+                            if entry.rank == -1 {
+                                // Separator
+                                SeparatorView()
+                                    .padding(.horizontal)
+                            } else if entry.rank > 3 {
                                 RankingRow(
                                     entry: entry,
                                     currentUserId: currentUserId,
@@ -76,16 +84,27 @@ struct NationalRankingView: View {
     }
 
     private func loadRankings() async {
-        await pointViewModel.fetchNationalLeaderboard(limit: 100)
-        await pointViewModel.fetchUserStats()
+        isLoadingNational = true
 
-        // Get current user ID
+        // Get current user ID first
         do {
             let authService = AuthSupabase()
             currentUserId = try await authService.getCurrentUserId()
+
+            // Use smart pagination with current user context
+            let pointService = PointSupabase()
+            let smartRankings = try await pointService.getSmartPaginatedNationalLeaderboard(userId: currentUserId!)
+            pointViewModel.nationalRanking = smartRankings
+
+            await pointViewModel.fetchUserStats()
         } catch {
-            print("❌ Failed to get current user ID: \(error)")
+            print("❌ Failed to load rankings: \(error)")
+            // Fallback to regular leaderboard
+            await pointViewModel.fetchNationalLeaderboard(limit: 100)
+            await pointViewModel.fetchUserStats()
         }
+
+        isLoadingNational = false
     }
 
     private func startAnimations() {
@@ -554,6 +573,27 @@ private struct EmptyStateView: View {
                 .padding(.horizontal)
         }
         .padding()
+    }
+}
+
+// MARK: - Separator View
+
+private struct SeparatorView: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            Rectangle()
+                .fill(Color.secondary.opacity(0.3))
+                .frame(height: 1)
+
+            Text("•••")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            Rectangle()
+                .fill(Color.secondary.opacity(0.3))
+                .frame(height: 1)
+        }
+        .padding(.vertical, 8)
     }
 }
 

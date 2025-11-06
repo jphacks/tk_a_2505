@@ -100,6 +100,57 @@ class PointSupabase {
 
     // MARK: - Ranking Operations
 
+    /// Gets smart paginated national leaderboard (top 10 + context around user)
+    /// - Parameter userId: The current user's UUID
+    /// - Returns: Array of RankingEntry with smart pagination
+    /// - Throws: Database error if fetch fails
+    func getSmartPaginatedNationalLeaderboard(userId: UUID) async throws -> [RankingEntry] {
+        print("🏆 Fetching smart paginated national leaderboard")
+
+        // Get user's rank first
+        guard let userRank = try await getUserNationalRank(userId: userId) else {
+            // User has no points, just return top 10
+            return try await getNationalLeaderboard(limit: 10)
+        }
+
+        print("📊 User rank: \(userRank)")
+
+        // Always get top 10
+        let topUsers = try await getNationalLeaderboard(limit: 10)
+
+        // If user is in top 25, just return top rankings
+        if userRank <= 25 {
+            return try await getNationalLeaderboard(limit: max(userRank + 15, 25))
+        }
+
+        // Get users around current user (15 behind, user, 15 ahead)
+        var allUsers = topUsers
+
+        // Add separator marker if gap exists
+        if userRank > 25 {
+            allUsers.append(RankingEntry(
+                id: UUID(),
+                rank: -1, // Special marker for separator
+                userId: UUID(),
+                userName: "---",
+                totalPoints: 0
+            ))
+        }
+
+        // Get context around user (offset to get from rank-15 to rank+15)
+        let contextStart = max(11, userRank - 15)
+        let contextLimit = min(31, userRank + 15)
+
+        let contextUsers = try await getNationalLeaderboardRange(
+            offset: contextStart - 1,
+            limit: contextLimit - contextStart + 1
+        )
+
+        allUsers.append(contentsOf: contextUsers)
+
+        return allUsers
+    }
+
     /// Gets national leaderboard with user names
     /// - Parameter limit: Number of top users to fetch (default: 100)
     /// - Returns: Array of RankingEntry with rank, userId, username, and points
@@ -118,39 +169,255 @@ class PointSupabase {
 
         print("✅ Fetched \(points.count) ranking entries")
 
-        // Fetch user names for these points (batch query would be better, but iterate for now)
+        // Extract all user IDs
+        let userIds = points.compactMap { $0.userId?.uuidString.lowercased() }
+
+        guard !userIds.isEmpty else {
+            return []
+        }
+
+        // Batch fetch all user names in ONE query
+        struct UserQuery: Decodable {
+            let id: String
+            let name: String?
+        }
+
+        let users: [UserQuery] = try await supabase
+            .from("users")
+            .select("id,name")
+            .in("id", values: userIds)
+            .execute()
+            .value
+
+        // Create lookup dictionary for O(1) access
+        let userDict = Dictionary(uniqueKeysWithValues: users.map { ($0.id, $0.name) })
+
+        // Build rankings with batched user data
         var rankings: [RankingEntry] = []
         for (index, point) in points.enumerated() {
             guard let userId = point.userId else { continue }
 
-            // Fetch user name
-            let userIdLowercase = userId.uuidString.lowercased()
-
-            // Simple model for user query
-            struct UserQuery: Decodable {
-                let name: String?
-            }
-
-            let users: [UserQuery] = try await supabase
-                .from("users")
-                .select("name")
-                .eq("id", value: userIdLowercase)
-                .execute()
-                .value
-
-            let userName = users.first?.name
+            let userName = userDict[userId.uuidString.lowercased()]
 
             rankings.append(RankingEntry(
                 id: point.id,
                 rank: index + 1,
                 userId: userId,
-                userName: userName,
+                userName: userName as! String,
                 totalPoints: point.point ?? 0
             ))
         }
 
-        print("✅ Built \(rankings.count) ranking entries with names")
+        print("✅ Built \(rankings.count) ranking entries with names (batched)")
         return rankings
+    }
+
+    /// Gets national leaderboard range with offset
+    /// - Parameters:
+    ///   - offset: Number of records to skip
+    ///   - limit: Number of records to fetch
+    /// - Returns: Array of RankingEntry with rank, userId, username, and points
+    /// - Throws: Database error if fetch fails
+    func getNationalLeaderboardRange(offset: Int, limit: Int) async throws -> [RankingEntry] {
+        print("🏆 Fetching national leaderboard range (offset: \(offset), limit: \(limit))")
+
+        // Fetch users with offset
+        let points: [Point] = try await supabase
+            .from("points")
+            .select()
+            .order("point", ascending: false)
+            .range(from: offset, to: offset + limit - 1)
+            .execute()
+            .value
+
+        // Extract all user IDs
+        let userIds = points.compactMap { $0.userId?.uuidString.lowercased() }
+
+        guard !userIds.isEmpty else {
+            return []
+        }
+
+        // Batch fetch all user names in ONE query
+        struct UserQuery: Decodable {
+            let id: String
+            let name: String?
+        }
+
+        let users: [UserQuery] = try await supabase
+            .from("users")
+            .select("id,name")
+            .in("id", values: userIds)
+            .execute()
+            .value
+
+        // Create lookup dictionary
+        let userDict = Dictionary(uniqueKeysWithValues: users.map { ($0.id, $0.name) })
+
+        // Build rankings
+        var rankings: [RankingEntry] = []
+        for (index, point) in points.enumerated() {
+            guard let userId = point.userId else { continue }
+
+            let userName = userDict[userId.uuidString.lowercased()]
+
+            rankings.append(RankingEntry(
+                id: point.id,
+                rank: offset + index + 1,
+                userId: userId,
+                userName: userName as! String,
+                totalPoints: point.point ?? 0
+            ))
+        }
+
+        return rankings
+    }
+
+    /// Gets team leaderboard with user names for a specific group
+    /// - Parameter groupId: The team/group UUID
+    /// - Returns: Array of RankingEntry for team members
+    /// - Throws: Database error if fetch fails
+    func getTeamLeaderboard(groupId: UUID) async throws -> [RankingEntry] {
+        print("🏆 Fetching team leaderboard for group: \(groupId)")
+
+        // First, get all group members
+        let members: [TeamMember] = try await supabase
+            .from("group_members")
+            .select()
+            .eq("group_id", value: groupId)
+            .execute()
+            .value
+
+        let memberUserIds = members.map { $0.userId }
+
+        guard !memberUserIds.isEmpty else {
+            print("⚠️ No members found in team")
+            return []
+        }
+
+        // Get points for all members in ONE query
+        let memberPoints: [Point] = try await supabase
+            .from("points")
+            .select()
+            .in("user_id", values: memberUserIds.map { $0.uuidString.lowercased() })
+            .order("point", ascending: false)
+            .execute()
+            .value
+
+        print("✅ Fetched \(memberPoints.count) member points")
+
+        // Extract user IDs from points
+        let userIdsWithPoints = memberPoints.compactMap { $0.userId?.uuidString.lowercased() }
+
+        guard !userIdsWithPoints.isEmpty else {
+            print("⚠️ No members have points yet")
+            return []
+        }
+
+        // Batch fetch ALL user names in ONE query
+        struct UserQuery: Decodable {
+            let id: String
+            let name: String?
+        }
+
+        let users: [UserQuery] = try await supabase
+            .from("users")
+            .select("id,name")
+            .in("id", values: userIdsWithPoints)
+            .execute()
+            .value
+
+        // Create lookup dictionary for O(1) access
+        let userDict = Dictionary(uniqueKeysWithValues: users.map { ($0.id, $0.name) })
+
+        // Build rankings with batched data
+        var rankings: [RankingEntry] = []
+        for (index, point) in memberPoints.enumerated() {
+            guard let userId = point.userId else { continue }
+
+            let userName = userDict[userId.uuidString.lowercased()]
+
+            rankings.append(RankingEntry(
+                id: point.id,
+                rank: index + 1,
+                userId: userId,
+                userName: userName as! String,
+                totalPoints: point.point ?? 0
+            ))
+        }
+
+        print("✅ Built \(rankings.count) team ranking entries (batched)")
+        return rankings
+    }
+
+    /// Gets smart paginated team leaderboard (top 10 + context around user)
+    /// - Parameters:
+    ///   - groupId: The team/group UUID
+    ///   - userId: The current user's UUID
+    /// - Returns: Array of RankingEntry with smart pagination
+    /// - Throws: Database error if fetch fails
+    func getSmartPaginatedTeamLeaderboard(groupId: UUID, userId: UUID) async throws -> [RankingEntry] {
+        print("🏆 Fetching smart paginated team leaderboard")
+
+        // Get full team leaderboard
+        let allRankings = try await getTeamLeaderboard(groupId: groupId)
+
+        guard let userIndex = allRankings.firstIndex(where: { $0.userId == userId }) else {
+            // User not found in rankings, return top 10
+            return Array(allRankings.prefix(10))
+        }
+
+        let userRank = userIndex + 1
+        print("📊 User team rank: \(userRank)/\(allRankings.count)")
+
+        // If team is small or user is in top 25, return all or top portion
+        if allRankings.count <= 25 || userRank <= 25 {
+            return allRankings
+        }
+
+        // Build smart paginated result
+        var result: [RankingEntry] = []
+
+        // Top 10
+        result.append(contentsOf: Array(allRankings.prefix(10)))
+
+        // Separator
+        result.append(RankingEntry(
+            id: UUID(),
+            rank: -1,
+            userId: UUID(),
+            userName: "---",
+            totalPoints: 0
+        ))
+
+        // Context around user (15 before, user, 15 after)
+        let contextStart = max(10, userIndex - 15)
+        let contextEnd = min(allRankings.count - 1, userIndex + 15)
+
+        result.append(contentsOf: Array(allRankings[contextStart ... contextEnd]))
+
+        return result
+    }
+
+    /// Gets user's rank within their team
+    /// - Parameters:
+    ///   - groupId: The team/group UUID
+    ///   - userId: The user's UUID
+    /// - Returns: User's rank within team (1-indexed), or nil if not in team or no points
+    /// - Throws: Database error if fetch fails
+    func getUserTeamRank(groupId: UUID, userId: UUID) async throws -> Int? {
+        print("🏆 Calculating team rank for user: \(userId) in group: \(groupId)")
+
+        let rankings = try await getTeamLeaderboard(groupId: groupId)
+
+        guard let userIndex = rankings.firstIndex(where: { $0.userId == userId }) else {
+            print("⚠️ User not found in team rankings")
+            return nil
+        }
+
+        let rank = userIndex + 1
+        print("✅ User team rank: \(rank)/\(rankings.count)")
+
+        return rank
     }
 
     /// Gets user's national ranking by counting users with higher points
