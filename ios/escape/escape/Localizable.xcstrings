@@ -5482,6 +5482,23 @@
         }
       }
     },
+    "setting.profile_photo_default": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "デフォルト"
+          }
+        }
+      }
+    },
     "setting.no_badges": {
       "extractionState": "manual",
       "localizations": {

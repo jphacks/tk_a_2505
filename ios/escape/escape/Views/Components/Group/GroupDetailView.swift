@@ -275,14 +275,11 @@ struct MemberRowView: View {
     var body: some View {
         HStack(spacing: 12) {
             // Member Avatar
-            Circle()
-                .fill(Color("brandOrange").opacity(0.3))
-                .frame(width: 40, height: 40)
-                .overlay(
-                    Text(String(member.user.displayName.prefix(1)).uppercased())
-                        .font(.headline)
-                        .foregroundColor(Color("brandOrange"))
-                )
+            UserAvatarView(
+                username: member.user.displayName,
+                size: .small,
+                colors: [Color("brandOrange")]
+            )
 
             // Member Info
             VStack(alignment: .leading, spacing: 2) {
