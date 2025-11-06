@@ -5448,6 +5448,13 @@
         }
       }
     },
+    "skill_level.advanced": {},
+    "skill_level.beginner": {},
+    "skill_level.expert": {},
+    "skill_level.intermediate": {},
+    "skill_level.master": {},
+    "skill_level.novice": {},
+    "skill_level.unknown": {},
     "stats.period.day": {
       "extractionState": "manual",
       "localizations": {

@@ -6,6 +6,7 @@
 //
 
 import MapKit
+import Supabase
 import SwiftUI
 
 // MARK: - Map Annotation Model
@@ -333,6 +334,62 @@ struct DetailBadgeBackView: View {
     }
 }
 
+// MARK: - 熟練度星アイコンコンポーネント
+
+struct SkillStarsView: View {
+    let starCount: Int
+    let maxStars: Int = 5
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(0 ..< maxStars, id: \.self) { index in
+                SkillStarView(isFilled: index < starCount)
+            }
+        }
+        .padding(.vertical, 8)
+    }
+}
+
+struct SkillStarView: View {
+    let isFilled: Bool
+
+    var body: some View {
+        ZStack {
+            // 影
+            Image(systemName: "star.fill")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(.black.opacity(0.25))
+                .offset(x: 1.5, y: 2)
+                .blur(radius: 1.5)
+
+            // メインの星
+            Image(systemName: isFilled ? "star.fill" : "star")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(isFilled ? .yellow : .white.opacity(0.3))
+
+            // 立体的なハイライト（埋まった星のみ）
+            if isFilled {
+                Image(systemName: "star.fill")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.white.opacity(0.6))
+                    .mask(
+                        LinearGradient(
+                            gradient: Gradient(stops: [
+                                .init(color: .white, location: 0.0),
+                                .init(color: .white, location: 0.4),
+                                .init(color: .clear, location: 0.8),
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .offset(x: -1, y: -1)
+                    .blendMode(.overlay)
+            }
+        }
+    }
+}
+
 // MARK: - 詳細画面用画像ローダー
 
 struct DetailImageLoader: View {
@@ -355,6 +412,8 @@ struct BadgeDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var isAnimating = false
     @State private var randomBackgroundColor = Badge.randomColor
+    @State private var skillLevel: Int = 0
+    @State private var isLoadingSkillLevel = true
 
     var body: some View {
         NavigationStack {
@@ -375,6 +434,21 @@ struct BadgeDetailView: View {
                             RotatableBadgeView(badge: badge)
                                 .scaleEffect(isAnimating ? 1.05 : 1.0)
                                 .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: isAnimating)
+
+                            // 熟練度星アイコン
+                            if !isLoadingSkillLevel {
+                                SkillStarsView(starCount: skillLevel)
+                            } else {
+                                // ローディング表示
+                                HStack(spacing: 8) {
+                                    ForEach(0 ..< 5) { _ in
+                                        Image(systemName: "star")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .foregroundColor(.white.opacity(0.3))
+                                    }
+                                }
+                                .padding(.vertical, 8)
+                            }
 
                             VStack(alignment: .leading, spacing: 8) {
                                 if let badgeNumber = badge.badgeNumber {
@@ -532,6 +606,55 @@ struct BadgeDetailView: View {
             }
             .onAppear {
                 isAnimating = true
+                Task {
+                    await loadSkillLevel()
+                }
+            }
+        }
+    }
+
+    // MARK: - Helper Methods
+
+    /// Loads the skill level for the current badge
+    private func loadSkillLevel() async {
+        do {
+            let authService = AuthSupabase()
+            let missionResultService = MissionResultSupabase()
+
+            let currentUserId = try await authService.getCurrentUserId()
+
+            guard let badgeUUID = UUID(uuidString: badge.id) else {
+                await MainActor.run {
+                    skillLevel = 0
+                    isLoadingSkillLevel = false
+                }
+                return
+            }
+
+            let shelterBadge: ShelterBadge = try await supabase
+                .from("shelter_badges")
+                .select()
+                .eq("id", value: badgeUUID)
+                .single()
+                .execute()
+                .value
+
+            let missionResults = try await missionResultService.getUserShelterMissionResults(
+                userId: currentUserId,
+                shelterId: shelterBadge.shelterId
+            )
+
+            let calculatedSkillLevel = SkillLevelCalculator.calculateStarCount(from: missionResults.count)
+
+            await MainActor.run {
+                skillLevel = calculatedSkillLevel
+                isLoadingSkillLevel = false
+            }
+
+        } catch {
+            await MainActor.run {
+                skillLevel = 0
+                isLoadingSkillLevel = false
             }
         }
     }
