@@ -244,7 +244,10 @@ private struct TeamRankingRow: View {
             }
 
             // User Avatar
-            UserAvatarView.teamRanking(username: entry.displayName)
+            UserAvatarView.teamRanking(
+                username: entry.displayName,
+                badgeImageUrl: entry.profileBadgeImageUrl
+            )
 
             // User Info
             VStack(alignment: .leading, spacing: 4) {

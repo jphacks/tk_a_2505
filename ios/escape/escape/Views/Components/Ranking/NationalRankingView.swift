@@ -290,6 +290,7 @@ private struct PodiumPosition: View {
             // Avatar placeholder
             UserAvatarView(
                 username: entry.displayName,
+                badgeImageUrl: entry.profileBadgeImageUrl,
                 size: .medium,
                 colors: [color],
                 strokeColor: color,
@@ -360,7 +361,10 @@ private struct RankingRow: View {
             }
 
             // User Avatar
-            UserAvatarView.nationalRanking(username: entry.displayName)
+            UserAvatarView.nationalRanking(
+                username: entry.displayName,
+                badgeImageUrl: entry.profileBadgeImageUrl
+            )
 
             // User Info
             VStack(alignment: .leading, spacing: 4) {

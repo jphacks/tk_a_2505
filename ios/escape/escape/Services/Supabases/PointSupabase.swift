@@ -133,7 +133,8 @@ class PointSupabase {
                 rank: -1, // Special marker for separator
                 userId: UUID(),
                 userName: "---",
-                totalPoints: 0
+                totalPoints: 0,
+                profileBadgeImageUrl: nil
             ))
         }
 
@@ -176,39 +177,79 @@ class PointSupabase {
             return []
         }
 
-        // Batch fetch all user names in ONE query
+        // Batch fetch all user names AND badge URLs in ONE query
         struct UserQuery: Decodable {
             let id: String
             let name: String?
+            let shelterBadgeId: String?
+
+            enum CodingKeys: String, CodingKey {
+                case id
+                case name
+                case shelterBadgeId = "shelter_badge_id"
+            }
         }
 
         let users: [UserQuery] = try await supabase
             .from("users")
-            .select("id,name")
+            .select("id,name,shelter_badge_id")
             .in("id", values: userIds)
             .execute()
             .value
 
         // Create lookup dictionary for O(1) access
-        let userDict = Dictionary(uniqueKeysWithValues: users.map { ($0.id, $0.name) })
+        let userDict = Dictionary(uniqueKeysWithValues: users.map { ($0.id, ($0.name, $0.shelterBadgeId)) })
 
-        // Build rankings with batched user data
+        // Get all badge IDs that need their image URLs
+        let badgeIds = users.compactMap { $0.shelterBadgeId }
+
+        // Batch fetch badge image URLs if there are any badges
+        var badgeUrlDict: [String: String] = [:]
+        if !badgeIds.isEmpty {
+            struct BadgeQuery: Decodable {
+                let id: String
+                let badgeName: String
+
+                enum CodingKeys: String, CodingKey {
+                    case id
+                    case badgeName = "badge_name"
+                }
+            }
+
+            let badges: [BadgeQuery] = try await supabase
+                .from("shelter_badges")
+                .select("id,badge_name")
+                .in("id", values: badgeIds)
+                .execute()
+                .value
+
+            // Build badge URL dictionary
+            for badge in badges {
+                let imageUrl = supabase.storage.from("badge_images").getPublicURL(path: "\(badge.badgeName).png")
+                badgeUrlDict[badge.id] = imageUrl.absoluteString
+            }
+        }
+
+        // Build rankings with batched user data and badge URLs
         var rankings: [RankingEntry] = []
         for (index, point) in points.enumerated() {
             guard let userId = point.userId else { continue }
 
-            let userName = userDict[userId.uuidString.lowercased()]
+            let userIdLower = userId.uuidString.lowercased()
+            let (userName, badgeId) = userDict[userIdLower] ?? (nil, nil)
+            let badgeUrl = badgeId.flatMap { badgeUrlDict[$0] }
 
             rankings.append(RankingEntry(
                 id: point.id,
                 rank: index + 1,
                 userId: userId,
-                userName: userName as! String,
-                totalPoints: point.point ?? 0
+                userName: userName,
+                totalPoints: point.point ?? 0,
+                profileBadgeImageUrl: badgeUrl
             ))
         }
 
-        print("✅ Built \(rankings.count) ranking entries with names (batched)")
+        print("✅ Built \(rankings.count) ranking entries with names and badges (batched)")
         return rankings
     }
 
@@ -237,35 +278,72 @@ class PointSupabase {
             return []
         }
 
-        // Batch fetch all user names in ONE query
+        // Batch fetch all user names AND badge URLs in ONE query
         struct UserQuery: Decodable {
             let id: String
             let name: String?
+            let shelterBadgeId: String?
+
+            enum CodingKeys: String, CodingKey {
+                case id
+                case name
+                case shelterBadgeId = "shelter_badge_id"
+            }
         }
 
         let users: [UserQuery] = try await supabase
             .from("users")
-            .select("id,name")
+            .select("id,name,shelter_badge_id")
             .in("id", values: userIds)
             .execute()
             .value
 
         // Create lookup dictionary
-        let userDict = Dictionary(uniqueKeysWithValues: users.map { ($0.id, $0.name) })
+        let userDict = Dictionary(uniqueKeysWithValues: users.map { ($0.id, ($0.name, $0.shelterBadgeId)) })
+
+        // Get all badge IDs and fetch their URLs
+        let badgeIds = users.compactMap { $0.shelterBadgeId }
+        var badgeUrlDict: [String: String] = [:]
+        if !badgeIds.isEmpty {
+            struct BadgeQuery: Decodable {
+                let id: String
+                let badgeName: String
+
+                enum CodingKeys: String, CodingKey {
+                    case id
+                    case badgeName = "badge_name"
+                }
+            }
+
+            let badges: [BadgeQuery] = try await supabase
+                .from("shelter_badges")
+                .select("id,badge_name")
+                .in("id", values: badgeIds)
+                .execute()
+                .value
+
+            for badge in badges {
+                let imageUrl = supabase.storage.from("badge_images").getPublicURL(path: "\(badge.badgeName).png")
+                badgeUrlDict[badge.id] = imageUrl.absoluteString
+            }
+        }
 
         // Build rankings
         var rankings: [RankingEntry] = []
         for (index, point) in points.enumerated() {
             guard let userId = point.userId else { continue }
 
-            let userName = userDict[userId.uuidString.lowercased()]
+            let userIdLower = userId.uuidString.lowercased()
+            let (userName, badgeId) = userDict[userIdLower] ?? (nil, nil)
+            let badgeUrl = badgeId.flatMap { badgeUrlDict[$0] }
 
             rankings.append(RankingEntry(
                 id: point.id,
                 rank: offset + index + 1,
                 userId: userId,
-                userName: userName as! String,
-                totalPoints: point.point ?? 0
+                userName: userName,
+                totalPoints: point.point ?? 0,
+                profileBadgeImageUrl: badgeUrl
             ))
         }
 
@@ -313,39 +391,76 @@ class PointSupabase {
             return []
         }
 
-        // Batch fetch ALL user names in ONE query
+        // Batch fetch ALL user names AND badge URLs in ONE query
         struct UserQuery: Decodable {
             let id: String
             let name: String?
+            let shelterBadgeId: String?
+
+            enum CodingKeys: String, CodingKey {
+                case id
+                case name
+                case shelterBadgeId = "shelter_badge_id"
+            }
         }
 
         let users: [UserQuery] = try await supabase
             .from("users")
-            .select("id,name")
+            .select("id,name,shelter_badge_id")
             .in("id", values: userIdsWithPoints)
             .execute()
             .value
 
         // Create lookup dictionary for O(1) access
-        let userDict = Dictionary(uniqueKeysWithValues: users.map { ($0.id, $0.name) })
+        let userDict = Dictionary(uniqueKeysWithValues: users.map { ($0.id, ($0.name, $0.shelterBadgeId)) })
 
-        // Build rankings with batched data
+        // Get all badge IDs and fetch their URLs
+        let badgeIds = users.compactMap { $0.shelterBadgeId }
+        var badgeUrlDict: [String: String] = [:]
+        if !badgeIds.isEmpty {
+            struct BadgeQuery: Decodable {
+                let id: String
+                let badgeName: String
+
+                enum CodingKeys: String, CodingKey {
+                    case id
+                    case badgeName = "badge_name"
+                }
+            }
+
+            let badges: [BadgeQuery] = try await supabase
+                .from("shelter_badges")
+                .select("id,badge_name")
+                .in("id", values: badgeIds)
+                .execute()
+                .value
+
+            for badge in badges {
+                let imageUrl = supabase.storage.from("badge_images").getPublicURL(path: "\(badge.badgeName).png")
+                badgeUrlDict[badge.id] = imageUrl.absoluteString
+            }
+        }
+
+        // Build rankings with batched data and badge URLs
         var rankings: [RankingEntry] = []
         for (index, point) in memberPoints.enumerated() {
             guard let userId = point.userId else { continue }
 
-            let userName = userDict[userId.uuidString.lowercased()]
+            let userIdLower = userId.uuidString.lowercased()
+            let (userName, badgeId) = userDict[userIdLower] ?? (nil, nil)
+            let badgeUrl = badgeId.flatMap { badgeUrlDict[$0] }
 
             rankings.append(RankingEntry(
                 id: point.id,
                 rank: index + 1,
                 userId: userId,
-                userName: userName as! String,
-                totalPoints: point.point ?? 0
+                userName: userName,
+                totalPoints: point.point ?? 0,
+                profileBadgeImageUrl: badgeUrl
             ))
         }
 
-        print("✅ Built \(rankings.count) team ranking entries (batched)")
+        print("✅ Built \(rankings.count) team ranking entries with badges (batched)")
         return rankings
     }
 
@@ -386,7 +501,8 @@ class PointSupabase {
             rank: -1,
             userId: UUID(),
             userName: "---",
-            totalPoints: 0
+            totalPoints: 0,
+            profileBadgeImageUrl: nil
         ))
 
         // Context around user (15 before, user, 15 after)
