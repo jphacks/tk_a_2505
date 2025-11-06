@@ -16,6 +16,9 @@ class PointViewModel {
     var recentPointRecords: [Point] = []
     var nationalRanking: [RankingEntry] = []
     var userNationalRank: Int?
+    var teamRanking: [RankingEntry] = []
+    var userTeamRank: Int?
+    var currentTeamId: UUID?
 
     // MARK: - Dependencies
 
@@ -99,10 +102,9 @@ class PointViewModel {
         isLoading = false
     }
 
-    /// Fetches national leaderboard
+    /// Fetches national leaderboard (without setting isLoading to avoid conflicts)
     /// - Parameter limit: Number of top users to fetch
     func fetchNationalLeaderboard(limit: Int = 100) async {
-        isLoading = true
         errorMessage = nil
 
         do {
@@ -112,8 +114,6 @@ class PointViewModel {
             errorMessage = "Failed to fetch leaderboard: \(error.localizedDescription)"
             print("❌ Error fetching leaderboard: \(error)")
         }
-
-        isLoading = false
     }
 
     /// Fetches user's national rank
@@ -127,10 +127,73 @@ class PointViewModel {
         }
     }
 
-    /// Fetches both total points and national rank
+    /// Fetches both total points and national rank (without loading state)
     func fetchUserStats() async {
-        await fetchTotalPoints()
-        await fetchUserNationalRank()
+        do {
+            let userId = try await authService.getCurrentUserId()
+
+            // Fetch in parallel for speed
+            async let pointsFetch = pointService.getTotalPoints(userId: userId)
+            async let rankFetch = pointService.getUserNationalRank(userId: userId)
+
+            totalPoints = try await pointsFetch
+            userNationalRank = try await rankFetch
+
+            print("✅ Fetched user stats (parallel): \(totalPoints) points, rank \(userNationalRank ?? 0)")
+        } catch {
+            print("❌ Error fetching user stats: \(error)")
+        }
+    }
+
+    /// Fetches team leaderboard with smart pagination (without setting isLoading to avoid conflicts)
+    /// - Parameter groupId: The team/group UUID
+    func fetchTeamLeaderboard(groupId: UUID) async {
+        errorMessage = nil
+        currentTeamId = groupId
+
+        do {
+            let userId = try await authService.getCurrentUserId()
+            teamRanking = try await pointService.getSmartPaginatedTeamLeaderboard(groupId: groupId, userId: userId)
+            print("✅ Fetched \(teamRanking.count) team ranking entries")
+        } catch {
+            errorMessage = "Failed to fetch team leaderboard: \(error.localizedDescription)"
+            print("❌ Error fetching team leaderboard: \(error)")
+        }
+    }
+
+    /// Fetches user's team rank
+    /// - Parameter groupId: The team/group UUID
+    func fetchUserTeamRank(groupId: UUID) async {
+        do {
+            let userId = try await authService.getCurrentUserId()
+            userTeamRank = try await pointService.getUserTeamRank(groupId: groupId, userId: userId)
+            print("✅ User team rank: \(userTeamRank ?? 0)")
+        } catch {
+            print("❌ Error fetching user team rank: \(error)")
+        }
+    }
+
+    /// Fetches both team leaderboard and user's rank in parallel
+    /// - Parameter groupId: The team/group UUID
+    func fetchTeamStats(groupId: UUID) async {
+        currentTeamId = groupId
+        errorMessage = nil
+
+        do {
+            let userId = try await authService.getCurrentUserId()
+
+            // Fetch team leaderboard and rank in parallel
+            async let leaderboardFetch = pointService.getSmartPaginatedTeamLeaderboard(groupId: groupId, userId: userId)
+            async let rankFetch = pointService.getUserTeamRank(groupId: groupId, userId: userId)
+
+            teamRanking = try await leaderboardFetch
+            userTeamRank = try await rankFetch
+
+            print("✅ Fetched team stats (parallel): \(teamRanking.count) entries, rank \(userTeamRank ?? 0)")
+        } catch {
+            errorMessage = "Failed to fetch team stats: \(error.localizedDescription)"
+            print("❌ Error fetching team stats: \(error)")
+        }
     }
 
     /// Resets the view model state
@@ -141,5 +204,8 @@ class PointViewModel {
         recentPointRecords = []
         nationalRanking = []
         userNationalRank = nil
+        teamRanking = []
+        userTeamRank = nil
+        currentTeamId = nil
     }
 }

@@ -115,7 +115,6 @@
     "Shelter Information": {},
     "Status:": {},
     "Steps": {},
-    "TODO": {},
     "Tap to begin your mission": {},
     "Test: %@": {},
     "Title:": {},
@@ -4118,6 +4117,23 @@
         }
       }
     },
+    "ranking.join_team_to_compete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Join a Group to see Group rankings"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "グループに参加してランキングを見よう"
+          }
+        }
+      }
+    },
     "ranking.loading": {
       "extractionState": "manual",
       "localizations": {
@@ -4135,6 +4151,23 @@
         }
       }
     },
+    "ranking.members": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "members"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "人"
+          }
+        }
+      }
+    },
     "ranking.national": {
       "extractionState": "manual",
       "localizations": {
@@ -4148,6 +4181,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "全国"
+          }
+        }
+      }
+    },
+    "ranking.national_rank_format": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "#%d"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全国%d位"
           }
         }
       }
@@ -4182,6 +4232,57 @@
           "stringUnit": {
             "state": "translated",
             "value": "まだランキングがありません"
+          }
+        }
+      }
+    },
+    "ranking.no_team_description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Join or create a Group to compete with others and climb the group rankings!"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "グループに参加または作成して、他のプレイヤーと競い合い、グループランキングを駆け上がろう！"
+          }
+        }
+      }
+    },
+    "ranking.no_team_preview": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Group"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "グループ未加入"
+          }
+        }
+      }
+    },
+    "ranking.no_team_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Team Yet"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まだチームに参加していません"
           }
         }
       }
@@ -4226,30 +4327,30 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Team"
+            "value": "group"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "チーム"
+            "value": "グループ"
           }
         }
       }
     },
-    "ranking.team_coming_soon": {
+    "ranking.team_complete_missions": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Team Rankings Coming Soon"
+            "value": "Complete missions with your group members!"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "チームランキング 近日公開"
+            "value": "グループメンバーと一緒にミッションをクリアしよう！"
           }
         }
       }
@@ -4260,13 +4361,47 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Join or create a team and compete together!"
+            "value": "Join or create a group and compete together!"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "チームを作成または参加して、一緒に競い合おう！"
+            "value": "グループを作成または参加して、一緒に競い合おう！"
+          }
+        }
+      }
+    },
+    "ranking.team_no_rankings": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Group Rankings Yet"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まだグループランキングがありません"
+          }
+        }
+      }
+    },
+    "ranking.team_rank_format": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "#%d"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d位"
           }
         }
       }
@@ -4318,6 +4453,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "あなたの順位"
+          }
+        }
+      }
+    },
+    "ranking.your_team_rank": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Group Rank"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "グループ内順位"
           }
         }
       }
@@ -4767,23 +4919,7 @@
         }
       }
     },
-    "result.rank_format": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "#%d"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "全国%d位"
-          }
-        }
-      }
-    },
+    "result.rank_format": {},
     "result.score.base_points": {
       "extractionState": "manual",
       "localizations": {
@@ -5414,7 +5550,8 @@
         }
       }
     },
-    "×%@": {}
+    "×%@": {},
+    "•••": {}
   },
   "version": "1.1"
 }

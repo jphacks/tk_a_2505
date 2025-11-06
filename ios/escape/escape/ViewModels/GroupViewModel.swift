@@ -301,4 +301,14 @@ class GroupViewModel {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.count >= 1 && trimmed.count <= 100
     }
+
+    /// Returns the user's first/primary group if they have one
+    var primaryGroup: TeamWithDetails? {
+        return userGroups.first
+    }
+
+    /// Checks if user has any groups
+    var hasAnyGroup: Bool {
+        return !userGroups.isEmpty
+    }
 }
