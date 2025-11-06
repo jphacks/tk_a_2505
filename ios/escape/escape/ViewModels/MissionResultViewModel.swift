@@ -270,7 +270,7 @@ class MissionResultViewModel {
             isUnlocked: true,
             imageName: nil,
             imageUrl: imageUrl ?? shelterBadge.getImageUrl(),
-            badgeNumber: shelter.commonId,
+            badgeNumber: shelter.number?.description,
             address: shelter.address,
             municipality: shelter.municipality,
             isShelter: shelter.isShelter ?? false,
