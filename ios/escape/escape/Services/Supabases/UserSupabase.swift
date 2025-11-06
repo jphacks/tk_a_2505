@@ -51,12 +51,12 @@ class UserSupabase {
 
         struct UpdateData: Encodable {
             let name: String
-            let profile_badge_id: String?
+            let shelter_badge_id: String?
         }
 
         let updateData = UpdateData(
             name: name,
-            profile_badge_id: profileBadgeId?.uuidString
+            shelter_badge_id: profileBadgeId?.uuidString
         )
 
         try await supabase
@@ -73,11 +73,11 @@ class UserSupabase {
         let currentUser = try await supabase.auth.session.user
 
         struct UpdateBadgeData: Encodable {
-            let profile_badge_id: String?
+            let shelter_badge_id: String?
         }
 
         let updateData = UpdateBadgeData(
-            profile_badge_id: profileBadgeId?.uuidString
+            shelter_badge_id: profileBadgeId?.uuidString
         )
 
         try await supabase

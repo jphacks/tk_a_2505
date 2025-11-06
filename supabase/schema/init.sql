@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS "public"."users" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "name" "text",
-    "profile_badge_id" "uuid"
+    "shelter_badge_id" "uuid"
 );
 
 
@@ -261,7 +261,7 @@ ALTER TABLE ONLY "public"."users"
 
 
 ALTER TABLE ONLY "public"."users"
-    ADD CONSTRAINT "users_profile_badge_id_fkey" FOREIGN KEY ("profile_badge_id") REFERENCES "public"."shelter_badges"("id") ON DELETE SET NULL;
+    ADD CONSTRAINT "users_shelter_badge_id_fkey" FOREIGN KEY ("shelter_badge_id") REFERENCES "public"."shelter_badges"("id") ON DELETE SET NULL;
 
 
 

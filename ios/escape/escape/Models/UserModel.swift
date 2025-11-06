@@ -17,7 +17,7 @@ struct User: Codable, Identifiable {
         case id
         case createdAt = "created_at"
         case name
-        case profileBadgeId = "profile_badge_id"
+        case profileBadgeId = "shelter_badge_id"
     }
 }
 
