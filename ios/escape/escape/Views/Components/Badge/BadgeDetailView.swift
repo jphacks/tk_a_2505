@@ -390,6 +390,106 @@ struct SkillStarView: View {
     }
 }
 
+// MARK: - コンパクト熟練度星アイコンコンポーネント
+
+struct CompactSkillStarsView: View {
+    let starCount: Int
+    let maxStars: Int = 5
+
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(0 ..< maxStars, id: \.self) { index in
+                CompactSkillStarView(isFilled: index < starCount)
+            }
+        }
+    }
+}
+
+struct CompactSkillStarView: View {
+    let isFilled: Bool
+
+    var body: some View {
+        ZStack {
+            // 影
+            Image(systemName: "star.fill")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(.black.opacity(0.25))
+                .offset(x: 1, y: 1.5)
+                .blur(radius: 1)
+
+            // メインの星
+            Image(systemName: isFilled ? "star.fill" : "star")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(isFilled ? .yellow : .white.opacity(0.3))
+
+            // 立体的なハイライト（埋まった星のみ）
+            if isFilled {
+                Image(systemName: "star.fill")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.white.opacity(0.6))
+                    .mask(
+                        LinearGradient(
+                            gradient: Gradient(stops: [
+                                .init(color: .white, location: 0.0),
+                                .init(color: .white, location: 0.4),
+                                .init(color: .clear, location: 0.8),
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .offset(x: -0.5, y: -0.5)
+                    .blendMode(.overlay)
+            }
+        }
+    }
+}
+
+// MARK: - 経験値ゲージコンポーネント
+
+struct ExperienceGaugeView: View {
+    let currentMissions: Int
+    let currentStarLevel: Int
+
+    private var progress: Double {
+        let thresholds = [0, 1, 3, 6, 10, 15] // 各星レベルに必要なミッション数
+
+        if currentStarLevel >= 5 {
+            return 1.0 // 最大レベル
+        }
+
+        let currentThreshold = thresholds[currentStarLevel]
+        let nextThreshold = thresholds[currentStarLevel + 1]
+
+        if currentMissions >= nextThreshold {
+            return 1.0
+        }
+
+        let progressInCurrentLevel = Double(currentMissions - currentThreshold)
+        let totalNeededForNextLevel = Double(nextThreshold - currentThreshold)
+
+        return max(0.0, min(1.0, progressInCurrentLevel / totalNeededForNextLevel))
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                // 背景
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color.white.opacity(0.3))
+                    .frame(height: 4)
+
+                // プログレス
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(.white)
+                    .frame(width: geometry.size.width * progress, height: 4)
+            }
+        }
+        .frame(height: 4)
+        .frame(width: 120)
+    }
+}
+
 // MARK: - 詳細画面用画像ローダー
 
 struct DetailImageLoader: View {
@@ -413,6 +513,7 @@ struct BadgeDetailView: View {
     @State private var isAnimating = false
     @State private var randomBackgroundColor = Badge.randomColor
     @State private var skillLevel: Int = 0
+    @State private var missionCount: Int = 0
     @State private var isLoadingSkillLevel = true
 
     var body: some View {
@@ -435,24 +536,9 @@ struct BadgeDetailView: View {
                                 .scaleEffect(isAnimating ? 1.05 : 1.0)
                                 .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: isAnimating)
 
-                            // 熟練度星アイコン
-                            if !isLoadingSkillLevel {
-                                SkillStarsView(starCount: skillLevel)
-                            } else {
-                                // ローディング表示
-                                HStack(spacing: 8) {
-                                    ForEach(0 ..< 5) { _ in
-                                        Image(systemName: "star")
-                                            .font(.system(size: 16, weight: .bold))
-                                            .foregroundColor(.white.opacity(0.3))
-                                    }
-                                }
-                                .padding(.vertical, 8)
-                            }
-
                             VStack(alignment: .leading, spacing: 8) {
                                 if let badgeNumber = badge.badgeNumber {
-                                    Text("Badge No. \(badgeNumber)")
+                                    Text("Shelter No. \(badgeNumber)")
                                         .font(.title3)
                                         .fontWeight(.semibold)
                                         .foregroundColor(.white.opacity(0.9))
@@ -467,6 +553,49 @@ struct BadgeDetailView: View {
                                     .fontWeight(.bold)
                                     .foregroundColor(.white)
                                     .multilineTextAlignment(.leading)
+
+                                // レベル表示
+                                if !isLoadingSkillLevel {
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        HStack(spacing: 8) {
+                                            Text("Lv.\(skillLevel)")
+                                                .font(.headline)
+                                                .fontWeight(.bold)
+                                                .foregroundColor(.white)
+
+                                            if skillLevel < 5 {
+                                                Text("→ Lv.\(skillLevel + 1)")
+                                                    .font(.caption)
+                                                    .foregroundColor(.white.opacity(0.7))
+                                            } else {
+                                                Text("MAX")
+                                                    .font(.caption)
+                                                    .foregroundColor(.orange)
+                                                    .fontWeight(.semibold)
+                                            }
+                                        }
+
+                                        // 経験値ゲージ
+                                        ExperienceGaugeView(
+                                            currentMissions: missionCount,
+                                            currentStarLevel: skillLevel
+                                        )
+                                    }
+                                    .padding(.top, 8)
+                                } else {
+                                    // ローディング表示
+                                    HStack(spacing: 8) {
+                                        Text("Lv.--")
+                                            .font(.headline)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.white.opacity(0.5))
+
+                                        RoundedRectangle(cornerRadius: 2)
+                                            .fill(Color.white.opacity(0.3))
+                                            .frame(width: 80, height: 4)
+                                    }
+                                    .padding(.top, 8)
+                                }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -648,14 +777,21 @@ struct BadgeDetailView: View {
 
             await MainActor.run {
                 skillLevel = calculatedSkillLevel
+                missionCount = missionResults.count
                 isLoadingSkillLevel = false
             }
 
         } catch {
             await MainActor.run {
                 skillLevel = 0
+                missionCount = 0
                 isLoadingSkillLevel = false
             }
         }
+    }
+
+    /// Get mission count for display
+    private func getMissionCount() -> Int {
+        return missionCount
     }
 }
