@@ -5448,6 +5448,74 @@
         }
       }
     },
+    "setting.profile_photo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile Photo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プロフィール写真"
+          }
+        }
+      }
+    },
+    "setting.profile_photo_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select a badge from your collection to use as your profile photo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コレクションからバッジを選んでプロフィール写真として使用できます"
+          }
+        }
+      }
+    },
+    "setting.no_badges": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No badges yet"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まだバッジがありません"
+          }
+        }
+      }
+    },
+    "setting.no_badges_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Complete missions to unlock badges"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ミッションをクリアしてバッジを手に入れましょう"
+          }
+        }
+      }
+    },
     "stats.period.day": {
       "extractionState": "manual",
       "localizations": {
