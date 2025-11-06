@@ -243,6 +243,9 @@ private struct TeamRankingRow: View {
                     .foregroundColor(.white)
             }
 
+            // User Avatar
+            UserAvatarView.teamRanking(username: entry.displayName)
+
             // User Info
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {

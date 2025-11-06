@@ -371,6 +371,9 @@ private struct RankingRow: View {
                     .foregroundColor(.white)
             }
 
+            // User Avatar
+            UserAvatarView.nationalRanking(username: entry.displayName)
+
             // User Info
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {
