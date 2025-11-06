@@ -9,7 +9,8 @@ import SwiftUI
 
 struct RankingView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var pointViewModel = PointViewModel()
+    let pointViewModel: PointViewModel
+    let groupViewModel: GroupViewModel
     @State private var selectedTab: RankingTab
 
     enum RankingTab: String, CaseIterable {
@@ -31,7 +32,9 @@ struct RankingView: View {
         }
     }
 
-    init(selectedTab: RankingCardView.RankingTab = .national) {
+    init(selectedTab: RankingCardView.RankingTab = .national, pointViewModel: PointViewModel, groupViewModel: GroupViewModel) {
+        self.pointViewModel = pointViewModel
+        self.groupViewModel = groupViewModel
         _selectedTab = State(initialValue: selectedTab == .national ? .national : .team)
     }
 
@@ -84,10 +87,10 @@ struct RankingView: View {
 
                 // Content
                 TabView(selection: $selectedTab) {
-                    NationalRankingView(pointViewModel: $pointViewModel)
+                    NationalRankingView(pointViewModel: pointViewModel)
                         .tag(RankingTab.national)
 
-                    TeamRankingView()
+                    TeamRankingView(pointViewModel: pointViewModel, groupViewModel: groupViewModel)
                         .tag(RankingTab.team)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
