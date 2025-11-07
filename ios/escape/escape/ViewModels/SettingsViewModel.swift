@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import SwiftUI
 import Supabase
+import SwiftUI
 
 @MainActor
 @Observable

@@ -21,7 +21,8 @@ struct SettingView: View {
                         // Profile Avatar - shows badge image if selected, otherwise shows initial
                         ZStack {
                             if let badgeImageUrl = viewModel.profileBadgeImageUrl,
-                               let url = URL(string: badgeImageUrl) {
+                               let url = URL(string: badgeImageUrl)
+                            {
                                 // Display badge image
                                 AsyncImage(url: url) { phase in
                                     switch phase {
@@ -32,7 +33,7 @@ struct SettingView: View {
                                             .overlay(
                                                 ProgressView()
                                             )
-                                    case .success(let image):
+                                    case let .success(image):
                                         image
                                             .resizable()
                                             .aspectRatio(contentMode: .fill)
@@ -209,7 +210,7 @@ struct ProfileEditView: View {
                         GridItem(.flexible()),
                         GridItem(.flexible()),
                         GridItem(.flexible()),
-                        GridItem(.flexible())
+                        GridItem(.flexible()),
                     ], spacing: 12) {
                         // Option to clear badge (use initial)
                         Button {
@@ -252,7 +253,8 @@ struct ProfileEditView: View {
                                     VStack(spacing: 4) {
                                         ZStack {
                                             if let imageUrl = badge.imageUrl,
-                                               let url = URL(string: imageUrl) {
+                                               let url = URL(string: imageUrl)
+                                            {
                                                 AsyncImage(url: url) { phase in
                                                     switch phase {
                                                     case .empty:
@@ -260,7 +262,7 @@ struct ProfileEditView: View {
                                                             .fill(Color.gray.opacity(0.2))
                                                             .frame(width: 60, height: 60)
                                                             .overlay(ProgressView())
-                                                    case .success(let image):
+                                                    case let .success(image):
                                                         image
                                                             .resizable()
                                                             .aspectRatio(contentMode: .fill)
