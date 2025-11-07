@@ -8,6 +8,44 @@
 import Foundation
 import Supabase
 
+// MARK: - RPC Parameter Types
+
+/// Parameter type for creating a team via RPC function
+private struct CreateTeamParams: Sendable, Encodable {
+    let group_name: String
+    let group_description: String?
+    let max_members_count: Int
+
+    nonisolated func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(group_name, forKey: .group_name)
+        try container.encode(group_description, forKey: .group_description)
+        try container.encode(max_members_count, forKey: .max_members_count)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case group_name
+        case group_description
+        case max_members_count
+    }
+}
+
+/// Parameter type for joining a team via RPC function
+private struct JoinTeamParams: Sendable, Encodable {
+    let p_invite_code: String
+
+    nonisolated func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(p_invite_code, forKey: .p_invite_code)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case p_invite_code
+    }
+}
+
+// MARK: - TeamSupabase
+
 class TeamSupabase {
     // MARK: - Team Operations
 
@@ -17,11 +55,6 @@ class TeamSupabase {
     /// - Throws: Database error if creation fails
     func createTeam(_ request: CreateTeamRequest) async throws -> UUID {
         // rpc関数のパラメータを適切な型で構築
-        struct CreateTeamParams: Encodable {
-            let group_name: String
-            let group_description: String?
-            let max_members_count: Int
-        }
 
         let params = CreateTeamParams(
             group_name: request.name,
@@ -29,10 +62,11 @@ class TeamSupabase {
             max_members_count: 50
         )
 
-        let response: UUID = try await supabase
-            .rpc("create_user_group", params: params)
-            .execute()
-            .value
+        let response: UUID =
+            try await supabase
+                .rpc("create_user_group", params: params)
+                .execute()
+                .value
 
         return response
     }
@@ -44,12 +78,13 @@ class TeamSupabase {
         let currentUser = try await supabase.auth.session.user
 
         // First get the groups the user is a member of
-        let memberTeams: [TeamMember] = try await supabase
-            .from("group_members")
-            .select()
-            .eq("user_id", value: currentUser.id)
-            .execute()
-            .value
+        let memberTeams: [TeamMember] =
+            try await supabase
+                .from("group_members")
+                .select()
+                .eq("user_id", value: currentUser.id)
+                .execute()
+                .value
 
         let groupIds = memberTeams.map { $0.groupId }
 
@@ -58,12 +93,13 @@ class TeamSupabase {
         }
 
         // Fetch the group details
-        let groups: [Team] = try await supabase
-            .from("groups")
-            .select()
-            .in("id", values: groupIds)
-            .execute()
-            .value
+        let groups: [Team] =
+            try await supabase
+                .from("groups")
+                .select()
+                .in("id", values: groupIds)
+                .execute()
+                .value
 
         // Get member counts for each group
         var groupsWithDetails: [TeamWithDetails] = []
@@ -90,13 +126,14 @@ class TeamSupabase {
     /// - Returns: Team object if found
     /// - Throws: Database error if fetch fails
     func fetchTeam(by groupId: UUID) async throws -> Team? {
-        let groups: [Team] = try await supabase
-            .from("groups")
-            .select()
-            .eq("id", value: groupId)
-            .limit(1)
-            .execute()
-            .value
+        let groups: [Team] =
+            try await supabase
+                .from("groups")
+                .select()
+                .eq("id", value: groupId)
+                .limit(1)
+                .execute()
+                .value
 
         return groups.first
     }
@@ -145,13 +182,14 @@ class TeamSupabase {
         let currentUser = try await supabase.auth.session.user
         print("🗑️ Current user ID: \(currentUser.id)")
 
-        let groups: [Team] = try await supabase
-            .from("groups")
-            .select()
-            .eq("id", value: groupId)
-            .eq("owner_id", value: currentUser.id)
-            .execute()
-            .value
+        let groups: [Team] =
+            try await supabase
+                .from("groups")
+                .select()
+                .eq("id", value: groupId)
+                .eq("owner_id", value: currentUser.id)
+                .execute()
+                .value
 
         print("🗑️ Found \(groups.count) groups to delete")
 
@@ -160,21 +198,23 @@ class TeamSupabase {
         }
 
         // Delete the group (RLS policy will handle ownership verification)
-        let result = try await supabase
-            .from("groups")
-            .delete()
-            .eq("id", value: groupId)
-            .execute()
+        let result =
+            try await supabase
+                .from("groups")
+                .delete()
+                .eq("id", value: groupId)
+                .execute()
 
         print("🗑️ Delete result: \(result)")
 
         // Verify deletion
-        let remainingTeams: [Team] = try await supabase
-            .from("groups")
-            .select()
-            .eq("id", value: groupId)
-            .execute()
-            .value
+        let remainingTeams: [Team] =
+            try await supabase
+                .from("groups")
+                .select()
+                .eq("id", value: groupId)
+                .execute()
+                .value
 
         print("🗑️ Remaining groups after deletion: \(remainingTeams.count)")
 
@@ -192,16 +232,13 @@ class TeamSupabase {
     /// - Returns: The group ID that was joined
     /// - Throws: Database error if join fails
     func joinTeam(inviteCode: String) async throws -> UUID {
-        struct JoinTeamParams: Encodable {
-            let p_invite_code: String
-        }
-
         let params = JoinTeamParams(p_invite_code: inviteCode)
 
-        let response: UUID = try await supabase
-            .rpc("join_group_by_invite_code", params: params)
-            .execute()
-            .value
+        let response: UUID =
+            try await supabase
+                .rpc("join_group_by_invite_code", params: params)
+                .execute()
+                .value
 
         return response
     }
@@ -212,24 +249,26 @@ class TeamSupabase {
     /// - Throws: Database error if fetch fails
     func fetchTeamMembers(groupId: UUID) async throws -> [TeamMemberWithUser] {
         // First, get all group members
-        let members: [TeamMember] = try await supabase
-            .from("group_members")
-            .select()
-            .eq("group_id", value: groupId)
-            .order("joined_at", ascending: true)
-            .execute()
-            .value
+        let members: [TeamMember] =
+            try await supabase
+                .from("group_members")
+                .select()
+                .eq("group_id", value: groupId)
+                .order("joined_at", ascending: true)
+                .execute()
+                .value
 
         // Get all unique user IDs
         let userIds = members.map { $0.userId }
 
         // Fetch all users in one query
-        let users: [User] = try await supabase
-            .from("users")
-            .select()
-            .in("id", values: userIds)
-            .execute()
-            .value
+        let users: [User] =
+            try await supabase
+                .from("users")
+                .select()
+                .in("id", values: userIds)
+                .execute()
+                .value
 
         // Create a dictionary for quick user lookup
         let userDict = Dictionary(uniqueKeysWithValues: users.map { ($0.id, $0) })
@@ -293,12 +332,13 @@ class TeamSupabase {
     /// - Returns: Number of members in the group
     /// - Throws: Database error if fetch fails
     private func fetchMemberCount(groupId: UUID) async throws -> Int {
-        let members: [TeamMember] = try await supabase
-            .from("group_members")
-            .select()
-            .eq("group_id", value: groupId)
-            .execute()
-            .value
+        let members: [TeamMember] =
+            try await supabase
+                .from("group_members")
+                .select()
+                .eq("group_id", value: groupId)
+                .execute()
+                .value
 
         return members.count
     }
@@ -309,14 +349,15 @@ class TeamSupabase {
     func isCurrentUserMember(of groupId: UUID) async throws -> Bool {
         let currentUser = try await supabase.auth.session.user
 
-        let members: [TeamMember] = try await supabase
-            .from("group_members")
-            .select()
-            .eq("group_id", value: groupId)
-            .eq("user_id", value: currentUser.id)
-            .limit(1)
-            .execute()
-            .value
+        let members: [TeamMember] =
+            try await supabase
+                .from("group_members")
+                .select()
+                .eq("group_id", value: groupId)
+                .eq("user_id", value: currentUser.id)
+                .limit(1)
+                .execute()
+                .value
 
         return !members.isEmpty
     }
@@ -327,14 +368,15 @@ class TeamSupabase {
     func getCurrentUserRole(in groupId: UUID) async throws -> MemberRole? {
         let currentUser = try await supabase.auth.session.user
 
-        let members: [TeamMember] = try await supabase
-            .from("group_members")
-            .select()
-            .eq("group_id", value: groupId)
-            .eq("user_id", value: currentUser.id)
-            .limit(1)
-            .execute()
-            .value
+        let members: [TeamMember] =
+            try await supabase
+                .from("group_members")
+                .select()
+                .eq("group_id", value: groupId)
+                .eq("user_id", value: currentUser.id)
+                .limit(1)
+                .execute()
+                .value
 
         return members.first?.role
     }
