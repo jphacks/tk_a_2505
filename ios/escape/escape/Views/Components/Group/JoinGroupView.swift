@@ -10,26 +10,17 @@ import SwiftUI
 struct JoinGroupView: View {
     @Bindable var groupViewModel: GroupViewModel
     @FocusState private var isInviteCodeFocused: Bool
+    @State private var showQRScanner = false
 
     var body: some View {
         VStack(spacing: 24) {
-            // Header Info
-            VStack(spacing: 12) {
-                Image(systemName: "qrcode")
-                    .font(.system(size: 48))
-                    .foregroundColor(Color("brandOrange"))
-
-                Text("group.join.title", bundle: .main)
-                    .font(.title2)
-                    .fontWeight(.semibold)
-
-                Text("group.join.description", bundle: .main)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-            }
-            .padding(.top, 20)
+            // Description
+            Text("group.join.description", bundle: .main)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
+                .padding(.top, 8)
 
             // Invite Code Form
             VStack(spacing: 20) {
@@ -56,20 +47,19 @@ struct JoinGroupView: View {
 
                         // QR Code Scanner Button (placeholder for future implementation)
                         Button(action: {
-                            // TODO: Implement QR code scanner
+                            showQRScanner = true
                         }) {
                             Image(systemName: "qrcode.viewfinder")
                                 .font(.title2)
                                 .foregroundColor(Color("brandOrange"))
                                 .frame(width: 40, height: 40)
                                 .background(Color("brandOrange").opacity(0.1))
-                                .cornerRadius(8)
+                                .cornerRadius(20)
                         }
-                        .disabled(true) // Disabled until QR scanner is implemented
                     }
 
                     // Format Help
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("group.join.format_label", bundle: .main)
                             .font(.caption)
                             .fontWeight(.medium)
@@ -92,9 +82,13 @@ struct JoinGroupView: View {
                                 .foregroundColor(isValidInviteCode ? .green : .red)
                                 .font(.caption)
 
-                            Text(isValidInviteCode ? String(localized: "group.join.valid_format", bundle: .main) : String(localized: "group.join.invalid_format", bundle: .main))
-                                .font(.caption2)
-                                .foregroundColor(isValidInviteCode ? .green : .red)
+                            Text(
+                                isValidInviteCode
+                                    ? String(localized: "group.join.valid_format", bundle: .main)
+                                    : String(localized: "group.join.invalid_format", bundle: .main)
+                            )
+                            .font(.caption2)
+                            .foregroundColor(isValidInviteCode ? .green : .red)
                         }
                         .transition(.opacity)
                     }
@@ -131,8 +125,12 @@ struct JoinGroupView: View {
                             Image(systemName: "person.badge.plus")
                         }
 
-                        Text(groupViewModel.isJoiningGroup ? String(localized: "group.join.joining", bundle: .main) : String(localized: "group.join.button", bundle: .main))
-                            .fontWeight(.semibold)
+                        Text(
+                            groupViewModel.isJoiningGroup
+                                ? String(localized: "group.join.joining", bundle: .main)
+                                : String(localized: "group.join.button", bundle: .main)
+                        )
+                        .fontWeight(.semibold)
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -140,31 +138,9 @@ struct JoinGroupView: View {
                         joinButtonEnabled ? Color("brandOrange") : Color.gray.opacity(0.3)
                     )
                     .foregroundColor(.white)
-                    .cornerRadius(12)
+                    .cornerRadius(20)
                 }
                 .disabled(!joinButtonEnabled)
-
-                // Example Code Display
-                VStack(spacing: 8) {
-                    Text("group.join.example_label", bundle: .main)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(.secondary)
-
-                    HStack(spacing: 8) {
-                        ForEach(["ABCD1234", "XYZ98765", "HELLO123"], id: \.self) { example in
-                            Text(example)
-                                .font(.system(.caption, design: .monospaced))
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color(.systemGray5))
-                                .cornerRadius(6)
-                                .onTapGesture {
-                                    groupViewModel.joinGroupInviteCode = example
-                                }
-                        }
-                    }
-                }
             }
             .padding(.horizontal)
 
@@ -176,9 +152,15 @@ struct JoinGroupView: View {
                     .foregroundColor(.secondary)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    JoinGroupInfoRow(icon: "message", text: String(localized: "group.join.tip_receive", bundle: .main))
-                    JoinGroupInfoRow(icon: "shield", text: String(localized: "group.join.tip_approval", bundle: .main))
-                    JoinGroupInfoRow(icon: "person.3", text: String(localized: "group.join.tip_activities", bundle: .main))
+                    JoinGroupInfoRow(
+                        icon: "message", text: String(localized: "group.join.tip_receive", bundle: .main)
+                    )
+                    JoinGroupInfoRow(
+                        icon: "shield", text: String(localized: "group.join.tip_approval", bundle: .main)
+                    )
+                    JoinGroupInfoRow(
+                        icon: "person.3", text: String(localized: "group.join.tip_activities", bundle: .main)
+                    )
                 }
                 .padding(.horizontal)
             }
@@ -196,6 +178,9 @@ struct JoinGroupView: View {
                     groupViewModel.clearError()
                 }
             }
+        }
+        .sheet(isPresented: $showQRScanner) {
+            QRCodeScannerView(scannedCode: $groupViewModel.joinGroupInviteCode)
         }
     }
 
