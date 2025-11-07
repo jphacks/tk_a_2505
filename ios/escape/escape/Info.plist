@@ -19,5 +19,10 @@
 	<string>This app uses your location to show your current position on the map and help you find nearby emergency shelters.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app uses your location to show your current position on the map and help you find nearby emergency shelters.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to scan QR codes for joining groups.</string>
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
+
 </dict>
 </plist>

@@ -288,25 +288,14 @@ private struct PodiumPosition: View {
                 .offset(y: showCrown ? 0 : 10)
 
             // Avatar placeholder
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [color.opacity(0.3), color.opacity(0.1)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .frame(width: 60, height: 60)
-                .overlay(
-                    Text(String(entry.displayName.prefix(1)))
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(color)
-                )
-                .overlay(
-                    Circle()
-                        .stroke(color, lineWidth: 3)
-                )
+            UserAvatarView(
+                username: entry.displayName,
+                badgeImageUrl: entry.profileBadgeImageUrl,
+                size: .medium,
+                colors: [color],
+                strokeColor: color,
+                strokeWidth: 3
+            )
 
             // Name
             Text(entry.displayName)
@@ -370,6 +359,12 @@ private struct RankingRow: View {
                     .fontWeight(.bold)
                     .foregroundColor(.white)
             }
+
+            // User Avatar
+            UserAvatarView.nationalRanking(
+                username: entry.displayName,
+                badgeImageUrl: entry.profileBadgeImageUrl
+            )
 
             // User Info
             VStack(alignment: .leading, spacing: 4) {

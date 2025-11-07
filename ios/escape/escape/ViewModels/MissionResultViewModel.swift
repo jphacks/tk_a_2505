@@ -44,6 +44,7 @@ class MissionResultViewModel {
     var shareImageData: Data?
     // Cache a snapshot image (as data) so we can show it in the share sheet preview.
     var shareSnapshotData: Data?
+    var badgeSkillLevel: Int = 0
 
     // MARK: - Dependencies
 
@@ -269,7 +270,7 @@ class MissionResultViewModel {
             isUnlocked: true,
             imageName: nil,
             imageUrl: imageUrl ?? shelterBadge.getImageUrl(),
-            badgeNumber: shelter.commonId,
+            badgeNumber: shelter.number?.description,
             address: shelter.address,
             municipality: shelter.municipality,
             isShelter: shelter.isShelter ?? false,
@@ -298,5 +299,36 @@ class MissionResultViewModel {
         }
 
         return nil
+    }
+
+    // MARK: - Skill Level Methods
+
+    /// Fetches mission result count for the badge's shelter and calculates skill level
+    /// - Parameter badge: The badge to calculate skill level for
+    func loadBadgeSkillLevel(for badge: Badge) async {
+        guard let shelterUUID = UUID(uuidString: badge.id) else {
+            print("❌ Invalid badge shelter ID: \(badge.id)")
+            return
+        }
+
+        do {
+            let currentUserId = try await authService.getCurrentUserId()
+            let missionResults = try await missionResultService.getUserShelterMissionResults(
+                userId: currentUserId,
+                shelterId: shelterUUID
+            )
+            let starCount = SkillLevelCalculator.calculateStarCount(from: missionResults.count)
+
+            await MainActor.run {
+                badgeSkillLevel = starCount
+            }
+
+            print("✅ Loaded skill level for badge \(badge.name): \(starCount) stars (\(missionResults.count) missions)")
+        } catch {
+            print("❌ Failed to load badge skill level: \(error)")
+            await MainActor.run {
+                badgeSkillLevel = 0
+            }
+        }
     }
 }

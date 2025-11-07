@@ -14,15 +14,16 @@ enum Tab {
 }
 
 struct NavigationView: View {
-    @State private var selectedTab: Tab = .home
+    @StateObject private var tabSelection = TabSelection()
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            HomeView(selectedTab: $selectedTab)
+        TabView(selection: $tabSelection.selectedTab) {
+            HomeView()
                 .tabItem {
                     Label("nav.home", systemImage: "house.fill")
                 }
                 .tag(Tab.home)
+                .environmentObject(tabSelection)
 
             MapView()
                 .ignoresSafeArea()

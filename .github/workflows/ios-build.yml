@@ -25,6 +25,18 @@ jobs:
     - name: List available Xcode versions
       run: ls /Applications | grep Xcode
 
+    - name: Select Xcode 15.x
+      run: |
+        # Find the latest Xcode 15.x version available
+        XCODE_15=$(ls /Applications | grep "Xcode_15" | sort -V | tail -n 1)
+        if [ -z "$XCODE_15" ]; then
+          echo "No Xcode 15.x found, using default Xcode"
+          xcodebuild -version
+        else
+          echo "Selecting $XCODE_15"
+          sudo xcode-select -s /Applications/${XCODE_15}/Contents/Developer
+        fi
+
     - name: Show Xcode version
       run: xcodebuild -version
 
@@ -76,6 +88,7 @@ jobs:
     - name: Build iOS App for Device
       working-directory: ios/escape
       run: |
+        set -o pipefail
         xcodebuild clean build \
           -project escape.xcodeproj \
           -scheme escape \
@@ -89,7 +102,7 @@ jobs:
           CODE_SIGNING_ALLOWED=NO \
           DEVELOPMENT_TEAM="" \
           PROVISIONING_PROFILE_SPECIFIER="" \
-          | xcpretty || cat
+          | xcpretty && exit ${PIPESTATUS[0]} || exit 1
 
     - name: Package as IPA
       working-directory: ios/escape

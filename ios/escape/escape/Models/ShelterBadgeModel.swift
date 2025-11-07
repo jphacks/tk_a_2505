@@ -210,7 +210,7 @@ struct UserBadgeWithShelter: Codable, Identifiable {
             isUnlocked: true,
             imageName: determineImageName(),
             imageUrl: shelterBadgeInfo.getImageUrl(),
-            badgeNumber: shelterInfo.commonId,
+            badgeNumber: shelterInfo.number?.description,
             address: shelterInfo.address,
             municipality: shelterInfo.municipality,
             isShelter: shelterInfo.isShelter ?? false,

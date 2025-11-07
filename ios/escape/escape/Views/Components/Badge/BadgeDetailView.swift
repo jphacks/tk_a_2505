@@ -6,13 +6,140 @@
 //
 
 import MapKit
+import Supabase
 import SwiftUI
+import UIKit
 
 // MARK: - Map Annotation Model
 
 struct MapAnnotation: Identifiable {
     let id = UUID()
     let coordinate: CLLocationCoordinate2D
+}
+
+// MARK: - Progress Circles View
+
+struct ProgressCirclesView: View {
+    let currentRounds: Int
+    let targetRounds: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Progress bar with level indicators
+            HStack(spacing: 12) {
+                // Current level label
+                Text(String(localized: "badge.level", table: "Localizable") + " \(getCurrentLevel())")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+
+                // Progress bar: line + dots + line
+                HStack(spacing: 8) {
+                    // Leading line
+                    Rectangle()
+                        .fill(Color("brandOrange"))
+                        .frame(height: 3)
+                        .frame(maxWidth: .infinity)
+
+                    // Progress dots
+                    HStack(spacing: 6) {
+                        let dotsNeeded = getDotsNeededForNextLevel()
+                        let currentProgress = getCurrentLevelProgress()
+
+                        ForEach(0 ..< dotsNeeded, id: \.self) { index in
+                            Circle()
+                                .fill(index < currentProgress ? Color("brandOrange") : Color(.systemGray4))
+                                .frame(width: 12, height: 12)
+                                .scaleEffect(index < currentProgress ? 1.1 : 1.0)
+                                .animation(
+                                    .easeInOut(duration: 0.3).delay(Double(index) * 0.1), value: currentProgress
+                                )
+                        }
+                    }
+
+                    // Trailing line
+                    Rectangle()
+                        .fill(Color(.systemGray4))
+                        .frame(height: 3)
+                        .frame(maxWidth: .infinity)
+                }
+
+                // Next level label (if not max level)
+                if getCurrentLevel() < 5 {
+                    Text(String(localized: "badge.level", table: "Localizable") + " \(getCurrentLevel() + 1)")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                } else {
+                    Text(String(localized: "badge.max_level", table: "Localizable"))
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(Color("brandOrange"))
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                let dotsNeeded = getDotsNeededForNextLevel()
+                let currentProgress = getCurrentLevelProgress()
+
+                if currentProgress < dotsNeeded {
+                    let remaining = dotsNeeded - currentProgress
+                    Text(
+                        String(
+                            format: NSLocalizedString(
+                                "badge.visits_needed_to_level_up", tableName: "Localizable", comment: ""
+                            ),
+                            remaining, remaining == 1 ? "" : "s"
+                        )
+                    )
+                    .font(.caption2)
+                    .foregroundColor(Color("brandOrange"))
+                    .fontWeight(.medium)
+                } else if getCurrentLevel() < 5 {
+                    Text(String(localized: "badge.ready_for_next_level", table: "Localizable"))
+                        .font(.caption2)
+                        .foregroundColor(Color("brandOrange"))
+                        .fontWeight(.medium)
+                }
+            }
+        }
+    }
+
+    private func getCurrentLevel() -> Int {
+        let thresholds = [0, 1, 3, 6, 10, 15]
+        for (level, threshold) in thresholds.enumerated() {
+            if currentRounds < threshold {
+                return max(0, level - 1)
+            }
+        }
+        return 5 // Max level
+    }
+
+    private func getDotsNeededForNextLevel() -> Int {
+        let thresholds = [0, 1, 3, 6, 10, 15]
+        let currentLevel = getCurrentLevel()
+
+        if currentLevel >= 5 {
+            return 5 // Show 5 dots for max level
+        }
+
+        let currentLevelThreshold = thresholds[currentLevel]
+        let nextLevelThreshold = thresholds[currentLevel + 1]
+
+        return nextLevelThreshold - currentLevelThreshold
+    }
+
+    private func getCurrentLevelProgress() -> Int {
+        let thresholds = [0, 1, 3, 6, 10, 15]
+        let currentLevel = getCurrentLevel()
+
+        if currentLevel >= 5 {
+            return 5 // Max progress for max level
+        }
+
+        let currentLevelThreshold = thresholds[currentLevel]
+        return currentRounds - currentLevelThreshold
+    }
 }
 
 // MARK: - 詳細画面用回転可能バッジビュー
@@ -333,6 +460,162 @@ struct DetailBadgeBackView: View {
     }
 }
 
+// MARK: - 熟練度星アイコンコンポーネント
+
+struct SkillStarsView: View {
+    let starCount: Int
+    let maxStars: Int = 5
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(0 ..< maxStars, id: \.self) { index in
+                SkillStarView(isFilled: index < starCount)
+            }
+        }
+        .padding(.vertical, 8)
+    }
+}
+
+struct SkillStarView: View {
+    let isFilled: Bool
+
+    var body: some View {
+        ZStack {
+            // 影
+            Image(systemName: "star.fill")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(.black.opacity(0.25))
+                .offset(x: 1.5, y: 2)
+                .blur(radius: 1.5)
+
+            // メインの星
+            Image(systemName: isFilled ? "star.fill" : "star")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(isFilled ? .yellow : .white.opacity(0.3))
+
+            // 立体的なハイライト（埋まった星のみ）
+            if isFilled {
+                Image(systemName: "star.fill")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.white.opacity(0.6))
+                    .mask(
+                        LinearGradient(
+                            gradient: Gradient(stops: [
+                                .init(color: .white, location: 0.0),
+                                .init(color: .white, location: 0.4),
+                                .init(color: .clear, location: 0.8),
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .offset(x: -1, y: -1)
+                    .blendMode(.overlay)
+            }
+        }
+    }
+}
+
+// MARK: - コンパクト熟練度星アイコンコンポーネント
+
+struct CompactSkillStarsView: View {
+    let starCount: Int
+    let maxStars: Int = 5
+
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(0 ..< maxStars, id: \.self) { index in
+                CompactSkillStarView(isFilled: index < starCount)
+            }
+        }
+    }
+}
+
+struct CompactSkillStarView: View {
+    let isFilled: Bool
+
+    var body: some View {
+        ZStack {
+            // 影
+            Image(systemName: "star.fill")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(.black.opacity(0.25))
+                .offset(x: 1, y: 1.5)
+                .blur(radius: 1)
+
+            // メインの星
+            Image(systemName: isFilled ? "star.fill" : "star")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(isFilled ? .yellow : .white.opacity(0.3))
+
+            // 立体的なハイライト（埋まった星のみ）
+            if isFilled {
+                Image(systemName: "star.fill")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.white.opacity(0.6))
+                    .mask(
+                        LinearGradient(
+                            gradient: Gradient(stops: [
+                                .init(color: .white, location: 0.0),
+                                .init(color: .white, location: 0.4),
+                                .init(color: .clear, location: 0.8),
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .offset(x: -0.5, y: -0.5)
+                    .blendMode(.overlay)
+            }
+        }
+    }
+}
+
+// MARK: - 経験値ゲージコンポーネント
+
+struct ExperienceGaugeView: View {
+    let currentMissions: Int
+    let currentStarLevel: Int
+
+    private var progress: Double {
+        let thresholds = [0, 1, 3, 6, 10, 15] // 各星レベルに必要なミッション数
+
+        if currentStarLevel >= 5 {
+            return 1.0 // 最大レベル
+        }
+
+        let currentThreshold = thresholds[currentStarLevel]
+        let nextThreshold = thresholds[currentStarLevel + 1]
+
+        if currentMissions >= nextThreshold {
+            return 1.0
+        }
+
+        let progressInCurrentLevel = Double(currentMissions - currentThreshold)
+        let totalNeededForNextLevel = Double(nextThreshold - currentThreshold)
+
+        return max(0.0, min(1.0, progressInCurrentLevel / totalNeededForNextLevel))
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                // 背景
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color.white.opacity(0.3))
+                    .frame(height: 4)
+
+                // プログレス
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(.white)
+                    .frame(width: geometry.size.width * progress, height: 4)
+            }
+        }
+        .frame(height: 4)
+        .frame(width: 120)
+    }
+}
+
 // MARK: - 詳細画面用画像ローダー
 
 struct DetailImageLoader: View {
@@ -353,18 +636,32 @@ struct DetailImageLoader: View {
 struct BadgeDetailView: View {
     let badge: Badge
     @Environment(\.dismiss) private var dismiss
-    @State private var isAnimating = false
     @State private var randomBackgroundColor = Badge.randomColor
+    @State private var averageBackgroundColor: Color? = nil
+    @State private var skillLevel: Int = 0
+    @State private var missionCount: Int = 0
+    @State private var isLoadingSkillLevel = true
 
     var body: some View {
         NavigationStack {
             ZStack {
-                // 背景グラデーション
-                LinearGradient(
-                    gradient: Gradient(colors: [randomBackgroundColor, randomBackgroundColor.opacity(0.7)]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                // Dynamic background based on badge image average color
+                Group {
+                    if let averageColor = averageBackgroundColor {
+                        LinearGradient(
+                            gradient: Gradient(stops: [
+                                .init(color: averageColor.asBackgroundColor(opacity: 0.9), location: 0.0),
+                                .init(color: averageColor.asBackgroundColor(opacity: 0.7), location: 0.4),
+                                .init(color: Color(.systemGroupedBackground).opacity(0.3), location: 1.0),
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        .animation(.easeInOut(duration: 0.8), value: averageBackgroundColor)
+                    } else {
+                        Color(.systemGroupedBackground)
+                    }
+                }
                 .ignoresSafeArea()
 
                 ScrollView {
@@ -373,26 +670,60 @@ struct BadgeDetailView: View {
                         VStack(spacing: 16) {
                             // 回転可能なバッジ
                             RotatableBadgeView(badge: badge)
-                                .scaleEffect(isAnimating ? 1.05 : 1.0)
-                                .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: isAnimating)
 
                             VStack(alignment: .leading, spacing: 8) {
-                                if let badgeNumber = badge.badgeNumber {
-                                    Text("Badge No. \(badgeNumber)")
-                                        .font(.title3)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(.white.opacity(0.9))
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(Color.white.opacity(0.25))
-                                        .cornerRadius(12)
-                                }
+                                VStack(alignment: .leading, spacing: 4) {
+                                    if let badgeNumber = badge.badgeNumber {
+                                        Text("#\(badgeNumber)")
+                                            .font(.title3)
+                                            .fontWeight(.medium)
+                                            .foregroundColor(.white)
+                                    }
 
-                                Text(badge.name)
-                                    .font(.largeTitle)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.white)
-                                    .multilineTextAlignment(.leading)
+                                    Text(badge.name)
+                                        .font(.largeTitle)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.white)
+                                        .multilineTextAlignment(.leading)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+
+                                // Progress indicator
+                                if !isLoadingSkillLevel {
+                                    VStack(alignment: .leading, spacing: 16) {
+                                        // Progress circles
+                                        VStack(alignment: .leading, spacing: 12) {
+                                            Text(String(localized: "badge.your_level", table: "Localizable"))
+                                                .font(.headline)
+                                                .fontWeight(.semibold)
+                                                .foregroundColor(.primary)
+
+                                            ProgressCirclesView(
+                                                currentRounds: missionCount,
+                                                targetRounds: getTargetRoundsForCurrentLevel()
+                                            )
+                                        }
+                                        .padding(20)
+                                        .background(Color(.secondarySystemGroupedBackground))
+                                        .cornerRadius(20)
+                                    }
+                                    .padding(.top, 12)
+                                } else {
+                                    // ローディング表示
+                                    HStack(spacing: 12) {
+                                        HStack(spacing: 6) {
+                                            ProgressView()
+                                                .tint(.secondary)
+                                            Text("Loading...")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                        .padding(12)
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
+                                    }
+                                    .padding(.top, 12)
+                                }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -406,24 +737,24 @@ struct BadgeDetailView: View {
                                 VStack(alignment: .leading, spacing: 12) {
                                     Text(String(localized: "badge.address", table: "Localizable"))
                                         .font(.headline)
-                                        .foregroundColor(.white)
+                                        .foregroundColor(.black)
 
                                     VStack(alignment: .leading, spacing: 4) {
                                         if let municipality = badge.municipality {
                                             Text(municipality)
                                                 .font(.body)
-                                                .foregroundColor(.white.opacity(0.8))
+                                                .foregroundColor(.secondary)
                                         }
                                         Text(address)
                                             .font(.body)
-                                            .foregroundColor(.white.opacity(0.9))
+                                            .foregroundColor(.black)
                                             .lineSpacing(4)
                                     }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(20)
-                                .background(Color.white.opacity(0.15))
-                                .cornerRadius(16)
+                                .background(Color(.secondarySystemGroupedBackground))
+                                .cornerRadius(20)
                             }
 
                             // 対応災害情報
@@ -431,28 +762,30 @@ struct BadgeDetailView: View {
                                 VStack(alignment: .leading, spacing: 12) {
                                     Text(String(localized: "badge.supported_disasters", table: "Localizable"))
                                         .font(.headline)
-                                        .foregroundColor(.white)
+                                        .foregroundColor(.black)
 
-                                    LazyVGrid(columns: [
-                                        GridItem(.flexible(), alignment: .leading),
-                                        GridItem(.flexible(), alignment: .leading),
-                                    ], spacing: 12) {
+                                    LazyVGrid(
+                                        columns: [
+                                            GridItem(.flexible(), alignment: .leading),
+                                            GridItem(.flexible(), alignment: .leading),
+                                        ], spacing: 12
+                                    ) {
                                         ForEach(badge.supportedDisasters, id: \.name) { disaster in
                                             HStack(spacing: 6) {
                                                 Image(systemName: disaster.icon)
                                                     .font(.caption)
-                                                    .foregroundColor(.white)
+                                                    .foregroundColor(.black)
                                                     .frame(width: 16, height: 16)
                                                 Text(disaster.name)
                                                     .font(.caption)
                                                     .fontWeight(.medium)
-                                                    .foregroundColor(.white)
+                                                    .foregroundColor(.black)
                                                     .lineLimit(1)
                                                 Spacer()
                                             }
                                             .padding(.horizontal, 10)
                                             .padding(.vertical, 6)
-                                            .background(Color.white.opacity(0.25))
+                                            .background(Color(.systemGray5))
                                             .cornerRadius(8)
                                             .frame(maxWidth: .infinity, alignment: .leading)
                                         }
@@ -460,8 +793,8 @@ struct BadgeDetailView: View {
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(20)
-                                .background(Color.white.opacity(0.15))
-                                .cornerRadius(16)
+                                .background(Color(.secondarySystemGroupedBackground))
+                                .cornerRadius(20)
                             }
 
                             // マップ表示
@@ -469,22 +802,23 @@ struct BadgeDetailView: View {
                                 VStack(alignment: .leading, spacing: 12) {
                                     Text(String(localized: "badge.location", table: "Localizable"))
                                         .font(.headline)
-                                        .foregroundColor(.white)
+                                        .foregroundColor(.black)
 
-                                    Map(coordinateRegion: .constant(MKCoordinateRegion(
-                                        center: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
-                                        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-                                    )), annotationItems: [MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude))]) { annotation in
-                                        MapPin(coordinate: annotation.coordinate, tint: .red)
+                                    Map {
+                                        Marker(
+                                            "",
+                                            coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+                                        )
+                                        .tint(.red)
                                     }
+                                    .mapStyle(.standard)
                                     .frame(height: 200)
-                                    .cornerRadius(12)
-                                    .disabled(true)
+                                    .cornerRadius(20)
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(20)
-                                .background(Color.white.opacity(0.15))
-                                .cornerRadius(16)
+                                .background(Color(.secondarySystemGroupedBackground))
+                                .cornerRadius(20)
                             }
                         }
                         .padding(.horizontal, 24)
@@ -503,14 +837,12 @@ struct BadgeDetailView: View {
                                             .font(.headline)
                                             .fontWeight(.bold)
                                     }
-                                    .foregroundColor(randomBackgroundColor)
+                                    .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 16)
-                                    .background(Color.white)
-                                    .cornerRadius(16)
+                                    .background(Color.accentColor)
+                                    .cornerRadius(20)
                                 }
-                                .scaleEffect(isAnimating ? 1.05 : 1.0)
-                                .animation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true), value: isAnimating)
                             }
                             .padding(.horizontal, 24)
                             .padding(.bottom, 40)
@@ -526,13 +858,152 @@ struct BadgeDetailView: View {
                     Button(String(localized: "badge.close", table: "Localizable")) {
                         dismiss()
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.accentColor)
                     .fontWeight(.semibold)
                 }
             }
             .onAppear {
-                isAnimating = true
+                Task {
+                    await loadSkillLevel()
+                    await extractAverageColor()
+                }
             }
+        }
+    }
+
+    // MARK: - Helper Methods
+
+    /// Loads the skill level for the current badge
+    private func loadSkillLevel() async {
+        do {
+            let authService = AuthSupabase()
+            let missionResultService = MissionResultSupabase()
+
+            let currentUserId = try await authService.getCurrentUserId()
+
+            guard let badgeUUID = UUID(uuidString: badge.id) else {
+                await MainActor.run {
+                    skillLevel = 0
+                    isLoadingSkillLevel = false
+                }
+                return
+            }
+
+            let shelterBadge: ShelterBadge =
+                try await supabase
+                    .from("shelter_badges")
+                    .select()
+                    .eq("id", value: badgeUUID)
+                    .single()
+                    .execute()
+                    .value
+
+            let missionResults = try await missionResultService.getUserShelterMissionResults(
+                userId: currentUserId,
+                shelterId: shelterBadge.shelterId
+            )
+
+            let calculatedSkillLevel = SkillLevelCalculator.calculateStarCount(from: missionResults.count)
+
+            await MainActor.run {
+                skillLevel = calculatedSkillLevel
+                missionCount = missionResults.count
+                isLoadingSkillLevel = false
+            }
+
+        } catch {
+            await MainActor.run {
+                skillLevel = 0
+                missionCount = 0
+                isLoadingSkillLevel = false
+            }
+        }
+    }
+
+    /// Get mission count for display
+    private func getMissionCount() -> Int {
+        return missionCount
+    }
+
+    /// Calculate visits needed for next level
+    private func visitsNeededForNextLevel() -> Int {
+        let thresholds = [0, 1, 3, 6, 10, 15] // Missions needed for each level
+
+        if skillLevel >= 5 {
+            return 0 // Max level reached
+        }
+
+        let nextThreshold = thresholds[skillLevel + 1]
+        return max(0, nextThreshold - missionCount)
+    }
+
+    /// Calculate rounds needed for next level (alias for visitsNeededForNextLevel)
+    private func roundsNeededForNextLevel() -> Int {
+        return visitsNeededForNextLevel()
+    }
+
+    /// Get target rounds for current level progress
+    private func getTargetRoundsForCurrentLevel() -> Int {
+        let thresholds = [0, 1, 3, 6, 10, 15] // Missions needed for each level
+
+        if skillLevel >= 5 {
+            return thresholds[5] // Max level target
+        }
+
+        return thresholds[skillLevel + 1] // Next level target
+    }
+
+    /// Extract average color from badge image
+    private func extractAverageColor() async {
+        // First try to get color from image URL
+        if let imageUrl = badge.imageUrl, !imageUrl.isEmpty {
+            await extractColorFromURL(imageUrl)
+        }
+        // Fallback to local image if URL fails or doesn't exist
+        else if let imageName = badge.imageName, !imageName.isEmpty {
+            await extractColorFromLocalImage(imageName)
+        }
+    }
+
+    /// Extract color from remote URL
+    private func extractColorFromURL(_ urlString: String) async {
+        guard let url = URL(string: urlString) else {
+            print("Invalid URL: \(urlString)")
+            return
+        }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            guard let image = UIImage(data: data) else {
+                print("Failed to create UIImage from data")
+                return
+            }
+
+            let vibrantColor = image.vibrantAverageColor
+            await MainActor.run {
+                print("🎨 Extracted vibrant color from URL: \(vibrantColor)")
+                self.averageBackgroundColor = vibrantColor
+            }
+        } catch {
+            print("Failed to extract color from URL: \(error)")
+            // Try fallback to local image if available
+            if let imageName = badge.imageName, !imageName.isEmpty {
+                await extractColorFromLocalImage(imageName)
+            }
+        }
+    }
+
+    /// Extract color from local image
+    private func extractColorFromLocalImage(_ imageName: String) async {
+        guard let image = UIImage(named: imageName) else {
+            print("Failed to load local image: \(imageName)")
+            return
+        }
+
+        let vibrantColor = image.vibrantAverageColor
+        await MainActor.run {
+            print("🎨 Extracted vibrant color from local image: \(vibrantColor)")
+            self.averageBackgroundColor = vibrantColor
         }
     }
 }

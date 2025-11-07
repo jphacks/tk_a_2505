@@ -3,6 +3,7 @@ import Link from "next/link";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { assetPrefix } from "@/lib/asset-prefix";
 import { Button } from "@/components/ui/button";
+import { House, Gamepad2, PersonStanding } from "lucide-react";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -60,7 +61,9 @@ export default async function Home({ params }: Props) {
                 size="lg"
                 className="bg-orange-500 hover:bg-orange-600"
               >
-                <Link href="#demo">{t("tryDemo")}</Link>
+                <Link href="https://testflight.apple.com/join/H8SKNCZ7">
+                  <b>{t("tryDemo")}</b>
+                </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
                 <Link href="#features">{t("learnMore")}</Link>
@@ -82,9 +85,9 @@ export default async function Home({ params }: Props) {
             </p>
           </div>
           <div className="mt-12 grid gap-8 md:grid-cols-3">
-            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-500 text-2xl text-white">
-                🏠
+            <div className="w-full rounded-lg border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-500">
+                <House className="h-6 w-6 text-white" />
               </div>
               <h3 className="mb-2 text-xl font-semibold text-zinc-900 dark:text-white">
                 {t("feature1Title")}
@@ -93,9 +96,9 @@ export default async function Home({ params }: Props) {
                 {t("feature1Description")}
               </p>
             </div>
-            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-500 text-2xl text-white">
-                🎮
+            <div className="w-full rounded-lg border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-500">
+                <Gamepad2 className="h-6 w-6 text-white" />
               </div>
               <h3 className="mb-2 text-xl font-semibold text-zinc-900 dark:text-white">
                 {t("feature2Title")}
@@ -104,9 +107,9 @@ export default async function Home({ params }: Props) {
                 {t("feature2Description")}
               </p>
             </div>
-            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-500 text-2xl text-white">
-                🚶
+            <div className="w-full rounded-lg border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-500">
+                <PersonStanding className="h-6 w-6 text-white" />
               </div>
               <h3 className="mb-2 text-xl font-semibold text-zinc-900 dark:text-white">
                 {t("feature3Title")}

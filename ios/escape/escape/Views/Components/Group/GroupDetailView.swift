@@ -48,9 +48,36 @@ struct GroupDetailView: View {
             .navigationTitle(String(localized: "group.detail.title", bundle: .main))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     Button(String(localized: "group.close", bundle: .main)) {
                         dismiss()
+                    }
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if groupViewModel.isCurrentUserOwner {
+                        Menu {
+                            Button(action: {
+                                // TODO: Implement group editing
+                            }) {
+                                Label("group.detail.edit", systemImage: "pencil")
+                            }
+                            .disabled(true)
+
+                            Divider()
+
+                            Button(
+                                role: .destructive,
+                                action: {
+                                    showingDeleteAlert = true
+                                }
+                            ) {
+                                Label("group.detail.delete", systemImage: "trash")
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
+                                .foregroundColor(.primary)
+                        }
                     }
                 }
             }
@@ -61,7 +88,10 @@ struct GroupDetailView: View {
                         .presentationDragIndicator(.visible)
                 }
             }
-            .alert(String(localized: "group.detail.leave_alert_title", bundle: .main), isPresented: $showingLeaveAlert) {
+            .alert(
+                String(localized: "group.detail.leave_alert_title", bundle: .main),
+                isPresented: $showingLeaveAlert
+            ) {
                 Button(String(localized: "group.detail.leave_button", bundle: .main), role: .destructive) {
                     Task {
                         await groupViewModel.leaveCurrentGroup()
@@ -72,7 +102,10 @@ struct GroupDetailView: View {
             } message: {
                 Text(String(localized: "group.detail.leave_alert_message", bundle: .main))
             }
-            .alert(String(localized: "group.detail.delete_alert_title", bundle: .main), isPresented: $showingDeleteAlert) {
+            .alert(
+                String(localized: "group.detail.delete_alert_title", bundle: .main),
+                isPresented: $showingDeleteAlert
+            ) {
                 Button(String(localized: "group.detail.delete_button", bundle: .main), role: .destructive) {
                     Task {
                         await groupViewModel.deleteGroup()
@@ -131,7 +164,7 @@ struct GroupHeaderView: View {
                             .padding(.vertical, 4)
                             .background(Color("brandOrange").opacity(0.2))
                             .foregroundColor(Color("brandOrange"))
-                            .cornerRadius(6)
+                            .cornerRadius(8)
                     }
                 }
             }
@@ -139,7 +172,7 @@ struct GroupHeaderView: View {
         .frame(maxWidth: .infinity)
         .padding()
         .background(Color(.systemGray6))
-        .cornerRadius(12)
+        .cornerRadius(20)
     }
 }
 
@@ -166,45 +199,11 @@ struct GroupActionButtonsView: View {
                 .padding()
                 .background(Color("brandOrange"))
                 .foregroundColor(.white)
-                .cornerRadius(12)
+                .cornerRadius(20)
             }
 
-            // Management Buttons (for owners/admins)
-            if groupViewModel.isCurrentUserOwner {
-                HStack(spacing: 12) {
-                    // Edit Group Button (placeholder)
-                    Button(action: {
-                        // TODO: Implement group editing
-                    }) {
-                        HStack {
-                            Image(systemName: "pencil")
-                            Text("group.detail.edit", bundle: .main)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(.systemGray5))
-                        .foregroundColor(.primary)
-                        .cornerRadius(8)
-                    }
-                    .disabled(true) // Disabled until editing is implemented
-
-                    // Delete Group Button
-                    Button(action: {
-                        showingDeleteAlert = true
-                    }) {
-                        HStack {
-                            Image(systemName: "trash")
-                            Text("group.detail.delete", bundle: .main)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.red.opacity(0.1))
-                        .foregroundColor(.red)
-                        .cornerRadius(8)
-                    }
-                }
-            } else {
-                // Leave Group Button
+            // Leave Group Button (for non-owners)
+            if !groupViewModel.isCurrentUserOwner {
                 Button(action: {
                     showingLeaveAlert = true
                 }) {
@@ -216,7 +215,7 @@ struct GroupActionButtonsView: View {
                     .padding()
                     .background(Color.red.opacity(0.1))
                     .foregroundColor(.red)
-                    .cornerRadius(12)
+                    .cornerRadius(20)
                 }
             }
         }
@@ -236,9 +235,14 @@ struct GroupMembersView: View {
 
                 Spacer()
 
-                Text(String(format: String(localized: "group.detail.member_count", bundle: .main), groupViewModel.groupMembers.count))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                Text(
+                    String(
+                        format: String(localized: "group.detail.member_count", bundle: .main),
+                        groupViewModel.groupMembers.count
+                    )
+                )
+                .font(.caption)
+                .foregroundColor(.secondary)
             }
 
             if groupViewModel.isLoading {
@@ -261,7 +265,7 @@ struct GroupMembersView: View {
         }
         .padding()
         .background(Color(.systemGray6))
-        .cornerRadius(12)
+        .cornerRadius(20)
     }
 }
 
@@ -275,14 +279,11 @@ struct MemberRowView: View {
     var body: some View {
         HStack(spacing: 12) {
             // Member Avatar
-            Circle()
-                .fill(Color("brandOrange").opacity(0.3))
-                .frame(width: 40, height: 40)
-                .overlay(
-                    Text(String(member.user.displayName.prefix(1)).uppercased())
-                        .font(.headline)
-                        .foregroundColor(Color("brandOrange"))
-                )
+            UserAvatarView(
+                username: member.user.displayName,
+                size: .small,
+                colors: [Color("brandOrange")]
+            )
 
             // Member Info
             VStack(alignment: .leading, spacing: 2) {
@@ -290,9 +291,14 @@ struct MemberRowView: View {
                     .font(.body)
                     .fontWeight(.medium)
 
-                Text(String(format: String(localized: "group.detail.joined_date", bundle: .main), member.member.joinedAt.formatted(date: .abbreviated, time: .omitted)))
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
+                Text(
+                    String(
+                        format: String(localized: "group.detail.joined_date", bundle: .main),
+                        member.member.joinedAt.formatted(date: .abbreviated, time: .omitted)
+                    )
+                )
+                .font(.caption2)
+                .foregroundColor(.secondary)
             }
 
             Spacer()
@@ -303,16 +309,15 @@ struct MemberRowView: View {
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
                 .background(
-                    member.member.role == .owner ? Color("brandOrange").opacity(0.2) :
-                        member.member.role == .admin ? Color.blue.opacity(0.2) :
-                        Color(.systemGray5)
+                    member.member.role == .owner
+                        ? Color("brandOrange").opacity(0.2)
+                        : member.member.role == .admin ? Color.blue.opacity(0.2) : Color(.systemGray5)
                 )
                 .foregroundColor(
-                    member.member.role == .owner ? Color("brandOrange") :
-                        member.member.role == .admin ? .blue :
-                        .secondary
+                    member.member.role == .owner
+                        ? Color("brandOrange") : member.member.role == .admin ? .blue : .secondary
                 )
-                .cornerRadius(6)
+                .cornerRadius(8)
 
             // Action Menu (for owners/admins)
             if groupViewModel.canManageMembers && member.member.role != .owner {
@@ -342,7 +347,7 @@ struct MemberRowView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(Color(.systemBackground))
-        .cornerRadius(8)
+        .cornerRadius(20)
     }
 }
 
@@ -357,9 +362,18 @@ struct GroupStatsView: View {
                 .font(.headline)
 
             VStack(spacing: 12) {
-                StatRowView(title: String(localized: "group.detail.stats_total_missions", bundle: .main), value: "0", icon: "target")
-                StatRowView(title: String(localized: "group.detail.stats_total_badges", bundle: .main), value: "0", icon: "shield.fill")
-                StatRowView(title: String(localized: "group.detail.stats_active_members", bundle: .main), value: "\(group.memberCount)", icon: "person.3.fill")
+                StatRowView(
+                    title: String(localized: "group.detail.stats_total_missions", bundle: .main), value: "0",
+                    icon: "target"
+                )
+                StatRowView(
+                    title: String(localized: "group.detail.stats_total_badges", bundle: .main), value: "0",
+                    icon: "shield.fill"
+                )
+                StatRowView(
+                    title: String(localized: "group.detail.stats_active_members", bundle: .main),
+                    value: "\(group.memberCount)", icon: "person.3.fill"
+                )
             }
 
             Text("group.detail.stats_ranking_note", bundle: .main)
@@ -368,7 +382,7 @@ struct GroupStatsView: View {
         }
         .padding()
         .background(Color(.systemGray6))
-        .cornerRadius(12)
+        .cornerRadius(20)
     }
 }
 
@@ -403,64 +417,77 @@ struct InviteCodeView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
-                // Header
-                VStack(spacing: 12) {
-                    Image(systemName: "qrcode")
-                        .font(.system(size: 48))
-                        .foregroundColor(Color("brandOrange"))
-
-                    Text("group.join.invite_code", bundle: .main)
-                        .font(.title2)
-                        .fontWeight(.bold)
-
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Header
                     Text("group.detail.invite_description", bundle: .main)
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
-                }
+                        .padding(.horizontal)
+                        .padding(.top, 8)
 
-                // Invite Code Display
-                VStack(spacing: 16) {
-                    Text(group.team.inviteCode)
-                        .font(.system(size: 32, weight: .bold, design: .monospaced))
-                        .foregroundColor(Color("brandOrange"))
-                        .padding()
-                        .background(Color("brandOrange").opacity(0.1))
-                        .cornerRadius(12)
-
-                    Button(action: {
-                        UIPasteboard.general.string = group.team.inviteCode
-                    }) {
-                        HStack {
-                            Image(systemName: "doc.on.clipboard")
-                            Text("group.detail.copy", bundle: .main)
+                    // Invite Code Display
+                    VStack(spacing: 16) {
+                        // QR Code
+                        if let qrImage = generateQRCode(from: group.team.inviteCode) {
+                            Image(uiImage: qrImage)
+                                .interpolation(.none)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 200, height: 200)
+                                .padding()
+                                .background(Color.white)
+                                .cornerRadius(20)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color("brandOrange"))
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
+
+                        Text(group.team.inviteCode)
+                            .font(.system(size: 32, weight: .bold, design: .monospaced))
+                            .foregroundColor(Color("brandOrange"))
+                            .padding()
+                            .background(Color("brandOrange").opacity(0.1))
+                            .cornerRadius(20)
+
+                        Button(action: {
+                            UIPasteboard.general.string = group.team.inviteCode
+                        }) {
+                            HStack {
+                                Image(systemName: "doc.on.clipboard")
+                                Text("group.detail.copy", bundle: .main)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color("brandOrange"))
+                            .foregroundColor(.white)
+                            .cornerRadius(20)
+                        }
+                    }
+
+                    // Info
+                    VStack(spacing: 8) {
+                        Text("group.detail.usage_title", bundle: .main)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.secondary)
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            GroupDetailInfoRow(
+                                icon: "1.circle",
+                                text: String(localized: "group.detail.usage_step1", bundle: .main)
+                            )
+                            GroupDetailInfoRow(
+                                icon: "2.circle",
+                                text: String(localized: "group.detail.usage_step2", bundle: .main)
+                            )
+                            GroupDetailInfoRow(
+                                icon: "3.circle",
+                                text: String(localized: "group.detail.usage_step3", bundle: .main)
+                            )
+                        }
                     }
                 }
-
-                // Info
-                VStack(spacing: 8) {
-                    Text("group.detail.usage_title", bundle: .main)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(.secondary)
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        GroupDetailInfoRow(icon: "1.circle", text: String(localized: "group.detail.usage_step1", bundle: .main))
-                        GroupDetailInfoRow(icon: "2.circle", text: String(localized: "group.detail.usage_step2", bundle: .main))
-                        GroupDetailInfoRow(icon: "3.circle", text: String(localized: "group.detail.usage_step3", bundle: .main))
-                    }
-                }
-
-                Spacer()
+                .padding()
             }
-            .padding()
             .navigationTitle(String(localized: "group.detail.invite_title", bundle: .main))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -471,6 +498,26 @@ struct InviteCodeView: View {
                 }
             }
         }
+    }
+
+    private func generateQRCode(from string: String) -> UIImage? {
+        let data = string.data(using: .ascii)
+
+        guard let filter = CIFilter(name: "CIQRCodeGenerator") else { return nil }
+        filter.setValue(data, forKey: "inputMessage")
+        filter.setValue("H", forKey: "inputCorrectionLevel")
+
+        guard let ciImage = filter.outputImage else { return nil }
+
+        let transform = CGAffineTransform(scaleX: 10, y: 10)
+        let scaledCIImage = ciImage.transformed(by: transform)
+
+        let context = CIContext()
+        guard let cgImage = context.createCGImage(scaledCIImage, from: scaledCIImage.extent) else {
+            return nil
+        }
+
+        return UIImage(cgImage: cgImage)
     }
 }
 
