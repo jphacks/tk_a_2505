@@ -244,7 +244,7 @@ struct MapView: View {
             if let shelter = mapViewModel.checkShelterProximity(
                 userLatitude: location.coordinate.latitude,
                 userLongitude: location.coordinate.longitude,
-                radiusMeters: 30
+                radiusMeters: 100
             ) {
                 Task {
                     await mapViewModel.handleShelterReached(
