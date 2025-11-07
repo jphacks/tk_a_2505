@@ -203,9 +203,11 @@ private struct NationalRankingPreview: View {
                             .foregroundColor(Color("brandMediumBlue"))
                     }
 
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    VStack(spacing: 4) {
+                        Image(systemName: "chevron.right.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(Color("brandOrange").opacity(0.8))
+                    }
                 }
                 .padding(12)
                 .background(
@@ -266,9 +268,11 @@ private struct TeamRankingPreview: View {
                             .foregroundColor(Color("brandMediumBlue"))
                     }
 
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    VStack(spacing: 4) {
+                        Image(systemName: "chevron.right.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(Color("brandMediumBlue").opacity(0.8))
+                    }
                 }
                 .padding(12)
                 .background(
