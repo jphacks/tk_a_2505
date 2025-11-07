@@ -530,7 +530,7 @@ struct BadgeDetailView: View {
                             RotatableBadgeView(badge: badge)
 
                             VStack(alignment: .leading, spacing: 8) {
-                                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                HStack(alignment: .lastTextBaseline, spacing: 8) {
                                     Text(badge.name)
                                         .font(.largeTitle)
                                         .fontWeight(.bold)
@@ -538,7 +538,7 @@ struct BadgeDetailView: View {
 
                                     if let badgeNumber = badge.badgeNumber {
                                         Text("#\(badgeNumber)")
-                                            .font(.largeTitle)
+                                            .font(.title3)
                                             .fontWeight(.medium)
                                             .foregroundColor(Color("brandOrange"))
                                     }
