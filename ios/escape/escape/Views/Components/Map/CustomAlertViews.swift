@@ -176,23 +176,42 @@ struct ShelterInfoSheet: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
 
-                            // Rating summary - inline display
-                            if let summary = ratingViewModel.ratingSummary, summary.hasRatings {
-                                RatingSummaryCard(summary: summary, style: .compact)
+                            // Rating summary - always show (displays empty state if no ratings)
+                            if !ratingViewModel.isLoadingRatings {
+                                if let summary = ratingViewModel.ratingSummary, summary.hasRatings {
+                                    RatingSummaryCard(summary: summary, style: .compact)
+                                        .padding(.top, 4)
+                                } else {
+                                    // Empty state - no ratings yet
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "star")
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                        Text("rating.empty.no_ratings_yet", bundle: .main)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
                                     .padding(.top, 4)
+                                }
                             }
                         }
                     }
 
-                    // Navigation to reviews
-                    if let summary = ratingViewModel.ratingSummary, summary.hasRatings {
+                    // Navigation to reviews - always show so users can rate
+                    if !ratingViewModel.isLoadingRatings {
                         NavigationLink {
                             ShelterReviewsView(shelter: shelter, viewModel: ratingViewModel)
                         } label: {
                             HStack {
-                                Text("See All Reviews")
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
+                                if let summary = ratingViewModel.ratingSummary, summary.hasRatings {
+                                    Text("rating.action.see_all_reviews", bundle: .main)
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                } else {
+                                    Text("rating.action.rate_this_shelter", bundle: .main)
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                }
 
                                 Spacer()
 

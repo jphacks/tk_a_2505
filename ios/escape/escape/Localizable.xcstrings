@@ -6145,6 +6145,57 @@
         }
       }
     },
+    "rating.empty.no_ratings_yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No ratings yet"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まだ評価がありません"
+          }
+        }
+      }
+    },
+    "rating.action.rate_this_shelter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rate This Shelter"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この避難所を評価する"
+          }
+        }
+      }
+    },
+    "rating.action.see_all_reviews": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See All Reviews"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべてのレビューを見る"
+          }
+        }
+      }
+    },
     "×%@": {},
     "•••": {}
   },
