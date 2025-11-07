@@ -437,8 +437,7 @@ struct MapView: View {
                             }) {
                                 // Check if user has unlocked this shelter's badge
                                 if let unlockedBadge = mapViewModel.getBadgeForShelter(shelter.id),
-                                   let imageUrl = unlockedBadge.getImageUrl()
-                                {
+                                   let imageUrl = unlockedBadge.getImageUrl() {
                                     // Display badge image for unlocked shelters
                                     ZStack {
                                         // Badge image
@@ -453,7 +452,7 @@ struct MapView: View {
                                                         ProgressView()
                                                             .tint(.white)
                                                     }
-                                            case let .success(image):
+                                            case .success(let image):
                                                 // Successfully loaded badge image
                                                 image
                                                     .resizable()

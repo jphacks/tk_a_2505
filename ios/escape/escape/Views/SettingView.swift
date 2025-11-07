@@ -19,58 +19,11 @@ struct SettingView: View {
                 Section {
                     HStack(spacing: 16) {
                         // Profile Avatar - shows badge image if selected, otherwise shows initial
-                        ZStack {
-                            if let badgeImageUrl = viewModel.profileBadgeImageUrl,
-                               let url = URL(string: badgeImageUrl)
-                            {
-                                // Display badge image
-                                AsyncImage(url: url) { phase in
-                                    switch phase {
-                                    case .empty:
-                                        Circle()
-                                            .fill(Color.gray.opacity(0.2))
-                                            .frame(width: 60, height: 60)
-                                            .overlay(
-                                                ProgressView()
-                                            )
-                                    case let .success(image):
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fill)
-                                            .frame(width: 60, height: 60)
-                                            .clipShape(Circle())
-                                            .overlay(
-                                                Circle()
-                                                    .strokeBorder(Color.accentColor, lineWidth: 2)
-                                            )
-                                    case .failure:
-                                        // Fallback to initial
-                                        Circle()
-                                            .fill(Color.accentColor.opacity(0.2))
-                                            .frame(width: 60, height: 60)
-                                            .overlay(
-                                                Text(viewModel.name.prefix(1).uppercased())
-                                                    .font(.title2)
-                                                    .fontWeight(.semibold)
-                                                    .foregroundColor(.accentColor)
-                                            )
-                                    @unknown default:
-                                        EmptyView()
-                                    }
-                                }
-                            } else {
-                                // Default avatar with initial
-                                Circle()
-                                    .fill(Color.accentColor.opacity(0.2))
-                                    .frame(width: 60, height: 60)
-                                    .overlay(
-                                        Text(viewModel.name.prefix(1).uppercased())
-                                            .font(.title2)
-                                            .fontWeight(.semibold)
-                                            .foregroundColor(.accentColor)
-                                    )
-                            }
-                        }
+                        UserAvatarView.profile(
+                            username: viewModel.name,
+                            badgeImageUrl: viewModel.profileBadgeImageUrl,
+                            size: .medium
+                        )
 
                         // Profile Info
                         VStack(alignment: .leading, spacing: 4) {
@@ -210,34 +163,20 @@ struct ProfileEditView: View {
                         GridItem(.flexible()),
                         GridItem(.flexible()),
                         GridItem(.flexible()),
-                        GridItem(.flexible()),
+                        GridItem(.flexible())
                     ], spacing: 12) {
                         // Option to clear badge (use initial)
                         Button {
                             viewModel.selectProfileBadge(nil)
                         } label: {
                             VStack(spacing: 4) {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.accentColor.opacity(0.2))
-                                        .frame(width: 60, height: 60)
-                                        .overlay(
-                                            Text(viewModel.name.prefix(1).uppercased())
-                                                .font(.title3)
-                                                .fontWeight(.semibold)
-                                                .foregroundColor(.accentColor)
-                                        )
-                                        .overlay(
-                                            Circle()
-                                                .strokeBorder(
-                                                    viewModel.selectedProfileBadgeId == nil
-                                                        ? Color.accentColor
-                                                        : Color.clear,
-                                                    lineWidth: 3
-                                                )
-                                        )
-                                }
-                                Text("Default")
+                                UserAvatarView(
+                                    username: viewModel.name,
+                                    size: .medium,
+                                    strokeColor: viewModel.selectedProfileBadgeId == nil ? Color.accentColor : Color.clear,
+                                    strokeWidth: 3
+                                )
+                                Text("setting.profile_photo_default")
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -251,64 +190,14 @@ struct ProfileEditView: View {
                                     viewModel.selectProfileBadge(badgeUUID)
                                 } label: {
                                     VStack(spacing: 4) {
-                                        ZStack {
-                                            if let imageUrl = badge.imageUrl,
-                                               let url = URL(string: imageUrl)
-                                            {
-                                                AsyncImage(url: url) { phase in
-                                                    switch phase {
-                                                    case .empty:
-                                                        Circle()
-                                                            .fill(Color.gray.opacity(0.2))
-                                                            .frame(width: 60, height: 60)
-                                                            .overlay(ProgressView())
-                                                    case let .success(image):
-                                                        image
-                                                            .resizable()
-                                                            .aspectRatio(contentMode: .fill)
-                                                            .frame(width: 60, height: 60)
-                                                            .clipShape(Circle())
-                                                            .overlay(
-                                                                Circle()
-                                                                    .strokeBorder(
-                                                                        viewModel.selectedProfileBadgeId == badgeUUID
-                                                                            ? Color.accentColor
-                                                                            : Color.clear,
-                                                                        lineWidth: 3
-                                                                    )
-                                                            )
-                                                    case .failure:
-                                                        Circle()
-                                                            .fill(badge.color.opacity(0.3))
-                                                            .frame(width: 60, height: 60)
-                                                            .overlay(
-                                                                Image(systemName: badge.icon)
-                                                                    .foregroundColor(badge.color)
-                                                            )
-                                                    @unknown default:
-                                                        EmptyView()
-                                                    }
-                                                }
-                                            } else {
-                                                // Fallback to icon
-                                                Circle()
-                                                    .fill(badge.color.opacity(0.3))
-                                                    .frame(width: 60, height: 60)
-                                                    .overlay(
-                                                        Image(systemName: badge.icon)
-                                                            .foregroundColor(badge.color)
-                                                    )
-                                                    .overlay(
-                                                        Circle()
-                                                            .strokeBorder(
-                                                                viewModel.selectedProfileBadgeId == badgeUUID
-                                                                    ? Color.accentColor
-                                                                    : Color.clear,
-                                                                lineWidth: 3
-                                                            )
-                                                    )
-                                            }
-                                        }
+                                        UserAvatarView(
+                                            username: badge.name,
+                                            badgeImageUrl: badge.imageUrl,
+                                            size: .medium,
+                                            colors: [badge.color],
+                                            strokeColor: viewModel.selectedProfileBadgeId == badgeUUID ? Color.accentColor : Color.clear,
+                                            strokeWidth: 3
+                                        )
                                         Text(badge.name)
                                             .font(.caption2)
                                             .foregroundColor(.secondary)

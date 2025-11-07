@@ -58,6 +58,7 @@ struct RankingEntry: Identifiable, Equatable {
     let userId: UUID
     let userName: String?
     let totalPoints: Int64
+    let profileBadgeImageUrl: String?
 
     var displayName: String {
         userName ?? "Anonymous User"
