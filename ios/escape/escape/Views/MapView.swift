@@ -244,7 +244,7 @@ struct MapView: View {
             if let shelter = mapViewModel.checkShelterProximity(
                 userLatitude: location.coordinate.latitude,
                 userLongitude: location.coordinate.longitude,
-                radiusMeters: 30
+                radiusMeters: 100
             ) {
                 Task {
                     await mapViewModel.handleShelterReached(
@@ -437,7 +437,8 @@ struct MapView: View {
                             }) {
                                 // Check if user has unlocked this shelter's badge
                                 if let unlockedBadge = mapViewModel.getBadgeForShelter(shelter.id),
-                                   let imageUrl = unlockedBadge.getImageUrl() {
+                                   let imageUrl = unlockedBadge.getImageUrl()
+                                {
                                     // Display badge image for unlocked shelters
                                     ZStack {
                                         // Badge image
@@ -452,7 +453,7 @@ struct MapView: View {
                                                         ProgressView()
                                                             .tint(.white)
                                                     }
-                                            case .success(let image):
+                                            case let .success(image):
                                                 // Successfully loaded badge image
                                                 image
                                                     .resizable()

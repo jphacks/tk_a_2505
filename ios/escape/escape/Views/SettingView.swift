@@ -183,7 +183,7 @@ struct ProfileEditView: View {
                         GridItem(.flexible()),
                         GridItem(.flexible()),
                         GridItem(.flexible()),
-                        GridItem(.flexible())
+                        GridItem(.flexible()),
                     ], spacing: 12) {
                         // Option to clear badge (use initial)
                         Button {

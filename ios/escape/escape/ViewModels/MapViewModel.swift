@@ -196,7 +196,7 @@ class MapViewModel {
     /// Check if user has reached any shelters within a specified radius (in meters)
     /// Returns the shelter if reached and not previously tracked, nil otherwise
     /// Only checks filtered shelters (based on current disaster type)
-    func checkShelterProximity(userLatitude: Double, userLongitude: Double, radiusMeters: Double = 50.0) -> Shelter? {
+    func checkShelterProximity(userLatitude: Double, userLongitude: Double, radiusMeters: Double) -> Shelter? {
         let shelter = mapService.checkShelterProximity(
             shelters: filteredShelters,
             userLatitude: userLatitude,

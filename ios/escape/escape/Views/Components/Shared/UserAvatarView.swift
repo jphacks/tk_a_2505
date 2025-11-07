@@ -71,14 +71,15 @@ struct UserAvatarView: View {
     var body: some View {
         ZStack {
             if let urlString = badgeImageUrl,
-               let url = URL(string: urlString) {
+               let url = URL(string: urlString)
+            {
                 // Try to load badge image
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .empty:
                         // Loading state
                         loadingView
-                    case .success(let image):
+                    case let .success(image):
                         // Successfully loaded badge image
                         image
                             .resizable()
