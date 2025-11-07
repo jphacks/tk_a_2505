@@ -225,7 +225,7 @@ class PointSupabase {
 
             // Build badge URL dictionary
             for badge in badges {
-                let imageUrl = supabase.storage.from("badge_images").getPublicURL(path: "\(badge.badgeName).png")
+                let imageUrl = try supabase.storage.from("badge_images").getPublicURL(path: "\(badge.badgeName).png")
                 badgeUrlDict[badge.id] = imageUrl.absoluteString
             }
         }
@@ -323,7 +323,7 @@ class PointSupabase {
                 .value
 
             for badge in badges {
-                let imageUrl = supabase.storage.from("badge_images").getPublicURL(path: "\(badge.badgeName).png")
+                let imageUrl = try supabase.storage.from("badge_images").getPublicURL(path: "\(badge.badgeName).png")
                 badgeUrlDict[badge.id] = imageUrl.absoluteString
             }
         }
@@ -436,7 +436,7 @@ class PointSupabase {
                 .value
 
             for badge in badges {
-                let imageUrl = supabase.storage.from("badge_images").getPublicURL(path: "\(badge.badgeName).png")
+                let imageUrl = try supabase.storage.from("badge_images").getPublicURL(path: "\(badge.badgeName).png")
                 badgeUrlDict[badge.id] = imageUrl.absoluteString
             }
         }
