@@ -44,17 +44,20 @@ class UserSupabase {
     /// Updates the current user's profile with name and profile badge
     /// - Parameters:
     ///   - name: New name for the user
-    ///   - profileBadgeId: UUID of the badge to use as profile photo (nil to clear)
+    ///   - profileBadgeId: UUID of the badge to use as profile photo (optional)
     /// - Throws: Database error if update fails
     func updateUserProfile(name: String, profileBadgeId: UUID?) async throws {
         let currentUser = try await supabase.auth.session.user
 
-        var updateData: [String: Any] = ["name": name]
-        if let badgeId = profileBadgeId {
-            updateData["shelter_badge_id"] = badgeId.uuidString
-        } else {
-            updateData["shelter_badge_id"] = NSNull()
+        struct UpdateData: Encodable {
+            let name: String
+            let shelter_badge_id: String?
         }
+
+        let updateData = UpdateData(
+            name: name,
+            shelter_badge_id: profileBadgeId?.uuidString
+        )
 
         try await supabase
             .from("users")
@@ -69,12 +72,13 @@ class UserSupabase {
     func updateProfileBadge(profileBadgeId: UUID?) async throws {
         let currentUser = try await supabase.auth.session.user
 
-        let updateData: [String: Any]
-        if let badgeId = profileBadgeId {
-            updateData = ["shelter_badge_id": badgeId.uuidString]
-        } else {
-            updateData = ["shelter_badge_id": NSNull()]
+        struct UpdateBadgeData: Encodable {
+            let shelter_badge_id: String?
         }
+
+        let updateData = UpdateBadgeData(
+            shelter_badge_id: profileBadgeId?.uuidString
+        )
 
         try await supabase
             .from("users")
