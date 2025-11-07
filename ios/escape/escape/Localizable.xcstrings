@@ -4633,6 +4633,23 @@
         }
       }
     },
+    "ranking.view_all": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View All"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべて表示"
+          }
+        }
+      }
+    },
     "ranking.your_points": {
       "extractionState": "manual",
       "localizations": {
