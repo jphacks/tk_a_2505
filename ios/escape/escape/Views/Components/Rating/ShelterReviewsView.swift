@@ -205,21 +205,27 @@ struct EditRatingSheet: View {
         ShelterReviewsView(
             shelter: Shelter(
                 id: UUID().uuidString,
+                number: 1,
+                commonId: "TEST001",
                 name: "Sample Shelter",
                 address: "123 Test Street",
                 municipality: "Test City",
-                latitude: 35.6812,
-                longitude: 139.7671,
-                commonId: "TEST001",
+                isShelter: false,
                 isFlood: true,
+                isLandslide: false,
+                isStormSurge: false,
                 isEarthquake: true,
                 isTsunami: false,
                 isFire: true,
-                isLandslide: false,
-                isStormSurge: false,
                 isInlandFlood: false,
                 isVolcano: false,
-                isShelter: false
+                isSameAddressAsShelter: false,
+                otherMunicipalNotes: nil,
+                acceptedPeople: nil,
+                latitude: 35.6812,
+                longitude: 139.7671,
+                remarks: nil,
+                lastUpdated: Date()
             ),
             viewModel: {
                 let vm = RatingViewModel()
