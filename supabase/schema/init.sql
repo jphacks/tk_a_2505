@@ -20,6 +20,7 @@
 -- 4. Functions
 \ir functions/auth_functions.sql
 \ir functions/group_functions.sql
+\ir functions/rating_functions.sql
 
 -- 5. Tables (order matters due to foreign key dependencies)
 \ir tables/users.sql
@@ -31,11 +32,13 @@
 \ir tables/shelter_badges.sql
 \ir tables/user_shelter_badges.sql
 \ir tables/points.sql
+\ir tables/shelter_ratings.sql
 
 -- 6. Policies
 \ir policies/user_policies.sql
 \ir policies/group_policies.sql
 \ir policies/general_policies.sql
+\ir policies/rating_policies.sql
 
 -- 7. Final Grants and Configuration
 \ir 99_grants.sql

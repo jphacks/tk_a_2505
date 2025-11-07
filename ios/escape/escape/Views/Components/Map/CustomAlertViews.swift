@@ -149,6 +149,7 @@ struct ShelterInfoSheet: View {
     @State private var shelterBadge: ShelterBadge?
     @State private var hasUserBadge = false
     @State private var isLoadingBadge = false
+    @State private var ratingViewModel = RatingViewModel()
 
     var body: some View {
         NavigationStack {
@@ -174,6 +175,32 @@ struct ShelterInfoSheet: View {
                             Text(shelter.address)
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
+
+                            // Rating summary - inline display
+                            if let summary = ratingViewModel.ratingSummary, summary.hasRatings {
+                                RatingSummaryCard(summary: summary, style: .compact)
+                                    .padding(.top, 4)
+                            }
+                        }
+                    }
+
+                    // Navigation to reviews
+                    if let summary = ratingViewModel.ratingSummary, summary.hasRatings {
+                        NavigationLink {
+                            ShelterReviewsView(shelter: shelter, viewModel: ratingViewModel)
+                        } label: {
+                            HStack {
+                                Text("See All Reviews")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+
+                                Spacer()
+
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                            }
+                            .foregroundColor(.blue)
+                            .padding(.vertical, 8)
                         }
                     }
 
@@ -336,6 +363,7 @@ struct ShelterInfoSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .task {
                 await fetchBadgeInfo()
+                await loadRatingData()
             }
         }
     }
@@ -370,6 +398,16 @@ struct ShelterInfoSheet: View {
             shelterBadge = nil
             hasUserBadge = false
         }
+    }
+
+    private func loadRatingData() async {
+        guard let shelterUUID = UUID(uuidString: shelter.id) else {
+            print("⚠️ Cannot load ratings: Shelter ID is not a valid UUID")
+            return
+        }
+
+        // Load rating summary and user's rating status
+        await ratingViewModel.loadAllData(for: shelterUUID)
     }
 }
 
