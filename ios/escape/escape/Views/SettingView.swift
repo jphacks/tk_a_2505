@@ -241,7 +241,10 @@ struct ProfileEditView: View {
                 Button {
                     Task {
                         await viewModel.updateProfile()
-                        dismiss()
+                        // Only dismiss if update was successful (no error)
+                        if !viewModel.showError {
+                            dismiss()
+                        }
                     }
                 } label: {
                     HStack {
@@ -260,6 +263,15 @@ struct ProfileEditView: View {
         }
         .navigationTitle("setting.edit_profile")
         .navigationBarTitleDisplayMode(.inline)
+        .alert("Error", isPresented: $viewModel.showError) {
+            Button("OK", role: .cancel) {
+                viewModel.showError = false
+            }
+        } message: {
+            if let errorMessage = viewModel.errorMessage {
+                Text(errorMessage)
+            }
+        }
     }
 }
 

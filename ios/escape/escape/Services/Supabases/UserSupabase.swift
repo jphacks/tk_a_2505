@@ -49,25 +49,16 @@ class UserSupabase {
     func updateUserProfile(name: String, profileBadgeId: UUID?) async throws {
         let currentUser = try await supabase.auth.session.user
 
-        // Build JSON manually to handle null properly
-        let jsonString: String
+        var updateData: [String: Any] = ["name": name]
         if let badgeId = profileBadgeId {
-            jsonString = """
-            {"name": "\(name.replacingOccurrences(of: "\"", with: "\\\""))", "shelter_badge_id": "\(badgeId.uuidString)"}
-            """
+            updateData["shelter_badge_id"] = badgeId.uuidString
         } else {
-            jsonString = """
-            {"name": "\(name.replacingOccurrences(of: "\"", with: "\\\""))", "shelter_badge_id": null}
-            """
-        }
-
-        guard let jsonData = jsonString.data(using: .utf8) else {
-            throw NSError(domain: "UserSupabase", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to create JSON"])
+            updateData["shelter_badge_id"] = NSNull()
         }
 
         try await supabase
             .from("users")
-            .update(jsonData)
+            .update(updateData)
             .eq("id", value: currentUser.id)
             .execute()
     }
@@ -78,25 +69,16 @@ class UserSupabase {
     func updateProfileBadge(profileBadgeId: UUID?) async throws {
         let currentUser = try await supabase.auth.session.user
 
-        // Build JSON manually to handle null properly
-        let jsonString: String
+        let updateData: [String: Any]
         if let badgeId = profileBadgeId {
-            jsonString = """
-            {"shelter_badge_id": "\(badgeId.uuidString)"}
-            """
+            updateData = ["shelter_badge_id": badgeId.uuidString]
         } else {
-            jsonString = """
-            {"shelter_badge_id": null}
-            """
-        }
-
-        guard let jsonData = jsonString.data(using: .utf8) else {
-            throw NSError(domain: "UserSupabase", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to create JSON"])
+            updateData = ["shelter_badge_id": NSNull()]
         }
 
         try await supabase
             .from("users")
-            .update(jsonData)
+            .update(updateData)
             .eq("id", value: currentUser.id)
             .execute()
     }
