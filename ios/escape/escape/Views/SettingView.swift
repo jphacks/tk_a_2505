@@ -9,8 +9,10 @@ import SwiftUI
 
 struct SettingView: View {
     @State private var viewModel = SettingsViewModel()
+    @State private var groupViewModel = GroupViewModel()
     @State private var showLogoutConfirmation = false
     @State private var showDeleteAccountConfirmation = false
+    @State private var showingGroupBottomSheet = false
 
     var body: some View {
         NavigationStack {
@@ -104,6 +106,20 @@ struct SettingView: View {
                     Text("setting.profile_section")
                 }
 
+                // Group Section
+                Section {
+                    Button {
+                        showingGroupBottomSheet = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "person.3.fill")
+                            Text("setting.manage_groups")
+                        }
+                    }
+                } header: {
+                    Text("setting.group_section")
+                }
+
                 // Developer Section
                 Section {
                     NavigationLink {
@@ -162,9 +178,13 @@ struct SettingView: View {
                 }
             }
             .navigationTitle("nav.setting")
+            .sheet(isPresented: $showingGroupBottomSheet) {
+                GroupBottomSheetView(groupViewModel: groupViewModel)
+            }
         }
         .task {
             await viewModel.loadProfile()
+            await groupViewModel.loadUserGroups()
         }
     }
 }
