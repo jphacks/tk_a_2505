@@ -291,7 +291,8 @@ struct MapView: View {
 
         print("🧘 Zen mode check: Found \(nearbyShelters.count) shelters within \(detectionRadius)m")
         print("🧘 Total filtered shelters: \(mapViewModel.filteredShelters.count)")
-        print("🧘 User location: \(userLocation.coordinate.latitude), \(userLocation.coordinate.longitude)")
+        print(
+            "🧘 User location: \(userLocation.coordinate.latitude), \(userLocation.coordinate.longitude)")
         print("🧘 Game mode: \(missionStateService.currentGameMode.rawValue)")
 
         if let closest = nearbyShelters.first {
@@ -419,15 +420,18 @@ struct MapView: View {
         ZStack {
             if missionStateService.currentGameMode.showsMap {
                 // Standard map view
-                Map(position: $position, interactionModes: .all) {
+                MapKit.Map(position: $position, interactionModes: .all) {
                     UserAnnotation(anchor: .center)
 
                     // Display shelter annotations
                     ForEach(mapViewModel.filteredShelters, id: \.id) { shelter in
-                        Annotation(shelter.name, coordinate: CLLocationCoordinate2D(
-                            latitude: shelter.latitude,
-                            longitude: shelter.longitude
-                        )) {
+                        Annotation(
+                            shelter.name,
+                            coordinate: CLLocationCoordinate2D(
+                                latitude: shelter.latitude,
+                                longitude: shelter.longitude
+                            )
+                        ) {
                             Button(action: {
                                 // Only allow tapping in Zen mode (no active mission)
                                 if missionStateService.currentGameMode == .zen {
@@ -468,12 +472,17 @@ struct MapView: View {
                                             case .failure:
                                                 // Failed to load - show default icon
                                                 Circle()
-                                                    .fill(shelter.isShelter == true ? Color("brandRed") : Color("brandOrange"))
+                                                    .fill(
+                                                        shelter.isShelter == true ? Color("brandRed") : Color("brandOrange")
+                                                    )
                                                     .frame(width: 40, height: 40)
                                                     .overlay {
-                                                        Image(systemName: shelter.isShelter == true ? "building.2.fill" : "mappin.circle.fill")
-                                                            .font(.system(size: 18))
-                                                            .foregroundColor(.white)
+                                                        Image(
+                                                            systemName: shelter.isShelter == true
+                                                                ? "building.2.fill" : "mappin.circle.fill"
+                                                        )
+                                                        .font(.system(size: 18))
+                                                        .foregroundColor(.white)
                                                     }
                                             @unknown default:
                                                 EmptyView()
@@ -487,9 +496,12 @@ struct MapView: View {
                                             .fill(shelter.isShelter == true ? Color("brandRed") : Color("brandOrange"))
                                             .frame(width: 32, height: 32)
 
-                                        Image(systemName: shelter.isShelter == true ? "building.2.fill" : "mappin.circle.fill")
-                                            .font(.system(size: 16))
-                                            .foregroundColor(.white)
+                                        Image(
+                                            systemName: shelter.isShelter == true
+                                                ? "building.2.fill" : "mappin.circle.fill"
+                                        )
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.white)
                                     }
                                 }
                             }
