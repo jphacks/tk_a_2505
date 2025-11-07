@@ -223,10 +223,10 @@ class PointSupabase {
                 .execute()
                 .value
 
-            // Build badge URL dictionary
+            // Build badge URL dictionary using manual URL construction (matches SettingsView pattern)
+            let baseUrl = "https://wmmddehrriniwxsgnwqy.supabase.co/storage/v1/object/public/shelter_badges"
             for badge in badges {
-                let imageUrl = try supabase.storage.from("badge_images").getPublicURL(path: "\(badge.badgeName).png")
-                badgeUrlDict[badge.id] = imageUrl.absoluteString
+                badgeUrlDict[badge.id] = "\(baseUrl)/\(badge.badgeName)"
             }
         }
 
@@ -322,9 +322,10 @@ class PointSupabase {
                 .execute()
                 .value
 
+            // Build badge URL dictionary using manual URL construction (matches SettingsView pattern)
+            let baseUrl = "https://wmmddehrriniwxsgnwqy.supabase.co/storage/v1/object/public/shelter_badges"
             for badge in badges {
-                let imageUrl = try supabase.storage.from("badge_images").getPublicURL(path: "\(badge.badgeName).png")
-                badgeUrlDict[badge.id] = imageUrl.absoluteString
+                badgeUrlDict[badge.id] = "\(baseUrl)/\(badge.badgeName)"
             }
         }
 
@@ -435,9 +436,10 @@ class PointSupabase {
                 .execute()
                 .value
 
+            // Build badge URL dictionary using manual URL construction (matches SettingsView pattern)
+            let baseUrl = "https://wmmddehrriniwxsgnwqy.supabase.co/storage/v1/object/public/shelter_badges"
             for badge in badges {
-                let imageUrl = try supabase.storage.from("badge_images").getPublicURL(path: "\(badge.badgeName).png")
-                badgeUrlDict[badge.id] = imageUrl.absoluteString
+                badgeUrlDict[badge.id] = "\(baseUrl)/\(badge.badgeName)"
             }
         }
 
