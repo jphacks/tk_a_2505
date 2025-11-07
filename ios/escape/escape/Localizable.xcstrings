@@ -115,7 +115,6 @@
     "Shelter Information": {},
     "Status:": {},
     "Steps": {},
-    "Tap to begin your mission": {},
     "Test: %@": {},
     "Title:": {},
     "View mission results for detailed stats": {},
@@ -3946,6 +3945,9 @@
           }
         }
       }
+    },
+    "mission.detail.beginMission": {
+      "extractionState": "manual"
     },
     "nav.dev": {
       "extractionState": "manual",

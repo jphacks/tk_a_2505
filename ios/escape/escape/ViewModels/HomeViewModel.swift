@@ -34,7 +34,7 @@ class HomeViewModel {
             // Fetch badge statistics
             badgeStats = try await badgeService.getBadgeStats()
         } catch {
-            debugPrint("❌ Failed to load badges: \(error)")
+            print("❌ Failed to load badges: \(error)")
             userBadges = [] // Fallback to empty array on error
             badgeStats = (0, 0)
         }

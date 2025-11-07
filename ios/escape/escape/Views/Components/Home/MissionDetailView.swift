@@ -24,7 +24,10 @@ struct MissionDetailView: View {
                 if let mission = mission, let disasterType = mission.disasterType {
                     // 背景グラデーション
                     LinearGradient(
-                        gradient: Gradient(colors: mission.disasterType?.gradientColors ?? [Color("brandOrange"), Color("brandRed")]),
+                        gradient: Gradient(
+                            colors: mission.disasterType?.gradientColors ?? [
+                                Color("brandOrange"), Color("brandRed"),
+                            ]),
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -34,20 +37,6 @@ struct MissionDetailView: View {
                         VStack(spacing: 24) {
                             // ヘッダーセクション
                             VStack(spacing: 20) {
-                                // アイコン
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.white.opacity(0.2))
-                                        .frame(width: 80, height: 80)
-
-                                    Image(systemName: mission.disasterType?.emergencyIcon ?? "exclamationmark.triangle.fill")
-                                        .font(.system(size: 40))
-                                        .foregroundColor(.white)
-                                        .scaleEffect(isAnimating ? 1.1 : 1.0)
-                                        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-
                                 // タイトルとタイプ
                                 VStack(alignment: .leading, spacing: 12) {
                                     Text(mission.title ?? "")
@@ -59,8 +48,10 @@ struct MissionDetailView: View {
 
                                     HStack(spacing: 8) {
                                         HStack(spacing: 4) {
-                                            Image(systemName: mission.disasterType?.iconName ?? "exclamationmark.triangle")
-                                                .font(.system(size: 11))
+                                            Image(
+                                                systemName: mission.disasterType?.iconName ?? "exclamationmark.triangle"
+                                            )
+                                            .font(.system(size: 11))
                                             Text(mission.disasterType?.localizedName ?? "Disaster")
                                                 .font(.caption)
                                                 .fontWeight(.semibold)
@@ -69,7 +60,7 @@ struct MissionDetailView: View {
                                         .padding(.horizontal, 10)
                                         .padding(.vertical, 5)
                                         .background(Color.white.opacity(0.25))
-                                        .cornerRadius(6)
+                                        .cornerRadius(8)
 
                                         if isMissionActive {
                                             HStack(spacing: 4) {
@@ -83,7 +74,7 @@ struct MissionDetailView: View {
                                             .padding(.horizontal, 10)
                                             .padding(.vertical, 5)
                                             .background(Color.green.opacity(0.4))
-                                            .cornerRadius(6)
+                                            .cornerRadius(8)
                                         }
                                     }
                                 }
@@ -113,7 +104,7 @@ struct MissionDetailView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(20)
                                 .background(
-                                    RoundedRectangle(cornerRadius: 16)
+                                    RoundedRectangle(cornerRadius: 20)
                                         .fill(Color.white.opacity(0.2))
                                         .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
                                 )
@@ -161,18 +152,27 @@ struct MissionDetailView: View {
                                                     Spacer()
 
                                                     // チェックマーク
-                                                    Image(systemName: selectedGameMode == mode ? "checkmark.circle.fill" : "circle")
-                                                        .font(.title3)
-                                                        .foregroundColor(.white)
+                                                    Image(
+                                                        systemName: selectedGameMode == mode
+                                                            ? "checkmark.circle.fill" : "circle"
+                                                    )
+                                                    .font(.title3)
+                                                    .foregroundColor(.white)
                                                 }
                                                 .foregroundColor(.white)
                                                 .padding(16)
                                                 .background(
-                                                    RoundedRectangle(cornerRadius: 14)
-                                                        .fill(selectedGameMode == mode ? Color.white.opacity(0.25) : Color.white.opacity(0.12))
+                                                    RoundedRectangle(cornerRadius: 20)
+                                                        .fill(
+                                                            selectedGameMode == mode
+                                                                ? Color.white.opacity(0.25) : Color.white.opacity(0.12)
+                                                        )
                                                         .overlay(
-                                                            RoundedRectangle(cornerRadius: 14)
-                                                                .stroke(Color.white.opacity(selectedGameMode == mode ? 0.4 : 0.0), lineWidth: 2)
+                                                            RoundedRectangle(cornerRadius: 20)
+                                                                .stroke(
+                                                                    Color.white.opacity(selectedGameMode == mode ? 0.4 : 0.0),
+                                                                    lineWidth: 2
+                                                                )
                                                         )
                                                 )
                                             }
@@ -197,31 +197,31 @@ struct MissionDetailView: View {
                                         Image(systemName: isMissionActive ? "xmark.circle.fill" : "play.circle.fill")
                                             .font(.title2)
 
-                                        Text(isMissionActive ? String(localized: "home.mission.cancel", table: "Localizable") : String(localized: "home.mission.start", table: "Localizable"))
-                                            .font(.title3)
-                                            .fontWeight(.bold)
+                                        Text(
+                                            isMissionActive
+                                                ? String(localized: "home.mission.cancel", table: "Localizable")
+                                                : String(localized: "home.mission.start", table: "Localizable")
+                                        )
+                                        .font(.title3)
+                                        .fontWeight(.bold)
                                     }
-                                    .foregroundColor(isMissionActive ? Color.white : (mission.disasterType?.color ?? Color("brandOrange")))
+                                    .foregroundColor(
+                                        isMissionActive
+                                            ? Color.white : (mission.disasterType?.color ?? Color("brandOrange"))
+                                    )
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 18)
                                     .background(
-                                        RoundedRectangle(cornerRadius: 16)
+                                        RoundedRectangle(cornerRadius: 20)
                                             .fill(isMissionActive ? Color.red : Color.white.opacity(0.95))
                                             .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
                                     )
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: 16)
+                                        RoundedRectangle(cornerRadius: 20)
                                             .stroke(Color.white.opacity(0.3), lineWidth: isMissionActive ? 0 : 1)
                                     )
                                 }
                                 .buttonStyle(.plain)
-
-                                if !isMissionActive {
-                                    Text("Tap to begin your mission")
-                                        .font(.caption)
-                                        .foregroundColor(.white.opacity(0.7))
-                                        .frame(maxWidth: .infinity)
-                                }
                             }
                             .padding(.horizontal, 24)
                             .padding(.bottom, 40)
@@ -301,7 +301,8 @@ struct MissionDetailView: View {
             id: UUID(),
             userId: UUID(),
             title: "震度6強の地震発生！避難所へ緊急避難せよ",
-            overview: "AI解析により、マグニチュード7.2の大地震が発生したシナリオが生成されました。建物の倒壊や火災の危険があります。最寄りの避難所まで安全なルートで避難してください。",
+            overview:
+            "AI解析により、マグニチュード7.2の大地震が発生したシナリオが生成されました。建物の倒壊や火災の危険があります。最寄りの避難所まで安全なルートで避難してください。",
             disasterType: .earthquake,
             status: .active,
             createdAt: Date()
@@ -309,4 +310,5 @@ struct MissionDetailView: View {
         selectedTab: .constant(.home),
         isPresented: .constant(true)
     )
+    .environment(\.missionStateService, MissionStateService())
 }

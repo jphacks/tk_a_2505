@@ -9,7 +9,6 @@ import Supabase
 import SwiftUI
 
 struct HomeView: View {
-    @Binding var selectedTab: Tab
     @State private var homeViewModel = HomeViewModel()
     @State private var groupViewModel = GroupViewModel()
     @State private var pointViewModel = PointViewModel()
@@ -75,9 +74,9 @@ struct HomeView: View {
 }
 
 #Preview("HomeView - English") {
-    HomeView(selectedTab: .constant(.home)).environment(\.locale, .init(identifier: "en"))
+    HomeView().environment(\.locale, .init(identifier: "en"))
 }
 
 #Preview("HomeView - Japanese") {
-    HomeView(selectedTab: .constant(.home)).environment(\.locale, .init(identifier: "ja"))
+    HomeView().environment(\.locale, .init(identifier: "ja"))
 }

@@ -11,6 +11,7 @@ struct MissionSection: View {
     @State private var missionViewModel = MissionViewModel()
     @State private var showingMissionDetail = false
     @Environment(\.missionStateService) var missionStateService
+    @EnvironmentObject var tabSelection: TabSelection
 
     var body: some View {
         Group {
@@ -48,10 +49,16 @@ struct MissionSection: View {
         .onAppear {
             loadCurrentMission()
         }
-        .onChange(of: missionStateService.currentMission) { _, _ in
-            // Reload mission when it changes (e.g., cancelled from another view)
+        .onChange(of: missionStateService.currentMission) {
             print("🔄 Mission state changed in HomeView")
             loadCurrentMission()
+        }
+        .sheet(isPresented: $showingMissionDetail) {
+            MissionDetailView(
+                mission: missionViewModel.todaysMission,
+                selectedTab: $tabSelection.selectedTab,
+                isPresented: $showingMissionDetail
+            )
         }
     }
 
