@@ -18,7 +18,7 @@ type TeamMember = {
 };
 
 type DataSource = {
-  icon: string;
+  icon: LucideIcon;
   title: string;
   description: string;
   links: Array<{ label: string; url: string }>;
