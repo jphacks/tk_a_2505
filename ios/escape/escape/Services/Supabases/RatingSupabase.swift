@@ -210,13 +210,18 @@ class RatingSupabase {
 
         try request.validate()
 
+        // Create update request with proper types
+        struct UpdateRequest: Encodable {
+            let rating: Int
+            let review: String?
+        }
+
+        let updateRequest = UpdateRequest(rating: rating, review: review)
+
         // Update the rating
         let updatedRating: ShelterRating = try await supabase
             .from("shelter_ratings")
-            .update([
-                "rating": rating,
-                "review": review ?? "",
-            ])
+            .update(updateRequest)
             .eq("id", value: ratingId)
             .select()
             .single()
