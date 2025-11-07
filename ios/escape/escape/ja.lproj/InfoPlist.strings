@@ -8,3 +8,6 @@
 /* Location permissions */
 "NSLocationWhenInUseUsageDescription" = "このアプリは、地図上にあなたの現在位置を表示し、近くの避難所を見つけるために位置情報を使用します。";
 "NSLocationAlwaysAndWhenInUseUsageDescription" = "このアプリは、地図上にあなたの現在位置を表示し、近くの避難所を見つけるために位置情報を使用します。";
+
+/* Camera permissions */
+"NSCameraUsageDescription" = "このアプリは、グループに参加するためにQRコードをスキャンするためにカメラへのアクセスが必要です。";
