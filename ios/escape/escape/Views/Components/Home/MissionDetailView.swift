@@ -21,7 +21,7 @@ struct MissionDetailView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                if let mission = mission, let disasterType = mission.disasterType {
+                if let mission = mission, let _ = mission.disasterType {
                     // 背景グラデーション
                     LinearGradient(
                         gradient: Gradient(

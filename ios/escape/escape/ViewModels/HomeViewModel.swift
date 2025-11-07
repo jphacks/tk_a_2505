@@ -13,6 +13,7 @@ class HomeViewModel {
     var userBadges: [Badge] = []
     var badgeStats: (total: Int, unlocked: Int) = (0, 0)
     var showingMissionDetail = false
+    var isLoadingBadges = false
 
     // MARK: - Dependencies
 
@@ -27,6 +28,9 @@ class HomeViewModel {
     // MARK: - Actions
 
     func loadUserBadges() async {
+        isLoadingBadges = true
+        defer { isLoadingBadges = false }
+
         do {
             let collectedBadges = try await badgeService.getUserCollectedBadgesWithDetails()
             userBadges = collectedBadges.map { $0.toBadge() }
