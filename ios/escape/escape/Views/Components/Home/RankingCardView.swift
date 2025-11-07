@@ -105,11 +105,8 @@ struct RankingCardView: View {
         }
         .task {
             // Pre-load all ranking data
-            async let userStatsFetch = pointViewModel.fetchUserStats()
-            async let groupsFetch = groupViewModel.loadUserGroups()
-
-            await userStatsFetch
-            await groupsFetch
+            let userStatsFetch: () = await pointViewModel.fetchUserStats()
+            let groupsFetch: () = await groupViewModel.loadUserGroups()
 
             // Load team stats if user has a group
             if let groupId = groupViewModel.primaryGroup?.team.id {

@@ -423,7 +423,7 @@ struct MapView: View {
                     UserAnnotation(anchor: .center)
 
                     // Display shelter annotations
-                    ForEach(mapViewModel.filteredShelters) { shelter in
+                    ForEach(mapViewModel.filteredShelters, id: \.id) { shelter in
                         Annotation(shelter.name, coordinate: CLLocationCoordinate2D(
                             latitude: shelter.latitude,
                             longitude: shelter.longitude
@@ -498,15 +498,14 @@ struct MapView: View {
                     }
 
                     // Display geofence polygons if available
-                    ForEach(mapViewModel.geofencePolygons.indices, id: \.self) {
-                        index in
+                    ForEach(mapViewModel.geofencePolygons.indices, id: \.self) { index in
                         MapPolygon(coordinates: mapViewModel.geofencePolygons[index])
                             .foregroundStyle(Color.red.opacity(0.25))
                             .stroke(Color.red, lineWidth: 2)
                     }
 
                     // Display zombies if zombie mission is active
-                    ForEach(zombieService.zombies) { zombie in
+                    ForEach(zombieService.zombies, id: \.id) { zombie in
                         Annotation("", coordinate: zombie.coordinate) {
                             ZStack {
                                 // Pulsing outer ring
