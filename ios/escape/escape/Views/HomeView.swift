@@ -20,8 +20,12 @@ struct HomeView: View {
                     MissionSection()
 
                     // バッジコレクション セクション
-                    BadgeCollectionView(badges: homeViewModel.userBadges, stats: homeViewModel.badgeStats)
-                        .padding(.horizontal)
+                    BadgeCollectionView(
+                        badges: homeViewModel.userBadges,
+                        stats: homeViewModel.badgeStats,
+                        isLoading: homeViewModel.isLoadingBadges
+                    )
+                    .padding(.horizontal)
 
                     // ランキング セクション
                     RankingCardView(pointViewModel: $pointViewModel)
