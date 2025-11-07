@@ -1,20 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { FeatureSection } from "./FeatureSection";
-import {
-  Map,
-  Award,
-  Bot,
-  Globe,
-  BarChart3,
-  Ruler,
-  Trophy,
-  Smartphone,
-  User,
-  Gamepad2,
-  Star,
-  Users,
-  MapPin,
-} from "lucide-react";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -27,11 +12,12 @@ export default async function DemoPage({ params }: Props) {
 
   // Hack Day Features
   const hackDayFeatures = [
-    { icon: Map, key: 1 },
-    { icon: Award, key: 2 },
-    { icon: Bot, key: 3 },
-    { icon: Globe, key: 4 },
-    { icon: BarChart3, key: 6 },
+    { icon: "🗺️", key: 1 },
+    { icon: "🏅", key: 2 },
+    { icon: "🤖", key: 3 },
+    { icon: "🌍", key: 4 },
+    { icon: "🎯", key: 5 },
+    { icon: "📊", key: 6 },
   ].map((f) => ({
     icon: f.icon,
     title: t(`hackFeature${f.key}Title`),
@@ -40,14 +26,16 @@ export default async function DemoPage({ params }: Props) {
 
   // Improvement Sprint Features
   const improvementFeatures = [
-    { icon: Ruler, key: 1 },
-    { icon: Trophy, key: 3 },
-    { icon: Smartphone, key: 4 },
-    { icon: User, key: 6 },
-    { icon: Gamepad2, key: 7 },
-    { icon: Star, key: 8 },
-    { icon: Users, key: 9 },
-    { icon: MapPin, key: 10 },
+    { icon: "📏", key: 1 },
+    { icon: "🎬", key: 2 },
+    { icon: "🏆", key: 3 },
+    { icon: "📱", key: 4 },
+    { icon: "💬", key: 5 },
+    { icon: "👤", key: 6 },
+    { icon: "🎮", key: 7 },
+    { icon: "⭐", key: 8 },
+    { icon: "👥", key: 9 },
+    { icon: "🗺️", key: 10 },
   ].map((f) => ({
     icon: f.icon,
     title: t(`improvementFeature${f.key}Title`),

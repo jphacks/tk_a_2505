@@ -1,8 +1,7 @@
 import { FeatureCard } from "./FeatureCard";
-import { LucideIcon } from "lucide-react";
 
 type Feature = {
-  icon: LucideIcon;
+  icon: string;
   title: string;
   description: string;
 };
@@ -25,6 +24,11 @@ export function FeatureSection({
       ? "bg-white dark:bg-zinc-900"
       : "bg-zinc-50 dark:bg-black";
 
+  const cardBgClass =
+    variant === "light"
+      ? "bg-zinc-50 dark:bg-zinc-950"
+      : "bg-white dark:bg-zinc-900";
+
   return (
     <section className={`${bgClass} py-16`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -39,12 +43,13 @@ export function FeatureSection({
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, index) => (
-            <FeatureCard
-              key={index}
-              icon={feature.icon}
-              title={feature.title}
-              description={feature.description}
-            />
+            <div key={index} className={cardBgClass}>
+              <FeatureCard
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+              />
+            </div>
           ))}
         </div>
       </div>

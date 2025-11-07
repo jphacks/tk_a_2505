@@ -2,7 +2,6 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { TeamMemberCard } from "./TeamMemberCard";
 import { DataSourceCard } from "./DataSourceCard";
 import { TechStackCard } from "./TechStackCard";
-import { Building2, Bot, LucideIcon } from "lucide-react";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -75,11 +74,11 @@ export default async function AboutPage({ params }: Props) {
   // Data sources configuration
   const dataSourcesConfig = [
     {
-      icon: Building2,
+      icon: "🏛️",
       links: [{ label: "visitWebsite", url: "https://www.gsi.go.jp/" }],
     },
     {
-      icon: Bot,
+      icon: "🤖",
       links: [
         { label: "Gemini API", url: "https://ai.google.dev/gemini-api" },
         { label: "Flux.1", url: "https://blackforestlabs.ai/" },
