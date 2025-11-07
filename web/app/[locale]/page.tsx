@@ -60,7 +60,9 @@ export default async function Home({ params }: Props) {
                 size="lg"
                 className="bg-orange-500 hover:bg-orange-600"
               >
-                <Link href="#demo">{t("tryDemo")}</Link>
+                <Link href="https://testflight.apple.com/join/H8SKNCZ7">
+                  {t("tryDemo")}
+                </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
                 <Link href="#features">{t("learnMore")}</Link>
