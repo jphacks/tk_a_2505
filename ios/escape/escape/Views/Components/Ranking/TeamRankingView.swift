@@ -8,7 +8,7 @@
 import SwiftUI
 
 // Wrapper to make UUID work with .sheet(item:)
-private struct IdentifiableUUID: Identifiable {
+private struct IdentifiableUUID: Identifiable, Equatable {
     let id: UUID
 }
 
