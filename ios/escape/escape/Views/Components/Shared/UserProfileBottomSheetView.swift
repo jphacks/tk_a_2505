@@ -54,7 +54,7 @@ struct UserProfileBottomSheetView: View {
         VStack(spacing: 16) {
             UserAvatarView.profile(
                 username: user.name ?? "Anonymous",
-                badgeImageUrl: viewModel.getShelterBadge()?.imageUrl,
+                badgeImageUrl: viewModel.getProfileBadge()?.imageUrl,
                 size: .large
             )
 

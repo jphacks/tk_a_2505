@@ -101,7 +101,8 @@ final class UserProfileViewModel {
 
         for result in missionResults {
             let dateString = formatter.string(from: result.createdAt)
-            pointsMap[dateString, default: 0] += result.finalPoints
+            let points = Int(result.finalPoints ?? 0)
+            pointsMap[dateString, default: 0] += points
         }
 
         self.dailyPointsMap = pointsMap
@@ -121,13 +122,13 @@ final class UserProfileViewModel {
         return badges
     }
 
-    /// Gets the current user's shelter badge for avatar display
-    func getShelterBadge() -> Badge? {
+    /// Gets the current user's profile badge for avatar display
+    func getProfileBadge() -> Badge? {
         guard let user = user,
-              let shelterBadgeId = user.shelterBadgeId else {
+              let profileBadgeId = user.profileBadgeId else {
             return nil
         }
 
-        return userBadges.first { $0.id == shelterBadgeId }
+        return userBadges.first { $0.id == profileBadgeId.uuidString }
     }
 }
