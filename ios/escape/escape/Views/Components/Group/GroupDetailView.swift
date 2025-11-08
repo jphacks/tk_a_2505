@@ -275,6 +275,7 @@ struct MemberRowView: View {
     let member: TeamMemberWithUser
     @Bindable var groupViewModel: GroupViewModel
     @State private var showingRoleMenu = false
+    @State private var showUserProfile = false
 
     var body: some View {
         HStack(spacing: 12) {
@@ -348,6 +349,15 @@ struct MemberRowView: View {
         .padding(.vertical, 8)
         .background(Color(.systemBackground))
         .cornerRadius(20)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            HapticFeedback.shared.lightImpact()
+            showUserProfile = true
+        }
+        .sheet(isPresented: $showUserProfile) {
+            UserProfileBottomSheetView(userId: member.user.id)
+                .presentationDetents([.medium, .large])
+        }
     }
 }
 
