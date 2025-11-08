@@ -51,7 +51,8 @@ struct TeamRankingView: View {
                         }
 
                         // Team Rankings
-                        ForEach(Array(pointViewModel.teamRanking.enumerated()), id: \.element.id) { index, entry in
+                        ForEach(Array(pointViewModel.teamRanking.enumerated()), id: \.element.id) {
+                            index, entry in
                             if entry.rank == -1 {
                                 // Separator
                                 SeparatorView()
@@ -151,7 +152,7 @@ private struct TeamHeaderView: View {
             }
             .padding()
             .background(
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: 20)
                     .fill(Color("brandMediumBlue").opacity(0.1))
             )
         }
@@ -233,12 +234,12 @@ private struct TeamRankingRow: View {
         HStack(spacing: 16) {
             // Rank Number
             ZStack {
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: 8)
                     .fill(rankGradient)
-                    .frame(width: 50, height: 50)
+                    .frame(width: 25, height: 25)
 
                 Text("\(entry.rank)")
-                    .font(.title3)
+                    .font(.callout)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
             }
@@ -267,13 +268,7 @@ private struct TeamRankingRow: View {
                             .padding(.vertical, 3)
                             .background(
                                 Capsule()
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [Color("brandMediumBlue"), Color("brandOrange")],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
+                                    .fill(Color("brandMediumBlue"))
                             )
                     }
                 }
@@ -294,34 +289,15 @@ private struct TeamRankingRow: View {
         }
         .padding(isCurrentUser ? 18 : 16)
         .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(isCurrentUser ?
-                    LinearGradient(
-                        colors: [Color("brandMediumBlue").opacity(0.25), Color("brandOrange").opacity(0.25)],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    ) :
-                    LinearGradient(
-                        colors: [Color(.secondarySystemBackground), Color(.secondarySystemBackground)],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
+            RoundedRectangle(cornerRadius: 20)
+                .fill(
+                    isCurrentUser ? Color("brandMediumBlue").opacity(0.1) : Color(.secondarySystemBackground)
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 16)
+                    RoundedRectangle(cornerRadius: 20)
                         .stroke(
-                            isCurrentUser ?
-                                LinearGradient(
-                                    colors: [Color("brandMediumBlue"), Color("brandOrange")],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                ) :
-                                LinearGradient(
-                                    colors: [Color.clear, Color.clear],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                ),
-                            lineWidth: isCurrentUser ? 3 : 0
+                            isCurrentUser ? Color("brandMediumBlue") : Color.clear,
+                            lineWidth: isCurrentUser ? 2 : 0
                         )
                 )
         )
@@ -344,13 +320,13 @@ private struct TeamRankingRow: View {
     private var rankGradient: LinearGradient {
         if entry.rank <= 3 {
             return LinearGradient(
-                colors: [Color("brandMediumBlue"), Color("brandOrange")],
+                colors: [Color("brandMediumBlue"), Color("brandMediumBlue")],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         } else {
             return LinearGradient(
-                colors: [Color.gray.opacity(0.6), Color.gray.opacity(0.4)],
+                colors: [Color.gray.opacity(0.6), Color.gray.opacity(0.6)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -435,7 +411,7 @@ private struct ErrorView: View {
                     .padding(.horizontal, 30)
                     .padding(.vertical, 12)
                     .background(
-                        RoundedRectangle(cornerRadius: 12)
+                        RoundedRectangle(cornerRadius: 8)
                             .fill(
                                 LinearGradient(
                                     colors: [Color("brandMediumBlue"), Color("brandOrange")],

@@ -16,6 +16,10 @@ class SettingsViewModel {
     var isLoading = false
     var showLogoutConfirmation = false
 
+    // Error handling
+    var errorMessage: String?
+    var showError = false
+
     // Badge-related properties
     var userBadges: [Badge] = []
     var selectedProfileBadgeId: UUID?
@@ -101,6 +105,10 @@ class SettingsViewModel {
         do {
             try await userService.updateUserProfile(name: name, profileBadgeId: selectedProfileBadgeId)
 
+            // Clear any previous errors on success
+            errorMessage = nil
+            showError = false
+
             // Update profile badge image URL after successful update
             if let badgeId = selectedProfileBadgeId {
                 await loadProfileBadgeImage(badgeId: badgeId)
@@ -109,6 +117,8 @@ class SettingsViewModel {
             }
         } catch {
             debugPrint("❌ Error updating profile: \(error)")
+            errorMessage = "Failed to update profile. Please try again."
+            showError = true
         }
     }
 

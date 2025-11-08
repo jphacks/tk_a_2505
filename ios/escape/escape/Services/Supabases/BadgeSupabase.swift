@@ -292,7 +292,11 @@ class BadgeSupabase {
         if let existingBadge = try await getBadgeForShelter(shelterId: shelterId) {
             // Badge exists, just unlock it for the user
             // Try to unlock (will skip if already unlocked)
-            _ = try? await unlockBadge(badgeId: existingBadge.id)
+            do {
+                _ = try await unlockBadge(badgeId: existingBadge.id)
+            } catch {
+                debugPrint("❌ Failed to unlock existing badge: \(error)")
+            }
             debugPrint("ℹ️ Badge already exists for shelter: \(shelterId)")
         } else {
             // User is the first visitor! Create a badge
