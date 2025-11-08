@@ -13,6 +13,8 @@ struct TeamRankingView: View {
     @State private var animateEntries = false
     @State private var currentUserId: UUID?
     @State private var isLoadingTeam = false
+    @State private var showUserProfile = false
+    @State private var selectedUserId: UUID?
 
     var body: some View {
         ZStack {
@@ -61,7 +63,8 @@ struct TeamRankingView: View {
                                 TeamRankingRow(
                                     entry: entry,
                                     currentUserId: currentUserId,
-                                    delay: Double(index) * 0.05
+                                    delay: Double(index) * 0.05,
+                                    onTap: handleUserTap
                                 )
                                 .padding(.horizontal)
                                 .opacity(animateEntries ? 1 : 0)
@@ -79,10 +82,21 @@ struct TeamRankingView: View {
                 }
             }
         }
+        .sheet(isPresented: $showUserProfile) {
+            if let userId = selectedUserId {
+                UserProfileBottomSheetView(userId: userId)
+                    .presentationDetents([.medium, .large])
+            }
+        }
         .task {
             await loadTeamRankings()
             startAnimations()
         }
+    }
+
+    private func handleUserTap(userId: UUID) {
+        selectedUserId = userId
+        showUserProfile = true
     }
 
     private func loadTeamRankings() async {
@@ -223,6 +237,7 @@ private struct TeamRankingRow: View {
     let entry: RankingEntry
     let currentUserId: UUID?
     let delay: Double
+    let onTap: (UUID) -> Void
     @State private var isPressed = false
     @State private var pulseAnimation = false
 
@@ -313,6 +328,11 @@ private struct TeamRankingRow: View {
                 withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
                     pulseAnimation = true
                 }
+            }
+        }
+        .onTapGesture {
+            if let userId = entry.userId {
+                onTap(userId)
             }
         }
     }

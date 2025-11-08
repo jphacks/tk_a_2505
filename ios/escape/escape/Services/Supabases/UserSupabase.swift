@@ -102,6 +102,22 @@ class UserSupabase {
         return users.first
     }
 
+    /// Fetches a user profile by their ID
+    /// - Parameter userId: The user's UUID
+    /// - Returns: User object
+    /// - Throws: Error if user not found or database error
+    func getUserProfile(userId: UUID) async throws -> User {
+        let user: User = try await supabase
+            .from("users")
+            .select()
+            .eq("id", value: userId)
+            .single()
+            .execute()
+            .value
+
+        return user
+    }
+
     /// Deletes the current user's account and all associated data
     /// - Throws: Database error if deletion fails
     func deleteAccount() async throws {

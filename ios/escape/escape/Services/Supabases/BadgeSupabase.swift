@@ -392,6 +392,86 @@ class BadgeSupabase {
 // MARK: - Error Handling
 
 extension BadgeSupabase {
+    /// Fetches user's collected badges by user ID
+    /// - Parameter userId: The user's UUID
+    /// - Returns: Array of UserShelterBadge objects
+    func fetchUserBadges(userId: UUID) async throws -> [UserShelterBadge] {
+        let userBadges: [UserShelterBadge] = try await supabase
+            .from("user_shelter_badges")
+            .select()
+            .eq("user_id", value: userId.uuidString.lowercased())
+            .order("created_at", ascending: false)
+            .execute()
+            .value
+
+        return userBadges
+    }
+
+    /// Fetches badges by their IDs and converts them to Badge UI models
+    /// - Parameter badgeIds: Array of badge UUIDs
+    /// - Returns: Array of Badge objects for UI display
+    func fetchBadgesByIds(_ badgeIds: [UUID]) async throws -> [Badge] {
+        guard !badgeIds.isEmpty else { return [] }
+
+        var badges: [Badge] = []
+
+        for badgeId in badgeIds {
+            do {
+                // Fetch the shelter badge
+                let shelterBadge: ShelterBadge = try await supabase
+                    .from("shelter_badges")
+                    .select()
+                    .eq("id", value: badgeId.uuidString.lowercased())
+                    .single()
+                    .execute()
+                    .value
+
+                // Fetch the shelter information
+                let shelter: Shelter = try await supabase
+                    .from("shelters")
+                    .select()
+                    .eq("id", value: shelterBadge.shelterId.uuidString.lowercased())
+                    .single()
+                    .execute()
+                    .value
+
+                // Create Badge UI model
+                let badge = Badge(
+                    id: shelterBadge.id.uuidString,
+                    name: shelter.name,
+                    icon: shelterBadge.determineIcon(),
+                    color: shelterBadge.determineColor(),
+                    isUnlocked: true,
+                    imageName: nil,
+                    imageUrl: shelterBadge.getImageUrl(),
+                    badgeNumber: shelter.number?.description,
+                    address: shelter.address,
+                    municipality: shelter.municipality,
+                    isShelter: shelter.isShelter ?? false,
+                    isFlood: shelter.isFlood ?? false,
+                    isLandslide: shelter.isLandslide ?? false,
+                    isStormSurge: shelter.isStormSurge ?? false,
+                    isEarthquake: shelter.isEarthquake ?? false,
+                    isTsunami: shelter.isTsunami ?? false,
+                    isFire: shelter.isFire ?? false,
+                    isInlandFlood: shelter.isInlandFlood ?? false,
+                    isVolcano: shelter.isVolcano ?? false,
+                    latitude: shelter.latitude,
+                    longitude: shelter.longitude,
+                    firstUserName: nil
+                )
+
+                badges.append(badge)
+            } catch {
+                print("⚠️ Failed to fetch badge \(badgeId): \(error)")
+                // Continue to next badge instead of failing completely
+                continue
+            }
+        }
+
+        return badges
+    }
+
     enum BadgeServiceError: LocalizedError {
         case userNotAuthenticated
         case badgeNotFound
