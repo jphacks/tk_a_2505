@@ -9,6 +9,16 @@ import Foundation
 import Supabase
 
 class RatingSupabase {
+    // MARK: - Dependencies
+
+    private let badgeService: BadgeSupabase
+
+    // MARK: - Initialization
+
+    init(badgeService: BadgeSupabase = BadgeSupabase()) {
+        self.badgeService = badgeService
+    }
+
     // MARK: - Fetch Ratings
 
     /// Fetches all ratings for a specific shelter
@@ -303,20 +313,19 @@ class RatingSupabase {
         debugPrint("   User ID: \(currentUser.id)")
         debugPrint("   Shelter ID: \(shelterId)")
 
-        // Call the database function user_can_rate_shelter
-        let result: [Bool] = try await supabase
-            .rpc(
-                "user_can_rate_shelter",
-                params: [
-                    "user_uuid": currentUser.id.uuidString,
-                    "shelter_uuid": shelterId.uuidString,
-                ]
-            )
-            .execute()
-            .value
+        // Get the badge for this shelter
+        guard let shelterBadge = try await badgeService.getBadgeForShelter(shelterId: shelterId) else {
+            debugPrint("   No badge exists for this shelter")
+            return false
+        }
 
-        debugPrint("   Can rate result: \(result.first ?? false)")
-        return result.first ?? false
+        debugPrint("   Badge ID: \(shelterBadge.id)")
+
+        // Check if user has unlocked this badge
+        let hasUnlockedBadge = try await badgeService.hasUnlockedBadge(badgeId: shelterBadge.id)
+
+        debugPrint("   Has unlocked badge: \(hasUnlockedBadge)")
+        return hasUnlockedBadge
     }
 
     /// Checks the current user's rating status for a shelter
