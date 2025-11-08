@@ -8,11 +8,14 @@ import Image from "next/image";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link, usePathname } from "@/i18n/routing";
+import { useParams } from "next/navigation";
 
 export function Navbar() {
   const t = useTranslations("navbar");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const params = useParams();
+  const locale = params.locale as string;
 
   const mainNavItems = [
     { key: "demo", href: "/demo" },
@@ -33,6 +36,7 @@ export function Navbar() {
             className="group flex items-center gap-2 transition-opacity hover:opacity-80"
           >
             <Image
+              key={locale}
               src={`${assetPrefix}/logo.png`}
               alt="HiNan! Logo"
               width={36}
