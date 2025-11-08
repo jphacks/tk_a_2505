@@ -299,6 +299,10 @@ class RatingSupabase {
     func canUserRateShelter(shelterId: UUID) async throws -> Bool {
         let currentUser = try await supabase.auth.session.user
 
+        debugPrint("🔍 Checking if user can rate shelter:")
+        debugPrint("   User ID: \(currentUser.id)")
+        debugPrint("   Shelter ID: \(shelterId)")
+
         // Call the database function user_can_rate_shelter
         let result: [Bool] = try await supabase
             .rpc(
@@ -311,6 +315,7 @@ class RatingSupabase {
             .execute()
             .value
 
+        debugPrint("   Can rate result: \(result.first ?? false)")
         return result.first ?? false
     }
 

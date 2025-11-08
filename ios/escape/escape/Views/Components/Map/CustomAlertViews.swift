@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Supabase
 
 // MARK: - Shelter Reached Alert View
 
@@ -150,6 +151,7 @@ struct ShelterInfoSheet: View {
     @State private var hasUserBadge = false
     @State private var isLoadingBadge = false
     @State private var ratingViewModel = RatingViewModel()
+    @State private var currentUserId: String = ""
 
     var body: some View {
         NavigationStack {
@@ -222,6 +224,34 @@ struct ShelterInfoSheet: View {
                             .padding(.vertical, 8)
                         }
                     }
+
+                    Divider()
+
+                    // DEBUG PANEL - Shows authorization status
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("🔍 DEBUG INFO")
+                            .font(.headline)
+                            .foregroundColor(.orange)
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            DebugInfoRow(label: "User ID", value: currentUserId)
+                            DebugInfoRow(label: "Shelter ID", value: shelter.id)
+                            DebugInfoRow(label: "Shelter UUID", value: UUID(uuidString: shelter.id)?.uuidString ?? "Invalid")
+                            DebugInfoRow(label: "Has Badge (local)", value: String(hasUserBadge))
+                            DebugInfoRow(label: "Has Badge (rating VM)", value: String(ratingViewModel.hasBadge))
+                            DebugInfoRow(label: "Can Rate", value: String(ratingViewModel.canRate))
+                            DebugInfoRow(label: "Has Existing Rating", value: String(ratingViewModel.hasExistingRating))
+                        }
+                        .font(.caption)
+                        .padding(12)
+                        .background(Color.yellow.opacity(0.1))
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.yellow, lineWidth: 1)
+                        )
+                    }
+                    .padding(.vertical, 8)
 
                     Divider()
 
@@ -381,9 +411,19 @@ struct ShelterInfoSheet: View {
             .navigationTitle(String(localized: "map.shelter_info.title", bundle: .main))
             .navigationBarTitleDisplayMode(.inline)
             .task {
+                await fetchUserId()
                 await fetchBadgeInfo()
                 await loadRatingData()
             }
+        }
+    }
+
+    private func fetchUserId() async {
+        do {
+            let user = try await supabase.auth.session.user
+            currentUserId = user.id.uuidString
+        } catch {
+            currentUserId = "Error: \(error.localizedDescription)"
         }
     }
 
@@ -421,12 +461,22 @@ struct ShelterInfoSheet: View {
 
     private func loadRatingData() async {
         guard let shelterUUID = UUID(uuidString: shelter.id) else {
-            print("⚠️ Cannot load ratings: Shelter ID is not a valid UUID")
+            print("⚠️ Cannot load ratings: Shelter ID is not a valid UUID: \(shelter.id)")
             return
         }
 
+        print("✅ Loading rating data for shelter:")
+        print("   Shelter name: \(shelter.name)")
+        print("   Shelter ID (string): \(shelter.id)")
+        print("   Shelter UUID: \(shelterUUID)")
+
         // Load rating summary and user's rating status
         await ratingViewModel.loadAllData(for: shelterUUID)
+
+        print("   Rating check complete:")
+        print("   - Can rate: \(ratingViewModel.canRate)")
+        print("   - Has badge: \(ratingViewModel.hasBadge)")
+        print("   - Has existing rating: \(ratingViewModel.hasExistingRating)")
     }
 }
 
@@ -451,6 +501,25 @@ struct CapabilityRow: View {
                 .foregroundColor(isSupported ? .green : .red)
         }
         .padding(.vertical, 4)
+    }
+}
+
+// MARK: - Debug Info Row
+
+struct DebugInfoRow: View {
+    let label: String
+    let value: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text(label + ":")
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+            Text(value)
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.leading)
+            Spacer()
+        }
     }
 }
 
