@@ -9,8 +9,10 @@ import SwiftUI
 
 struct SettingView: View {
     @State private var viewModel = SettingsViewModel()
+    @State private var groupViewModel = GroupViewModel()
     @State private var showLogoutConfirmation = false
     @State private var showDeleteAccountConfirmation = false
+    @State private var showingGroupBottomSheet = false
 
     var body: some View {
         NavigationStack {
@@ -55,6 +57,20 @@ struct SettingView: View {
                     }
                 } header: {
                     Text("setting.profile_section")
+                }
+
+                // Group Section
+                Section {
+                    Button {
+                        showingGroupBottomSheet = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "person.3.fill")
+                            Text("setting.manage_groups")
+                        }
+                    }
+                } header: {
+                    Text("setting.group_section")
                 }
 
                 // Developer Section
@@ -115,9 +131,13 @@ struct SettingView: View {
                 }
             }
             .navigationTitle("nav.setting")
+            .sheet(isPresented: $showingGroupBottomSheet) {
+                GroupBottomSheetView(groupViewModel: groupViewModel)
+            }
         }
         .task {
             await viewModel.loadProfile()
+            await groupViewModel.loadUserGroups()
         }
     }
 }
@@ -163,7 +183,7 @@ struct ProfileEditView: View {
                         GridItem(.flexible()),
                         GridItem(.flexible()),
                         GridItem(.flexible()),
-                        GridItem(.flexible())
+                        GridItem(.flexible()),
                     ], spacing: 12) {
                         // Option to clear badge (use initial)
                         Button {
@@ -221,7 +241,10 @@ struct ProfileEditView: View {
                 Button {
                     Task {
                         await viewModel.updateProfile()
-                        dismiss()
+                        // Only dismiss if update was successful (no error)
+                        if !viewModel.showError {
+                            dismiss()
+                        }
                     }
                 } label: {
                     HStack {
@@ -240,6 +263,15 @@ struct ProfileEditView: View {
         }
         .navigationTitle("setting.edit_profile")
         .navigationBarTitleDisplayMode(.inline)
+        .alert("Error", isPresented: $viewModel.showError) {
+            Button("OK", role: .cancel) {
+                viewModel.showError = false
+            }
+        } message: {
+            if let errorMessage = viewModel.errorMessage {
+                Text(errorMessage)
+            }
+        }
     }
 }
 

@@ -28,7 +28,7 @@ class MapService {
         shelters: [Shelter],
         userLatitude: Double,
         userLongitude: Double,
-        radiusMeters: Double = 50.0,
+        radiusMeters: Double,
         reachedShelters: Set<String>
     ) -> Shelter? {
         print("🔍 Checking shelter proximity:")

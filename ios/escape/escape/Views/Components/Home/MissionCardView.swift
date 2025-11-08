@@ -47,7 +47,7 @@ struct MissionCardView: View {
             }
 
             if let mission = mission,
-               let disasterType = mission.disasterType,
+               let _ = mission.disasterType,
                mission.status != .completed
             {
                 Button(action: onTap) {

@@ -50,15 +50,6 @@ struct GroupBottomSheetView: View {
 
                 ScrollView {
                     VStack(spacing: 24) {
-                        // Simple Header Section
-                        VStack(spacing: 16) {
-                            Text("group.title", bundle: .main)
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
-                                .foregroundColor(.primary)
-                        }
-                        .padding(.top, 20)
-
                         // Simple Tab Selection
                         HStack(spacing: 0) {
                             ForEach(GroupTab.allCases, id: \.rawValue) { tab in
@@ -87,30 +78,34 @@ struct GroupBottomSheetView: View {
                             }
                         }
                         .background(Color(.systemGray6))
-                        .cornerRadius(12)
+                        .cornerRadius(20)
+                        .padding(.top, 20)
                         .padding(.horizontal, 20)
 
                         // Content Section
                         VStack {
                             switch selectedTab {
                             case .myGroups:
-                                MyGroupsView(groupViewModel: groupViewModel)
-                                    .transition(.asymmetric(
-                                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                                        removal: .move(edge: .leading).combined(with: .opacity)
-                                    ))
+                                MyGroupsView(groupViewModel: groupViewModel, selectedTab: $selectedTab)
+                                    .transition(
+                                        .asymmetric(
+                                            insertion: .move(edge: .trailing).combined(with: .opacity),
+                                            removal: .move(edge: .leading).combined(with: .opacity)
+                                        ))
                             case .createGroup:
-                                CreateGroupView(groupViewModel: groupViewModel)
-                                    .transition(.asymmetric(
-                                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                                        removal: .move(edge: .leading).combined(with: .opacity)
-                                    ))
+                                CreateGroupView(groupViewModel: groupViewModel, selectedTab: $selectedTab)
+                                    .transition(
+                                        .asymmetric(
+                                            insertion: .move(edge: .trailing).combined(with: .opacity),
+                                            removal: .move(edge: .leading).combined(with: .opacity)
+                                        ))
                             case .joinGroup:
                                 JoinGroupView(groupViewModel: groupViewModel)
-                                    .transition(.asymmetric(
-                                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                                        removal: .move(edge: .leading).combined(with: .opacity)
-                                    ))
+                                    .transition(
+                                        .asymmetric(
+                                            insertion: .move(edge: .trailing).combined(with: .opacity),
+                                            removal: .move(edge: .leading).combined(with: .opacity)
+                                        ))
                             }
                         }
                         .animation(.spring(response: 0.5, dampingFraction: 0.8), value: selectedTab)
@@ -123,6 +118,7 @@ struct GroupBottomSheetView: View {
                     await groupViewModel.loadUserGroups()
                 }
             }
+            .navigationTitle(String(localized: "group.title", bundle: .main))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -146,6 +142,7 @@ struct GroupBottomSheetView: View {
 
 struct MyGroupsView: View {
     @Bindable var groupViewModel: GroupViewModel
+    @Binding var selectedTab: GroupBottomSheetView.GroupTab
 
     var body: some View {
         LazyVStack(spacing: 12) {
@@ -154,7 +151,7 @@ struct MyGroupsView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 40)
             } else if groupViewModel.userGroups.isEmpty {
-                EmptyGroupsView()
+                EmptyGroupsView(selectedTab: $selectedTab)
             } else {
                 ForEach(groupViewModel.userGroups, id: \.id) { group in
                     GroupCardView(group: group, groupViewModel: groupViewModel)
@@ -166,6 +163,8 @@ struct MyGroupsView: View {
 }
 
 struct EmptyGroupsView: View {
+    @Binding var selectedTab: GroupBottomSheetView.GroupTab
+
     var body: some View {
         VStack(spacing: 24) {
             VStack(spacing: 16) {
@@ -185,55 +184,69 @@ struct EmptyGroupsView: View {
 
             // Simple suggestion cards
             VStack(spacing: 12) {
-                HStack(spacing: 12) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(Color("brandOrange"))
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        selectedTab = .createGroup
+                    }
+                }) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(Color("brandOrange"))
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("group.empty.create_action", bundle: .main)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.primary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("group.empty.create_action", bundle: .main)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.primary)
 
-                        Text("group.empty.create_description", bundle: .main)
+                            Text("group.empty.create_description", bundle: .main)
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "arrow.right")
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                     }
-
-                    Spacer()
-
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
+                    .padding(16)
+                    .background(Color(.systemGray6))
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
                 }
-                .padding(16)
-                .background(Color(.systemGray6))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .buttonStyle(PlainButtonStyle())
 
-                HStack(spacing: 12) {
-                    Image(systemName: "qrcode")
-                        .font(.system(size: 20))
-                        .foregroundColor(Color("brandOrange"))
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        selectedTab = .joinGroup
+                    }
+                }) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "qrcode")
+                            .font(.system(size: 20))
+                            .foregroundColor(Color("brandOrange"))
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("group.empty.join_action", bundle: .main)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.primary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("group.empty.join_action", bundle: .main)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.primary)
 
-                        Text("group.empty.join_description", bundle: .main)
+                            Text("group.empty.join_description", bundle: .main)
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "arrow.right")
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                     }
-
-                    Spacer()
-
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
+                    .padding(16)
+                    .background(Color(.systemGray6))
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
                 }
-                .padding(16)
-                .background(Color(.systemGray6))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .buttonStyle(PlainButtonStyle())
             }
         }
         .padding(.horizontal, 20)
@@ -292,7 +305,7 @@ struct GroupCardView: View {
                                 .padding(.vertical, 2)
                                 .background(Color("brandOrange").opacity(0.2))
                                 .foregroundColor(Color("brandOrange"))
-                                .cornerRadius(4)
+                                .cornerRadius(8)
                         }
                     }
                 }
@@ -305,7 +318,7 @@ struct GroupCardView: View {
             }
             .padding(16)
             .background(Color(.systemGray6))
-            .cornerRadius(12)
+            .cornerRadius(20)
         }
         .buttonStyle(PlainButtonStyle())
         .sheet(isPresented: $showingGroupDetail) {

@@ -50,7 +50,8 @@ struct NationalRankingView: View {
                         }
 
                         // All Rankings (including separators)
-                        ForEach(Array(pointViewModel.nationalRanking.enumerated()), id: \.element.id) { index, entry in
+                        ForEach(Array(pointViewModel.nationalRanking.enumerated()), id: \.element.id) {
+                            index, entry in
                             if entry.rank == -1 {
                                 // Separator
                                 SeparatorView()
@@ -93,7 +94,8 @@ struct NationalRankingView: View {
 
             // Use smart pagination with current user context
             let pointService = PointSupabase()
-            let smartRankings = try await pointService.getSmartPaginatedNationalLeaderboard(userId: currentUserId!)
+            let smartRankings = try await pointService.getSmartPaginatedNationalLeaderboard(
+                userId: currentUserId!)
             pointViewModel.nationalRanking = smartRankings
 
             await pointViewModel.fetchUserStats()
@@ -310,7 +312,7 @@ private struct PodiumPosition: View {
                 .foregroundColor(.secondary)
 
             // Podium
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .fill(
                     LinearGradient(
                         colors: [color.opacity(0.3), color.opacity(0.1)],
@@ -325,7 +327,7 @@ private struct PodiumPosition: View {
                         .foregroundColor(color.opacity(0.3))
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
+                    RoundedRectangle(cornerRadius: 8)
                         .stroke(color.opacity(0.5), lineWidth: 2)
                 )
         }
@@ -350,9 +352,9 @@ private struct RankingRow: View {
         HStack(spacing: 16) {
             // Rank Number
             ZStack {
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: 8)
                     .fill(rankGradient)
-                    .frame(width: 50, height: 50)
+                    .frame(width: 25, height: 25)
 
                 Text("\(entry.rank)")
                     .font(.title3)
@@ -411,29 +413,30 @@ private struct RankingRow: View {
         }
         .padding(isCurrentUser ? 18 : 16)
         .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(isCurrentUser ?
-                    LinearGradient(
-                        colors: [Color("brandOrange").opacity(0.25), Color("brandRed").opacity(0.25)],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    ) :
-                    LinearGradient(
-                        colors: [Color(.secondarySystemBackground), Color(.secondarySystemBackground)],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
+            RoundedRectangle(cornerRadius: 20)
+                .fill(
+                    isCurrentUser
+                        ? LinearGradient(
+                            colors: [Color("brandOrange").opacity(0.25), Color("brandRed").opacity(0.25)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                        : LinearGradient(
+                            colors: [Color(.secondarySystemBackground), Color(.secondarySystemBackground)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 16)
+                    RoundedRectangle(cornerRadius: 20)
                         .stroke(
-                            isCurrentUser ?
-                                LinearGradient(
+                            isCurrentUser
+                                ? LinearGradient(
                                     colors: [Color("brandOrange"), Color("brandRed")],
                                     startPoint: .leading,
                                     endPoint: .trailing
-                                ) :
-                                LinearGradient(
+                                )
+                                : LinearGradient(
                                     colors: [Color.clear, Color.clear],
                                     startPoint: .leading,
                                     endPoint: .trailing
@@ -529,7 +532,7 @@ private struct ErrorView: View {
                     .padding(.horizontal, 30)
                     .padding(.vertical, 12)
                     .background(
-                        RoundedRectangle(cornerRadius: 12)
+                        RoundedRectangle(cornerRadius: 8)
                             .fill(
                                 LinearGradient(
                                     colors: [Color("brandOrange"), Color("brandRed")],

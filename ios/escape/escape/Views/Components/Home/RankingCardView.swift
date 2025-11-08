@@ -30,7 +30,7 @@ struct RankingCardView: View {
             }
             showingRankingDetail = true
         } label: {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 6) {
                 // Header
                 HStack {
                     Image(systemName: "trophy.fill")
@@ -52,7 +52,7 @@ struct RankingCardView: View {
 
                 // Tab Selector
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 0) {
+                    HStack(spacing: 6) {
                         // National Tab
                         TabButton(
                             title: "ranking.national",
@@ -94,20 +94,19 @@ struct RankingCardView: View {
             .background(
                 RoundedRectangle(cornerRadius: 20)
                     .fill(Color(.systemBackground))
-                    .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                    .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
             )
         }
         .buttonStyle(.plain)
         .sheet(isPresented: $showingRankingDetail) {
-            RankingView(selectedTab: selectedTab, pointViewModel: pointViewModel, groupViewModel: groupViewModel)
+            RankingView(
+                selectedTab: selectedTab, pointViewModel: pointViewModel, groupViewModel: groupViewModel
+            )
         }
         .task {
             // Pre-load all ranking data
-            async let userStatsFetch = pointViewModel.fetchUserStats()
-            async let groupsFetch = groupViewModel.loadUserGroups()
-
-            await userStatsFetch
-            await groupsFetch
+            let userStatsFetch: () = await pointViewModel.fetchUserStats()
+            let groupsFetch: () = await groupViewModel.loadUserGroups()
 
             // Load team stats if user has a group
             if let groupId = groupViewModel.primaryGroup?.team.id {
@@ -138,18 +137,19 @@ private struct TabButton: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ?
-                        LinearGradient(
-                            colors: [Color("brandOrange"), Color("brandRed")],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        ) :
-                        LinearGradient(
-                            colors: [Color.gray.opacity(0.2), Color.gray.opacity(0.2)],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(
+                        isSelected
+                            ? LinearGradient(
+                                colors: [Color("brandOrange"), Color("brandRed")],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                            : LinearGradient(
+                                colors: [Color.gray.opacity(0.2), Color.gray.opacity(0.2)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
                     )
             )
             .foregroundColor(isSelected ? .white : .secondary)
@@ -164,7 +164,7 @@ private struct NationalRankingPreview: View {
     let pointViewModel: PointViewModel
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 8) {
             // User's Stats
             if let rank = pointViewModel.userNationalRank {
                 HStack(spacing: 12) {
@@ -173,16 +173,18 @@ private struct NationalRankingPreview: View {
                             .font(.caption2)
                             .foregroundColor(.secondary)
 
-                        Text(String(format: NSLocalizedString("ranking.national_rank_format", comment: ""), rank))
-                            .font(.title3)
-                            .fontWeight(.heavy)
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [Color("brandOrange"), Color("brandRed")],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
+                        Text(
+                            String(format: NSLocalizedString("ranking.national_rank_format", comment: ""), rank)
+                        )
+                        .font(.title3)
+                        .fontWeight(.heavy)
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color("brandOrange"), Color("brandRed")],
+                                startPoint: .leading,
+                                endPoint: .trailing
                             )
+                        )
                     }
 
                     Spacer()
@@ -197,10 +199,16 @@ private struct NationalRankingPreview: View {
                             .fontWeight(.bold)
                             .foregroundColor(Color("brandMediumBlue"))
                     }
+
+                    VStack(spacing: 4) {
+                        Image(systemName: "chevron.right.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(Color("brandOrange").opacity(0.8))
+                    }
                 }
                 .padding(12)
                 .background(
-                    RoundedRectangle(cornerRadius: 12)
+                    RoundedRectangle(cornerRadius: 8)
                         .fill(Color("brandOrange").opacity(0.1))
                 )
             }
@@ -215,7 +223,7 @@ private struct TeamRankingPreview: View {
     let groupViewModel: GroupViewModel
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 8) {
             if !groupViewModel.hasAnyGroup {
                 // No team placeholder
                 VStack(spacing: 8) {
@@ -240,13 +248,7 @@ private struct TeamRankingPreview: View {
                         Text(String(format: NSLocalizedString("ranking.team_rank_format", comment: ""), rank))
                             .font(.title3)
                             .fontWeight(.heavy)
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [Color("brandMediumBlue"), Color("brandOrange")],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
+                            .foregroundColor(Color("brandMediumBlue"))
                     }
 
                     Spacer()
@@ -262,10 +264,16 @@ private struct TeamRankingPreview: View {
                             .fontWeight(.bold)
                             .foregroundColor(Color("brandMediumBlue"))
                     }
+
+                    VStack(spacing: 4) {
+                        Image(systemName: "chevron.right.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(Color("brandMediumBlue").opacity(0.8))
+                    }
                 }
                 .padding(12)
                 .background(
-                    RoundedRectangle(cornerRadius: 12)
+                    RoundedRectangle(cornerRadius: 8)
                         .fill(Color("brandMediumBlue").opacity(0.1))
                 )
             }

@@ -13,6 +13,7 @@ class HomeViewModel {
     var userBadges: [Badge] = []
     var badgeStats: (total: Int, unlocked: Int) = (0, 0)
     var showingMissionDetail = false
+    var isLoadingBadges = false
 
     // MARK: - Dependencies
 
@@ -27,6 +28,9 @@ class HomeViewModel {
     // MARK: - Actions
 
     func loadUserBadges() async {
+        isLoadingBadges = true
+        defer { isLoadingBadges = false }
+
         do {
             let collectedBadges = try await badgeService.getUserCollectedBadgesWithDetails()
             userBadges = collectedBadges.map { $0.toBadge() }
@@ -34,7 +38,7 @@ class HomeViewModel {
             // Fetch badge statistics
             badgeStats = try await badgeService.getBadgeStats()
         } catch {
-            debugPrint("❌ Failed to load badges: \(error)")
+            print("❌ Failed to load badges: \(error)")
             userBadges = [] // Fallback to empty array on error
             badgeStats = (0, 0)
         }

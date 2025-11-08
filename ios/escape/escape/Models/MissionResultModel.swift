@@ -91,6 +91,52 @@ extension MissionResult {
     }
 }
 
+// MARK: - Skill Level Calculator
+
+enum SkillLevelCalculator {
+    /// Calculate skill level (star count) based on mission result count at specific shelter
+    /// - Parameter missionResultCount: Number of mission results for the shelter
+    /// - Returns: Star count from 1 to 5
+    static func calculateStarCount(from missionResultCount: Int) -> Int {
+        switch missionResultCount {
+        case 0:
+            return 0 // No missions completed
+        case 1 ... 2:
+            return 1 // 1 star for 1-2 missions
+        case 3 ... 5:
+            return 2 // 2 stars for 3-5 missions
+        case 6 ... 9:
+            return 3 // 3 stars for 6-9 missions
+        case 10 ... 14:
+            return 4 // 4 stars for 10-14 missions
+        default:
+            return 5 // 5 stars for 15+ missions (maximum)
+        }
+    }
+
+    /// Get skill level description in Japanese
+    /// - Parameter starCount: Number of stars (0-5)
+    /// - Returns: Localized skill level description
+    static func skillLevelDescription(for starCount: Int) -> String {
+        switch starCount {
+        case 0:
+            return String(localized: "skill_level.beginner", table: "Localizable")
+        case 1:
+            return String(localized: "skill_level.novice", table: "Localizable")
+        case 2:
+            return String(localized: "skill_level.intermediate", table: "Localizable")
+        case 3:
+            return String(localized: "skill_level.advanced", table: "Localizable")
+        case 4:
+            return String(localized: "skill_level.expert", table: "Localizable")
+        case 5:
+            return String(localized: "skill_level.master", table: "Localizable")
+        default:
+            return String(localized: "skill_level.unknown", table: "Localizable")
+        }
+    }
+}
+
 // MARK: - Score Calculator
 
 enum MissionScoreCalculator {

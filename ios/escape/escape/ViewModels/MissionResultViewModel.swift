@@ -33,7 +33,9 @@ class MissionResultViewModel {
     var sharePayload: BadgeSharePayload? {
         guard let badge = acquiredBadge else { return nil }
         // Pull a localized template and inject the badge name so the share message respects each language.
-        let template = NSLocalizedString("badge_share_message", comment: "Share message shown when a badge is earned")
+        let template = NSLocalizedString(
+            "badge_share_message", comment: "Share message shown when a badge is earned"
+        )
         return BadgeSharePayload(
             message: String(format: template, badge.name),
             imageURL: badge.imageUrl.flatMap { URL(string: $0) }
@@ -44,6 +46,7 @@ class MissionResultViewModel {
     var shareImageData: Data?
     // Cache a snapshot image (as data) so we can show it in the share sheet preview.
     var shareSnapshotData: Data?
+    var badgeSkillLevel: Int = 0
 
     // MARK: - Dependencies
 
@@ -121,7 +124,11 @@ class MissionResultViewModel {
                 generatedBadgeUrl = badge.getImageUrl()
 
                 // Add to user_shelter_badges table (if not already added)
-                try? await badgeService.unlockBadge(badgeId: badge.id)
+                do {
+                    _ = try await badgeService.unlockBadge(badgeId: badge.id)
+                } catch {
+                    debugPrint("❌ Failed to unlock badge: \(error)")
+                }
 
                 isBadgeGenerated = true
                 isGeneratingBadge = false
@@ -181,7 +188,11 @@ class MissionResultViewModel {
                 // Badge was created by another request, use it
                 acquiredBadge = createBadgeUIModel(from: existingBadge, shelter: shelter)
                 generatedBadgeUrl = existingBadge.getImageUrl()
-                try? await badgeService.unlockBadge(badgeId: existingBadge.id)
+                do {
+                    _ = try await badgeService.unlockBadge(badgeId: existingBadge.id)
+                } catch {
+                    debugPrint("❌ Failed to unlock existing badge: \(error)")
+                }
                 isBadgeGenerated = true
                 showSuccessAlert = true
                 return
@@ -191,7 +202,8 @@ class MissionResultViewModel {
             await badgeViewModel.generateBadge(
                 locationName: shelter.name,
                 locationAddress: shelter.address,
-                locationDescription: userDescription.isEmpty ? "A notable shelter location" : userDescription,
+                locationDescription: userDescription.isEmpty
+                    ? "A notable shelter location" : userDescription,
                 colorTheme: nil
             )
 
@@ -199,7 +211,9 @@ class MissionResultViewModel {
                 generatedBadgeUrl = badgeUrl
 
                 // Extract filename from URL for badge name
-                let badgeFileName = extractFileNameFromUrl(badgeUrl) ?? "badge_\(Int(Date().timeIntervalSince1970 * 1000)).png"
+                let badgeFileName =
+                    extractFileNameFromUrl(badgeUrl)
+                        ?? "badge_\(Int(Date().timeIntervalSince1970 * 1000)).png"
 
                 // Final check before creating to prevent race conditions
                 let finalCheck = try await badgeService.getBadgeForShelter(shelterId: shelterUUID)
@@ -207,7 +221,11 @@ class MissionResultViewModel {
                     // Badge was created by another request, use it instead
                     acquiredBadge = createBadgeUIModel(from: existingBadge, shelter: shelter)
                     generatedBadgeUrl = existingBadge.getImageUrl()
-                    try? await badgeService.unlockBadge(badgeId: existingBadge.id)
+                    do {
+                        _ = try await badgeService.unlockBadge(badgeId: existingBadge.id)
+                    } catch {
+                        debugPrint("❌ Failed to unlock final check badge: \(error)")
+                    }
                     isBadgeGenerated = true
                     showSuccessAlert = true
                     return
@@ -260,7 +278,9 @@ class MissionResultViewModel {
     }
 
     // Helper function to create Badge UI model
-    private func createBadgeUIModel(from shelterBadge: ShelterBadge, shelter: Shelter, imageUrl: String? = nil) -> Badge {
+    private func createBadgeUIModel(
+        from shelterBadge: ShelterBadge, shelter: Shelter, imageUrl: String? = nil
+    ) -> Badge {
         Badge(
             id: shelterBadge.id.uuidString,
             name: shelter.name,
@@ -269,7 +289,7 @@ class MissionResultViewModel {
             isUnlocked: true,
             imageName: nil,
             imageUrl: imageUrl ?? shelterBadge.getImageUrl(),
-            badgeNumber: shelter.commonId,
+            badgeNumber: shelter.number?.description,
             address: shelter.address,
             municipality: shelter.municipality,
             isShelter: shelter.isShelter ?? false,
@@ -298,5 +318,38 @@ class MissionResultViewModel {
         }
 
         return nil
+    }
+
+    // MARK: - Skill Level Methods
+
+    /// Fetches mission result count for the badge's shelter and calculates skill level
+    /// - Parameter badge: The badge to calculate skill level for
+    func loadBadgeSkillLevel(for badge: Badge) async {
+        guard let shelterUUID = UUID(uuidString: badge.id) else {
+            print("❌ Invalid badge shelter ID: \(badge.id)")
+            return
+        }
+
+        do {
+            let currentUserId = try await authService.getCurrentUserId()
+            let missionResults = try await missionResultService.getUserShelterMissionResults(
+                userId: currentUserId,
+                shelterId: shelterUUID
+            )
+            let starCount = SkillLevelCalculator.calculateStarCount(from: missionResults.count)
+
+            await MainActor.run {
+                badgeSkillLevel = starCount
+            }
+
+            print(
+                "✅ Loaded skill level for badge \(badge.name): \(starCount) stars (\(missionResults.count) missions)"
+            )
+        } catch {
+            print("❌ Failed to load badge skill level: \(error)")
+            await MainActor.run {
+                badgeSkillLevel = 0
+            }
+        }
     }
 }
