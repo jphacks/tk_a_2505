@@ -4931,7 +4931,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "第%d位"
+            "value": "%d位"
           }
         }
       }
