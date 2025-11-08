@@ -13,7 +13,6 @@ struct NationalRankingView: View {
     @State private var showSparkles = false
     @State private var currentUserId: UUID?
     @State private var isLoadingNational = false
-    @State private var showUserProfile = false
     @State private var selectedUserId: UUID?
 
     var body: some View {
@@ -81,11 +80,9 @@ struct NationalRankingView: View {
                 }
             }
         }
-        .sheet(isPresented: $showUserProfile) {
-            if let userId = selectedUserId {
-                UserProfileBottomSheetView(userId: userId)
-                    .presentationDetents([.medium, .large])
-            }
+        .sheet(item: $selectedUserId) { userId in
+            UserProfileBottomSheetView(userId: userId)
+                .presentationDetents([.medium, .large])
         }
         .task {
             await loadRankings()
@@ -95,7 +92,6 @@ struct NationalRankingView: View {
 
     private func handleUserTap(userId: UUID) {
         selectedUserId = userId
-        showUserProfile = true
     }
 
     private func loadRankings() async {

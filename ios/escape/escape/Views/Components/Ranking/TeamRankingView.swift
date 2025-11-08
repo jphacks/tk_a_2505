@@ -13,7 +13,6 @@ struct TeamRankingView: View {
     @State private var animateEntries = false
     @State private var currentUserId: UUID?
     @State private var isLoadingTeam = false
-    @State private var showUserProfile = false
     @State private var selectedUserId: UUID?
 
     var body: some View {
@@ -82,11 +81,9 @@ struct TeamRankingView: View {
                 }
             }
         }
-        .sheet(isPresented: $showUserProfile) {
-            if let userId = selectedUserId {
-                UserProfileBottomSheetView(userId: userId)
-                    .presentationDetents([.medium, .large])
-            }
+        .sheet(item: $selectedUserId) { userId in
+            UserProfileBottomSheetView(userId: userId)
+                .presentationDetents([.medium, .large])
         }
         .task {
             await loadTeamRankings()
@@ -96,7 +93,6 @@ struct TeamRankingView: View {
 
     private func handleUserTap(userId: UUID) {
         selectedUserId = userId
-        showUserProfile = true
     }
 
     private func loadTeamRankings() async {
