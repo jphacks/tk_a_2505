@@ -27,7 +27,12 @@ struct RatingCard: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top, spacing: 12) {
                 // User avatar
-                userAvatar
+                UserAvatarView(
+                    username: ratingWithUser.userName,
+                    badgeImageUrl: nil,  // Could fetch badge image if needed
+                    size: .small,
+                    showLoadingIndicator: false
+                )
 
                 VStack(alignment: .leading, spacing: 8) {
                     // Header: User name and date
@@ -69,55 +74,6 @@ struct RatingCard: View {
                 Divider()
             }
         }
-    }
-
-    // MARK: - User Avatar
-
-    @ViewBuilder
-    private var userAvatar: some View {
-        if let profileBadgeId = ratingWithUser.userProfileBadgeId {
-            // User has a profile badge - try to load it
-            AsyncImage(url: getBadgeImageUrl(for: profileBadgeId)) { phase in
-                switch phase {
-                case .empty:
-                    avatarPlaceholder
-                case let .success(image):
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 40, height: 40)
-                        .clipShape(Circle())
-                case .failure:
-                    avatarPlaceholder
-                @unknown default:
-                    avatarPlaceholder
-                }
-            }
-        } else {
-            avatarPlaceholder
-        }
-    }
-
-    private var avatarPlaceholder: some View {
-        Circle()
-            .fill(Color(.systemGray4))
-            .frame(width: 40, height: 40)
-            .overlay(
-                Image(systemName: "person.fill")
-                    .font(.system(size: 20))
-                    .foregroundColor(.white)
-            )
-    }
-
-    // MARK: - Helper Methods
-
-    private func getBadgeImageUrl(for badgeId: UUID) -> URL? {
-        // This would ideally fetch from the badge service
-        // For now, construct URL similar to ShelterBadge.getImageUrl()
-        let baseUrl = "https://wmmddehrriniwxsgnwqy.supabase.co/storage/v1/object/public/shelter_badges"
-        // We need the badge_name, which we don't have here
-        // This is a limitation - might need to include badge_name in the model
-        return nil  // Fallback to placeholder
     }
 }
 

@@ -190,7 +190,6 @@ class RatingSupabase {
             .execute()
             .value
 
-        debugPrint("✅ Created rating for shelter: \(shelterId), rating: \(rating) stars")
         return createdRating
     }
 
@@ -238,7 +237,6 @@ class RatingSupabase {
             .execute()
             .value
 
-        debugPrint("✅ Updated rating: \(ratingId), new rating: \(rating) stars")
         return updatedRating
     }
 
@@ -283,8 +281,6 @@ class RatingSupabase {
             .delete()
             .eq("id", value: ratingId)
             .execute()
-
-        debugPrint("✅ Deleted rating: \(ratingId)")
     }
 
     /// Deletes the current user's rating for a specific shelter
@@ -307,25 +303,11 @@ class RatingSupabase {
     /// - Parameter shelterId: The shelter UUID
     /// - Returns: True if user can rate, false otherwise
     func canUserRateShelter(shelterId: UUID) async throws -> Bool {
-        let currentUser = try await supabase.auth.session.user
-
-        debugPrint("🔍 Checking if user can rate shelter:")
-        debugPrint("   User ID: \(currentUser.id)")
-        debugPrint("   Shelter ID: \(shelterId)")
-
-        // Get the badge for this shelter
         guard let shelterBadge = try await badgeService.getBadgeForShelter(shelterId: shelterId) else {
-            debugPrint("   No badge exists for this shelter")
             return false
         }
 
-        debugPrint("   Badge ID: \(shelterBadge.id)")
-
-        // Check if user has unlocked this badge
-        let hasUnlockedBadge = try await badgeService.hasUnlockedBadge(badgeId: shelterBadge.id)
-
-        debugPrint("   Has unlocked badge: \(hasUnlockedBadge)")
-        return hasUnlockedBadge
+        return try await badgeService.hasUnlockedBadge(badgeId: shelterBadge.id)
     }
 
     /// Checks the current user's rating status for a shelter

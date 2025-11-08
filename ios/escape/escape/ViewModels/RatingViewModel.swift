@@ -68,13 +68,8 @@ class RatingViewModel {
 
             // Load all ratings with user info
             ratings = try await ratingService.getRatingsWithUsersForShelter(shelterId: shelterId)
-
-            debugPrint(
-                "✅ Loaded \(ratings.count) ratings for shelter: \(shelterId), avg: \(ratingSummary?.averageRating ?? 0)"
-            )
         } catch {
             errorMessage = "Failed to load ratings"
-            debugPrint("❌ Error loading ratings: \(error)")
         }
     }
 
@@ -91,10 +86,8 @@ class RatingViewModel {
                 formState.rating = rating.rating
                 formState.review = rating.review ?? ""
             }
-
-            debugPrint("✅ Loaded user rating: \(userRating != nil ? "exists" : "none")")
         } catch {
-            debugPrint("❌ Error loading user rating: \(error)")
+            // Silently handle - user has no rating
         }
     }
 
@@ -109,15 +102,10 @@ class RatingViewModel {
             canRate = status.canRate
             hasBadge = status.hasBadge
             hasExistingRating = status.hasExistingRating
-
-            debugPrint(
-                "✅ Rating permission check: canRate=\(canRate), hasBadge=\(hasBadge), hasExisting=\(hasExistingRating)"
-            )
         } catch {
             canRate = false
             hasBadge = false
             hasExistingRating = false
-            debugPrint("❌ Error checking rating permission: \(error)")
         }
     }
 
@@ -185,21 +173,17 @@ class RatingViewModel {
                 ? String(localized: "rating.success.updated", defaultValue: "Rating updated!", table: "Localizable")
                 : String(localized: "rating.success.created", defaultValue: "Rating submitted!", table: "Localizable")
 
-            debugPrint("✅ Rating submitted: \(finalStars) stars")
-
             // Reload ratings to show updated data
             await loadRatings(for: targetShelterId)
 
         } catch let error as UpsertRatingRequest.ValidationError {
             errorMessage = error.localizedDescription
-            debugPrint("❌ Validation error: \(error)")
         } catch {
             errorMessage = String(
                 localized: "rating.error.submit_failed",
                 defaultValue: "Failed to submit rating. Please try again.",
                 table: "Localizable"
             )
-            debugPrint("❌ Error submitting rating: \(error)")
         }
     }
 
@@ -231,8 +215,6 @@ class RatingViewModel {
                     table: "Localizable"
                 )
 
-                debugPrint("✅ Rating deleted for shelter: \(shelterId)")
-
                 // Reload ratings to show updated data
                 await loadRatings(for: shelterId)
             } else {
@@ -244,7 +226,6 @@ class RatingViewModel {
                 defaultValue: "Failed to delete rating. Please try again.",
                 table: "Localizable"
             )
-            debugPrint("❌ Error deleting rating: \(error)")
         }
     }
 
@@ -273,7 +254,6 @@ class RatingViewModel {
             }
         } catch {
             errorMessage = "Failed to delete rating"
-            debugPrint("❌ Error deleting rating: \(error)")
         }
     }
 
@@ -285,8 +265,6 @@ class RatingViewModel {
 
         formState.rating = rating.rating
         formState.review = rating.review ?? ""
-
-        debugPrint("📝 Started editing rating")
     }
 
     /// Resets the form to empty state
@@ -376,7 +354,6 @@ class RatingViewModel {
             let ratings = try await ratingService.getCurrentUserRatings()
             return ratings.count
         } catch {
-            debugPrint("❌ Error getting user rating count: \(error)")
             return 0
         }
     }
@@ -386,7 +363,6 @@ class RatingViewModel {
         do {
             return try await ratingService.getSheltersRatedByCurrentUser()
         } catch {
-            debugPrint("❌ Error getting rated shelters: \(error)")
             return []
         }
     }

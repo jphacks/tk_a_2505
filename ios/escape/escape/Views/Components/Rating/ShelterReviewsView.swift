@@ -13,6 +13,7 @@ struct ShelterReviewsView: View {
 
     let shelter: Shelter
     @Bindable var viewModel: RatingViewModel
+    @State private var showEditSheet = false
 
     // MARK: - Body
 
@@ -32,6 +33,9 @@ struct ShelterReviewsView: View {
         }
         .navigationTitle("Reviews")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showEditSheet) {
+            EditRatingSheet(viewModel: viewModel)
+        }
         .task {
             // Data should already be loaded by ShelterInfoSheet
             // But refresh if needed
@@ -96,6 +100,7 @@ struct ShelterReviewsView: View {
                         // Edit button
                         Button(action: {
                             viewModel.startEditingRating()
+                            showEditSheet = true
                         }) {
                             Text("Edit Your Rating")
                                 .font(.subheadline)
