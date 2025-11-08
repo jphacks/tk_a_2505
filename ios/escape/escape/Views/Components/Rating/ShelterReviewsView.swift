@@ -99,6 +99,7 @@ struct ShelterReviewsView: View {
 
                         // Edit button
                         Button(action: {
+                            HapticFeedback.shared.lightImpact()
                             viewModel.startEditingRating()
                             showEditSheet = true
                         }) {
@@ -143,7 +144,7 @@ struct ShelterReviewsView: View {
 
             if viewModel.isLoadingRatings {
                 // Loading skeletons
-                ForEach(0..<3, id: \.self) { _ in
+                ForEach(0 ..< 3, id: \.self) { _ in
                     RatingCardSkeleton()
                 }
             } else if viewModel.ratings.isEmpty {
@@ -192,7 +193,7 @@ struct EditRatingSheet: View {
                 }
             }
         }
-        .onChange(of: viewModel.successMessage) { oldValue, newValue in
+        .onChange(of: viewModel.successMessage) { _, newValue in
             if newValue != nil {
                 // Dismiss sheet after successful submission
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -265,8 +266,8 @@ struct EditRatingSheet: View {
                             userId: UUID(),
                             rating: 4,
                             review: "Good shelter, well maintained.",
-                            createdAt: Date().addingTimeInterval(-172800),
-                            updatedAt: Date().addingTimeInterval(-172800)
+                            createdAt: Date().addingTimeInterval(-172_800),
+                            updatedAt: Date().addingTimeInterval(-172_800)
                         ),
                         user: User(
                             id: UUID(),

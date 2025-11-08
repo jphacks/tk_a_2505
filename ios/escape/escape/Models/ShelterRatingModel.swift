@@ -14,8 +14,8 @@ struct ShelterRating: Codable, Identifiable {
     let id: UUID
     let shelterId: UUID
     let userId: UUID
-    let rating: Int  // 1-5 stars
-    let review: String?  // Optional review text (max 500 chars)
+    let rating: Int // 1-5 stars
+    let review: String? // Optional review text (max 500 chars)
     let createdAt: Date
     let updatedAt: Date
 
@@ -53,7 +53,7 @@ extension ShelterRating {
     /// Returns star rating as an array for easy UI rendering
     /// Example: rating = 4 returns [true, true, true, true, false]
     var starsArray: [Bool] {
-        (1...5).map { $0 <= rating }
+        (1 ... 5).map { $0 <= rating }
     }
 }
 
@@ -115,7 +115,7 @@ struct ShelterRatingSummary: Codable {
     /// Returns star rating as an array for easy UI rendering
     /// Uses half-star logic for averages
     var starsArray: [StarState] {
-        (1...5).map { index in
+        (1 ... 5).map { index in
             let threshold = Double(index)
             if averageRating >= threshold {
                 return .full
@@ -153,7 +153,7 @@ struct UpsertRatingRequest: Codable {
 
     /// Validates the rating data before submission
     func validate() throws {
-        guard rating >= 1 && rating <= 5 else {
+        guard rating >= 1, rating <= 5 else {
             throw ValidationError.invalidRating
         }
 

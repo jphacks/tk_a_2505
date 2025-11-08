@@ -243,6 +243,7 @@ struct ProfileEditView: View {
                         await viewModel.updateProfile()
                         // Only dismiss if update was successful (no error)
                         if !viewModel.showError {
+                            HapticFeedback.shared.success()
                             dismiss()
                         }
                     }

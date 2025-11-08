@@ -162,6 +162,18 @@ struct RatingFormView: View {
         .padding()
         .background(Color(.systemBackground))
         .cornerRadius(16)
+        .onChange(of: viewModel.successMessage) { oldValue, newValue in
+            // Haptic feedback for successful operations
+            if newValue != nil && oldValue == nil {
+                // Check if this was a delete operation (only shown in edit mode)
+                if isEditing && newValue?.contains("deleted") == true || newValue?.contains("Deleted") == true {
+                    HapticFeedback.shared.warning()
+                } else {
+                    // This is a submit/update operation
+                    HapticFeedback.shared.success()
+                }
+            }
+        }
     }
 }
 

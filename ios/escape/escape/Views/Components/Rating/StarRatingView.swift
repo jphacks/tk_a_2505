@@ -45,10 +45,10 @@ struct StarRatingView: View {
     ) {
         self.rating = rating
         self.maxRating = maxRating
-        self.isInteractive = false
+        isInteractive = false
         self.starSize = starSize
         self.spacing = spacing
-        self.onRatingChanged = nil
+        onRatingChanged = nil
     }
 
     /// Creates a star rating view for user input
@@ -67,7 +67,7 @@ struct StarRatingView: View {
     ) {
         self.rating = Double(rating)
         self.maxRating = maxRating
-        self.isInteractive = true
+        isInteractive = true
         self.starSize = starSize
         self.spacing = spacing
         self.onRatingChanged = onRatingChanged
@@ -77,7 +77,7 @@ struct StarRatingView: View {
 
     var body: some View {
         HStack(spacing: spacing) {
-            ForEach(1...maxRating, id: \.self) { index in
+            ForEach(1 ... maxRating, id: \.self) { index in
                 starView(for: index)
                     .onTapGesture {
                         if isInteractive {
