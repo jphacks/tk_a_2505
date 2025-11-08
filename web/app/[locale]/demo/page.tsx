@@ -14,6 +14,7 @@ import {
   Star,
   Users,
   MapPin,
+  MessageSquare,
 } from "lucide-react";
 
 type Props = {
@@ -48,6 +49,7 @@ export default async function DemoPage({ params }: Props) {
     { icon: Star, key: 8 },
     { icon: Users, key: 9 },
     { icon: MapPin, key: 10 },
+    { icon: MessageSquare, key: 11 },
   ].map((f) => ({
     icon: f.icon,
     title: t(`improvementFeature${f.key}Title`),
