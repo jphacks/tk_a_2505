@@ -15,8 +15,8 @@ struct ActivityHeatmapView: View {
     private let baseColor = Color(hex: "f54900")
 
     @State private var selectedDate: String?
-    @State private var tooltipPosition: CGPoint = .zero
     @State private var showTooltip = false
+    @State private var tooltipFrame: CGRect = .zero
 
     private let columns = Array(repeating: GridItem(.fixed(30), spacing: 4), count: 7)
     private let cellSize: CGFloat = 30
@@ -27,20 +27,31 @@ struct ActivityHeatmapView: View {
                 .font(.headline)
                 .foregroundColor(.primary)
 
-            ZStack(alignment: .topLeading) {
-                // Heatmap grid
-                LazyVGrid(columns: columns, spacing: 4) {
-                    ForEach(getLast30Days(), id: \.self) { date in
-                        dayCellView(for: date)
-                    }
-                }
+            VStack(alignment: .leading, spacing: 8) {
+                // Weekday labels
+                weekdayLabels
 
-                // Tooltip overlay
-                if showTooltip, let selectedDate = selectedDate {
-                    tooltipView(for: selectedDate)
-                        .position(tooltipPosition)
-                        .transition(.opacity)
-                        .zIndex(100)
+                // Heatmap grid with tooltip overlay
+                ZStack(alignment: .topLeading) {
+                    LazyVGrid(columns: columns, spacing: 4, pinnedViews: []) {
+                        ForEach(Array(getAlignedDays().enumerated()), id: \.offset) { index, dayData in
+                            if let date = dayData {
+                                dayCellView(for: date, index: index)
+                            } else {
+                                // Empty placeholder cell for alignment
+                                Color.clear
+                                    .frame(width: cellSize, height: cellSize)
+                            }
+                        }
+                    }
+
+                    // Tooltip overlay
+                    if showTooltip, let selectedDate = selectedDate {
+                        tooltipView(for: selectedDate)
+                            .offset(x: tooltipFrame.minX - 40, y: tooltipFrame.minY - 70)
+                            .transition(.opacity)
+                            .zIndex(100)
+                    }
                 }
             }
 
@@ -67,24 +78,40 @@ struct ActivityHeatmapView: View {
         .cornerRadius(12)
     }
 
+    // MARK: - Weekday Labels
+
+    private var weekdayLabels: some View {
+        HStack(spacing: 4) {
+            ForEach(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], id: \.self) { day in
+                Text(day)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .frame(width: cellSize)
+            }
+        }
+    }
+
     // MARK: - Day Cell View
 
-    private func dayCellView(for date: Date) -> some View {
+    private func dayCellView(for date: Date, index: Int) -> some View {
         let dateString = formatDate(date)
         let points = dailyPoints[dateString] ?? 0
         let color = getColorForPoints(points)
 
-        return Rectangle()
-            .fill(color)
-            .frame(width: cellSize, height: cellSize)
-            .cornerRadius(4)
-            .overlay(
-                RoundedRectangle(cornerRadius: 4)
-                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-            )
-            .onTapGesture { location in
-                handleDayTap(date: dateString, points: points, at: location)
-            }
+        return GeometryReader { geometry in
+            Rectangle()
+                .fill(color)
+                .frame(width: cellSize, height: cellSize)
+                .cornerRadius(4)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                )
+                .onTapGesture {
+                    handleDayTap(date: dateString, points: points, frame: geometry.frame(in: .local))
+                }
+        }
+        .frame(width: cellSize, height: cellSize)
     }
 
     // MARK: - Tooltip View
@@ -106,7 +133,7 @@ struct ActivityHeatmapView: View {
         .background(
             RoundedRectangle(cornerRadius: 8)
                 .fill(Color(.systemBackground))
-                .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 2)
+                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 8)
@@ -116,18 +143,44 @@ struct ActivityHeatmapView: View {
 
     // MARK: - Helper Methods
 
-    private func handleDayTap(date: String, points: Int, at location: CGPoint) {
+    private func handleDayTap(date: String, points: Int, frame: CGRect) {
         selectedDate = date
-        // Calculate tooltip position (above the cell)
-        tooltipPosition = CGPoint(x: location.x, y: location.y - 50)
-        showTooltip = true
+        tooltipFrame = frame
 
-        // Auto-hide tooltip after 2 seconds
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            withAnimation {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            showTooltip = true
+        }
+
+        // Auto-hide tooltip after 2.5 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            withAnimation(.easeInOut(duration: 0.2)) {
                 showTooltip = false
             }
         }
+    }
+
+    /// Returns an array of dates aligned to weekdays, with nil for padding
+    private func getAlignedDays() -> [Date?] {
+        let calendar = Calendar.current
+        let dates = getLast30Days()
+
+        guard let firstDate = dates.first else {
+            return []
+        }
+
+        // Get the weekday of the first date (1 = Sunday, 2 = Monday, ..., 7 = Saturday)
+        let weekday = calendar.component(.weekday, from: firstDate)
+
+        // Convert to Monday-based index (0 = Monday, 6 = Sunday)
+        let mondayBasedIndex = weekday == 1 ? 6 : weekday - 2
+
+        // Create padding with nil values
+        var alignedDays: [Date?] = Array(repeating: nil, count: mondayBasedIndex)
+
+        // Add actual dates
+        alignedDays.append(contentsOf: dates.map { $0 as Date? })
+
+        return alignedDays
     }
 
     private func getLast30Days() -> [Date] {
