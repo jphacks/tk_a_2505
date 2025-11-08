@@ -162,6 +162,7 @@ struct RotatableBadgeView: View {
         }
         .rotation3DEffect(.degrees(rotationAngle), axis: (x: 0, y: 1, z: 0))
         .onTapGesture {
+            HapticFeedback.shared.mediumImpact()
             withAnimation(.easeInOut(duration: 0.8)) {
                 rotationAngle += 180
                 isFlipped.toggle()
