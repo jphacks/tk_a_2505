@@ -553,8 +553,8 @@ struct MapView: View {
                             center: userLocation.coordinate,
                             radius: DeveloperSettings.shared.shelterProximityRadius
                         )
-                        .foregroundStyle(Color.blue.opacity(0.1))
-                        .stroke(Color.blue, style: StrokeStyle(lineWidth: 2, dash: [5, 5]))
+                        .foregroundStyle(Color.brandOrange.opacity(0.1))
+                        .stroke(Color.brandOrange, style: StrokeStyle(lineWidth: 1.5))
                     }
                 }
                 .mapStyle(.standard(elevation: .realistic))

@@ -27,6 +27,12 @@ struct DevView: View {
         .shelterProximityRadius
     @State private var showRadiusArea: Bool = DeveloperSettings.shared.showRadiusArea
 
+    // Mission Status Management
+    @State private var selectedMissionStatus: MissionState = .active
+    @State private var isUpdatingMissionStatus = false
+    @State private var latestMission: Mission?
+    @State private var isLoadingLatestMission = false
+
     var body: some View {
         NavigationStack {
             Form {
@@ -180,8 +186,36 @@ struct DevView: View {
                     Text("Mission Generator")
                 }
 
-                // Current Mission Details
-                if let mission = missionStateService.currentMission {
+                // Mission Status Management
+                missionStatusSection
+
+                // Refresh Latest Mission Button
+                Section {
+                    Button("Refresh Latest Mission") {
+                        Task {
+                            await loadLatestMission()
+                        }
+                    }
+                    .disabled(isLoadingLatestMission)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .background(isLoadingLatestMission ? Color.gray.opacity(0.3) : Color.green.opacity(0.8))
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    .overlay {
+                        if isLoadingLatestMission {
+                            ProgressView()
+                                .tint(.white)
+                        }
+                    }
+                } footer: {
+                    Text("Reloads your most recent mission from the database")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                // Latest Mission Details
+                if let mission = latestMission {
                     Section {
                         VStack(alignment: .leading, spacing: 12) {
                             // Title
@@ -281,7 +315,7 @@ struct DevView: View {
                             }
                         }
                     } header: {
-                        Text("Current Mission Details")
+                        Text("Latest Mission Details")
                     }
                 }
             }
@@ -290,6 +324,11 @@ struct DevView: View {
                 // Initialize developer settings from UserDefaults
                 shelterProximityRadius = DeveloperSettings.shared.shelterProximityRadius
                 showRadiusArea = DeveloperSettings.shared.showRadiusArea
+
+                // Load latest mission from database
+                Task {
+                    await loadLatestMission()
+                }
             }
             .sheet(isPresented: $showImagePreview) {
                 if let imageUrl = badgeViewModel.generatedBadgeUrl {
@@ -302,6 +341,84 @@ struct DevView: View {
                     shelter: selectedShelter ?? sampleShelter
                 )
             }
+        }
+    }
+
+    private var missionStatusSection: some View {
+        Section {
+            if isLoadingLatestMission {
+                VStack(spacing: 8) {
+                    ProgressView()
+                        .tint(.blue)
+                    Text("Loading latest mission...")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical)
+            } else if let mission = latestMission {
+                VStack(spacing: 12) {
+                    HStack {
+                        Text("Latest Mission Status:")
+                            .font(.body)
+                        Spacer()
+                        Text(mission.status.rawValue)
+                            .font(.body)
+                            .fontWeight(.medium)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(stateColor(for: mission.status))
+                            .cornerRadius(6)
+                    }
+
+                    Picker("Update Status To", selection: $selectedMissionStatus) {
+                        Text("have (active)").tag(MissionState.active)
+                        Text("done (completed)").tag(MissionState.completed)
+                        Text("creating (in progress)").tag(MissionState.inProgress)
+                        Text("none (no mission)").tag(MissionState.noMission)
+                    }
+                    .pickerStyle(MenuPickerStyle())
+
+                    Button("Update Mission Status in Supabase") {
+                        Task {
+                            await updateLatestMissionStatus()
+                        }
+                    }
+                    .disabled(isUpdatingMissionStatus)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .background(isUpdatingMissionStatus ? Color.gray.opacity(0.3) : Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    .overlay {
+                        if isUpdatingMissionStatus {
+                            ProgressView()
+                                .tint(.white)
+                        }
+                    }
+                }
+            } else {
+                VStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.title2)
+                        .foregroundColor(.orange)
+                    Text("No missions found")
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                    Text("Generate a mission first to manage its status")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.vertical)
+            }
+        } header: {
+            Text("Latest Mission Status Management")
+        } footer: {
+            Text(
+                "Updates the mission status in Supabase database. Shows your most recent mission regardless of date."
+            )
+            .font(.caption)
+            .foregroundColor(.secondary)
         }
     }
 
@@ -358,23 +475,13 @@ struct DevView: View {
 
     private var developerSettingsSection: some View {
         Section {
-            // Shelter Proximity Radius Setting
-            HStack {
-                Text("Shelter Proximity Radius")
-                    .font(.body)
-                Spacer()
-                Text("\(Int(shelterProximityRadius)) m")
-                    .font(.body)
-                    .foregroundColor(.secondary)
-            }
-
             VStack(spacing: 8) {
                 Stepper(
                     value: $shelterProximityRadius,
                     in: 1 ... 100,
                     step: 1
                 ) {
-                    Text("Shelter Proximity Radius: \(Int(shelterProximityRadius)) m")
+                    Text("Radius: \(Int(shelterProximityRadius)) m")
                         .font(.body)
                 }
                 .onChange(of: shelterProximityRadius) { _, newValue in
@@ -475,11 +582,70 @@ struct DevView: View {
                 disasterTypeHint: selectedDisasterType
             )
 
-            // If successful, update the mission state manager
+            // If successful, update the mission state manager and reload latest mission
             if let mission = missionGeneratorViewModel.generatedMission {
                 missionStateService.updateMission(mission)
+                // Reload latest mission to show the newly generated one
+                await loadLatestMission()
             }
         }
+    }
+
+    private func updateLatestMissionStatus() async {
+        guard let mission = latestMission else {
+            print("❌ No latest mission to update")
+            return
+        }
+
+        isUpdatingMissionStatus = true
+
+        do {
+            // Update status in Supabase database
+            let missionViewModel = MissionViewModel()
+            try await missionViewModel.updateMissionStatus(
+                missionId: mission.id,
+                status: selectedMissionStatus
+            )
+
+            // Update local latest mission state
+            latestMission = Mission(
+                id: mission.id,
+                userId: mission.userId,
+                title: mission.title,
+                overview: mission.overview,
+                disasterType: mission.disasterType,
+                status: selectedMissionStatus,
+                createdAt: mission.createdAt
+            )
+
+            print("✅ Latest mission status updated to: \(selectedMissionStatus.rawValue)")
+
+        } catch {
+            print("❌ Failed to update latest mission status: \(error)")
+        }
+
+        isUpdatingMissionStatus = false
+    }
+
+    private func loadLatestMission() async {
+        guard let currentUser = supabase.auth.currentUser else {
+            print("⚠️ User not authenticated")
+            return
+        }
+
+        isLoadingLatestMission = true
+
+        let missionViewModel = MissionViewModel()
+        await missionViewModel.fetchLatestMission(userId: currentUser.id)
+
+        latestMission = missionViewModel.todaysMission
+
+        // Initialize mission status to latest mission status
+        if let mission = latestMission {
+            selectedMissionStatus = mission.status
+        }
+
+        isLoadingLatestMission = false
     }
 
     private func stateColor(for state: MissionState) -> Color {
