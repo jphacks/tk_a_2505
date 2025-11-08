@@ -331,9 +331,7 @@ private struct TeamRankingRow: View {
             }
         }
         .onTapGesture {
-            if let userId = entry.userId {
-                onTap(userId)
-            }
+            onTap(entry.userId)
         }
     }
 

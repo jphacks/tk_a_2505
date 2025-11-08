@@ -286,9 +286,7 @@ private struct WinnerBanner: View {
         .scaleEffect(animate ? 1 : 0.8)
         .opacity(animate ? 1 : 0)
         .onTapGesture {
-            if let userId = entry.userId {
-                onTap(userId)
-            }
+            onTap(entry.userId)
         }
     }
 }
@@ -358,9 +356,7 @@ private struct PodiumPosition: View {
         }
         .frame(maxWidth: .infinity)
         .onTapGesture {
-            if let userId = entry.userId {
-                onTap(userId)
-            }
+            onTap(entry.userId)
         }
     }
 }
@@ -491,9 +487,7 @@ private struct RankingRow: View {
             }
         }
         .onTapGesture {
-            if let userId = entry.userId {
-                onTap(userId)
-            }
+            onTap(entry.userId)
         }
     }
 
