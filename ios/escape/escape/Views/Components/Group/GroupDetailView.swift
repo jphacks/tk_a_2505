@@ -281,8 +281,8 @@ struct MemberRowView: View {
             // Member Avatar
             UserAvatarView(
                 username: member.user.displayName,
-                size: .small,
-                colors: [Color("brandOrange")]
+                badgeImageUrl: groupViewModel.memberBadgeUrls[member.user.id],
+                size: .small
             )
 
             // Member Info
