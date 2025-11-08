@@ -5146,7 +5146,23 @@
         }
       }
     },
-    "result.rank_format": {},
+    "result.rank_format": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "#%d"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d位"
+          }
+        }
+      }
+    },
     "result.score.base_points": {
       "extractionState": "manual",
       "localizations": {

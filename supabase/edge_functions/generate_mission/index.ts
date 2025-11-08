@@ -15,21 +15,22 @@ const DISASTER_TYPES = [
 	"Fire",
 	"Inland Flood",
 	"Volcano",
+	"Zombie",
 ];
-const systemPrompt = `あなたは防災訓練アプリのミッション生成AIです。様々な災害に備えるための現実的で魅力的なミッションシナリオを生成してください。
+const systemPrompt = `あなたは防災訓練アプリのミッション生成AIです。指定された災害に備えるための現実的で魅力的なミッションシナリオを生成してください。
 
 以下の正確な構造でJSONレスポンスを返してください：
 {
   "title": "簡潔で魅力的なミッションタイトル（最大60文字）",
   "overview": "シナリオ、目標、ユーザーが行うべきことを説明する詳細なミッション説明（2-3文）",
-  "disaster_type": "次のいずれか: Flood, Landslide, Storm Surge, Earthquake, Tsunami, Fire, Inland Flood, Volcano"
+  "disaster_type": "プロンプトで指定された災害タイプをそのまま使用"
 }
 
 要件:
 - タイトルは行動指向で簡潔に（日本語で記述）
 - 概要は情報的で動機付けとなるように（日本語で記述）
-- 災害タイプは必ずリストの値と完全一致すること（英語、大文字小文字区別）
-- ミッションは教育的で実用的に
+- 災害タイプはプロンプトで指定されたものを正確に使用すること（英語、大文字小文字区別）
+- ミッションは指定された災害に特化した教育的で実用的な内容に
 - 実際の防災シナリオに焦点を当てること`;
 serve(async (req) => {
 	console.log("[START] Generate Mission (Japanese) edge function invoked");
@@ -53,6 +54,15 @@ serve(async (req) => {
 		console.log(
 			"[DISASTER_TYPE_HINT] Received:",
 			disaster_type_hint || "none (will be randomly selected)"
+		);
+
+		// Randomly select a disaster type from the list
+		const selectedDisasterType =
+			disaster_type_hint ||
+			DISASTER_TYPES[Math.floor(Math.random() * DISASTER_TYPES.length)];
+		console.log(
+			"[DISASTER_TYPE] Selected disaster type:",
+			selectedDisasterType
 		);
 		// Get the authorization header to authenticate the user
 		console.log("[AUTH] Extracting authorization token...");
@@ -111,14 +121,11 @@ serve(async (req) => {
 		}
 		console.log("[AUTH] User authenticated, ID:", user.id);
 		// Build the user query for Gemini (Japanese)
-		let userQuery = "ミッションシナリオを生成してください";
+		let userQuery = `${selectedDisasterType}災害に関するミッションシナリオを生成してください`;
 		if (context) {
 			userQuery += `。次の文脈に基づいて: ${context}`;
 		}
-		if (disaster_type_hint) {
-			userQuery += `。${disaster_type_hint}災害の防災に焦点を当てること`;
-		}
-		userQuery += "。";
+		userQuery += `。disaster_typeは必ず「${selectedDisasterType}」を使用すること。`;
 		const fullPrompt = `${systemPrompt}\n\n${userQuery}`;
 		console.log(
 			"[PROMPT] Full prompt length:",
@@ -164,20 +171,13 @@ serve(async (req) => {
 			);
 			throw new Error("Failed to parse mission data from Gemini response");
 		}
-		// Validate the disaster type
-		if (!DISASTER_TYPES.includes(missionData.disaster_type)) {
-			console.warn(
-				"[VALIDATION] Invalid disaster type:",
-				missionData.disaster_type
-			);
-			// Default to a random disaster type if invalid
-			missionData.disaster_type =
-				DISASTER_TYPES[Math.floor(Math.random() * DISASTER_TYPES.length)];
-			console.log(
-				"[VALIDATION] Using fallback disaster type:",
-				missionData.disaster_type
-			);
-		}
+
+		// Use the pre-selected disaster type directly (more reliable than Gemini's response)
+		console.log(
+			"[DISASTER_TYPE] Using pre-selected disaster type:",
+			selectedDisasterType
+		);
+
 		// Insert into missions table
 		console.log("[DATABASE] Inserting mission into database...");
 		const { data: missionRecord, error: insertError } = await supabaseAdmin
@@ -186,7 +186,7 @@ serve(async (req) => {
 				user_id: user.id,
 				title: missionData.title,
 				overview: missionData.overview,
-				disaster_type: missionData.disaster_type,
+				disaster_type: selectedDisasterType,
 				status: "have",
 			})
 			.select()

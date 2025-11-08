@@ -190,7 +190,7 @@ enum MissionScoreCalculator {
     }
 
     /// Calculate route efficiency multiplier
-    /// Formula: Max(0.7, Min(1.0, optimalDistance / actualDistance))
+    /// Formula: Max(0.9, Min(1.0, optimalDistance / actualDistance))
     /// Default: 1.0 for short distances
     private static func calculateRouteEfficiencyMultiplier(
         actualDistance: Double,
@@ -204,7 +204,7 @@ enum MissionScoreCalculator {
         // Calculate efficiency ratio
         let efficiency = optimalDistance / actualDistance
 
-        // Clamp between 0.7 and 1.0
-        return max(0.7, min(1.0, efficiency))
+        // Clamp between 0.9 and 1.0
+        return max(0.9, min(1.0, efficiency))
     }
 }
