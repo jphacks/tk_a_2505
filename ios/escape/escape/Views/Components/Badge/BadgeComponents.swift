@@ -307,6 +307,7 @@ struct BadgeItemView: View {
             .simultaneousGesture(
                 TapGesture()
                     .onEnded { _ in
+                        HapticFeedback.shared.lightImpact()
                         showingDetail = true
                     }
             )
@@ -321,6 +322,12 @@ struct BadgeItemView: View {
         .frame(width: 140, height: 170)
         .sheet(isPresented: $showingDetail) {
             BadgeDetailView(badge: badge)
+        }
+        .onChange(of: showingDetail) { oldValue, newValue in
+            // Haptic feedback when sheet is dismissed
+            if oldValue && !newValue {
+                HapticFeedback.shared.lightImpact()
+            }
         }
     }
 
@@ -396,6 +403,7 @@ struct BadgeCardButton: View {
 
     var body: some View {
         Button(action: {
+            HapticFeedback.shared.lightImpact()
             showingDetail = true
         }) {
             VStack(spacing: 8) {
@@ -475,6 +483,12 @@ struct BadgeCardButton: View {
         .sheet(isPresented: $showingDetail) {
             BadgeDetailView(badge: badge)
         }
+        .onChange(of: showingDetail) { oldValue, newValue in
+            // Haptic feedback when sheet is dismissed
+            if oldValue && !newValue {
+                HapticFeedback.shared.lightImpact()
+            }
+        }
     }
 }
 
@@ -486,6 +500,7 @@ struct Simple3DBadgeView: View {
 
     var body: some View {
         Button(action: {
+            HapticFeedback.shared.lightImpact()
             showingDetail = true
         }) {
             VStack(spacing: 4) {
@@ -569,6 +584,12 @@ struct Simple3DBadgeView: View {
         .buttonStyle(PlainButtonStyle())
         .sheet(isPresented: $showingDetail) {
             BadgeDetailView(badge: badge)
+        }
+        .onChange(of: showingDetail) { oldValue, newValue in
+            // Haptic feedback when sheet is dismissed
+            if oldValue && !newValue {
+                HapticFeedback.shared.lightImpact()
+            }
         }
     }
 

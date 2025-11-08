@@ -358,6 +358,12 @@ struct MemberRowView: View {
             UserProfileBottomSheetView(userId: member.user.id)
                 .presentationDetents([.medium, .large])
         }
+        .onChange(of: showUserProfile) { oldValue, newValue in
+            // Haptic feedback when sheet is dismissed
+            if oldValue && !newValue {
+                HapticFeedback.shared.lightImpact()
+            }
+        }
     }
 }
 
