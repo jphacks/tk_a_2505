@@ -63,6 +63,7 @@ extension ShelterRating {
 struct ShelterRatingWithUser: Codable, Identifiable {
     let rating: ShelterRating
     let user: User?
+    let userProfileBadgeImageUrl: String?
 
     var id: UUID {
         rating.id

@@ -255,7 +255,8 @@ struct EditRatingSheet: View {
                             createdAt: Date(),
                             name: "Test User 1",
                             profileBadgeId: nil
-                        )
+                        ),
+                        userProfileBadgeImageUrl: nil
                     ),
                     ShelterRatingWithUser(
                         rating: ShelterRating(
@@ -272,7 +273,8 @@ struct EditRatingSheet: View {
                             createdAt: Date(),
                             name: "Test User 2",
                             profileBadgeId: nil
-                        )
+                        ),
+                        userProfileBadgeImageUrl: nil
                     ),
                 ]
                 vm.hasBadge = true

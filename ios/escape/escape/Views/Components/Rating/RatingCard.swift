@@ -29,7 +29,7 @@ struct RatingCard: View {
                 // User avatar
                 UserAvatarView(
                     username: ratingWithUser.userName,
-                    badgeImageUrl: nil,  // Could fetch badge image if needed
+                    badgeImageUrl: ratingWithUser.userProfileBadgeImageUrl,
                     size: .small,
                     showLoadingIndicator: false
                 )
@@ -174,7 +174,8 @@ struct RatingEmptyState: View {
                             createdAt: Date(),
                             name: "User \(index + 1)",
                             profileBadgeId: nil
-                        )
+                        ),
+                        userProfileBadgeImageUrl: nil
                     )
                 )
                 .padding(.horizontal)

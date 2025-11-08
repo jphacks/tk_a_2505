@@ -43,7 +43,7 @@ class RatingSupabase {
         // Step 1: Fetch all ratings for the shelter
         let ratings = try await getRatingsForShelter(shelterId: shelterId)
 
-        // Step 2: For each rating, fetch the corresponding user information
+        // Step 2: For each rating, fetch the corresponding user information and badge image URL
         var result: [ShelterRatingWithUser] = []
 
         for rating in ratings {
@@ -56,10 +56,27 @@ class RatingSupabase {
                 .execute()
                 .value
 
+            // Fetch badge image URL if user has a profile badge
+            var badgeImageUrl: String?
+            if let profileBadgeId = user?.profileBadgeId {
+                let shelterBadges: [ShelterBadge] = try await supabase
+                    .from("shelter_badges")
+                    .select()
+                    .eq("id", value: profileBadgeId)
+                    .limit(1)
+                    .execute()
+                    .value
+
+                if let shelterBadge = shelterBadges.first {
+                    badgeImageUrl = shelterBadge.getImageUrl()
+                }
+            }
+
             // Combine into ShelterRatingWithUser
             let combined = ShelterRatingWithUser(
                 rating: rating,
-                user: user
+                user: user,
+                userProfileBadgeImageUrl: badgeImageUrl
             )
 
             result.append(combined)
