@@ -265,6 +265,7 @@ struct GroupCardView: View {
         Button(action: {
             Task {
                 await groupViewModel.selectGroup(group)
+                HapticFeedback.shared.lightImpact()
                 showingGroupDetail = true
             }
         }) {
@@ -323,6 +324,12 @@ struct GroupCardView: View {
         .buttonStyle(PlainButtonStyle())
         .sheet(isPresented: $showingGroupDetail) {
             GroupDetailView(groupViewModel: groupViewModel)
+        }
+        .onChange(of: showingGroupDetail) { oldValue, newValue in
+            // Haptic feedback when sheet is dismissed
+            if oldValue && !newValue {
+                HapticFeedback.shared.lightImpact()
+            }
         }
     }
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 // Wrapper to make UUID work with .sheet(item:)
-private struct IdentifiableUUID: Identifiable {
+private struct IdentifiableUUID: Identifiable, Equatable {
     let id: UUID
 }
 
@@ -90,6 +90,12 @@ struct TeamRankingView: View {
             UserProfileBottomSheetView(userId: identifiableUserId.id)
                 .presentationDetents([.medium, .large])
         }
+        .onChange(of: selectedUserId) { oldValue, newValue in
+            // Haptic feedback when sheet is dismissed
+            if oldValue != nil && newValue == nil {
+                HapticFeedback.shared.lightImpact()
+            }
+        }
         .task {
             await loadTeamRankings()
             startAnimations()
@@ -97,6 +103,7 @@ struct TeamRankingView: View {
     }
 
     private func handleUserTap(userId: UUID) {
+        HapticFeedback.shared.lightImpact()
         selectedUserId = IdentifiableUUID(id: userId)
     }
 

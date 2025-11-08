@@ -41,6 +41,7 @@ struct MissionSection: View {
                 .padding(.horizontal)
             } else {
                 MissionCardView(mission: missionViewModel.todaysMission) {
+                    HapticFeedback.shared.lightImpact()
                     showingMissionDetail = true
                 }
                 .padding(.horizontal)
@@ -59,6 +60,12 @@ struct MissionSection: View {
                 selectedTab: $tabSelection.selectedTab,
                 isPresented: $showingMissionDetail
             )
+        }
+        .onChange(of: showingMissionDetail) { oldValue, newValue in
+            // Haptic feedback when sheet is dismissed
+            if oldValue && !newValue {
+                HapticFeedback.shared.lightImpact()
+            }
         }
     }
 
