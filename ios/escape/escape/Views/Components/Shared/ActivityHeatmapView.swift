@@ -81,12 +81,12 @@ struct ActivityHeatmapView: View {
     // MARK: - Weekday Labels
 
     private var weekdayLabels: some View {
-        HStack(spacing: 4) {
+        LazyVGrid(columns: columns, spacing: 4) {
             ForEach(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], id: \.self) { day in
                 Text(day)
                     .font(.caption2)
                     .foregroundColor(.secondary)
-                    .frame(width: cellSize)
+                    .frame(width: cellSize, alignment: .center)
             }
         }
     }
