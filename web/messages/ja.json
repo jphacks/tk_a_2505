@@ -49,6 +49,8 @@
     "hackFeature6Title": "堅牢なバックエンドアーキテクチャ",
     "improvementFeature10Description": "生成されたバッジを地図上にアイコンとして表示し、遠くからもバッジを識別・収集しやすくします。",
     "improvementFeature10Title": "バッジマップアイコン",
+    "improvementFeature11Description": "避難所を訪れたユーザーが本物の評価とレビューを残すことができ、緊急時に他のユーザーが情報に基づいた意思決定を行うのに役立ちます。",
+    "improvementFeature11Title": "避難所のコメントと評価",
     "improvementFeature1Description": "避難訓練中の移動距離・歩数を記録し見返せるようにすることで、フィットネスへの統合を強化します。",
     "improvementFeature1Title": "距離・歩数トラッキング",
     "improvementFeature3Description": "全国ランキング、チームランキング（組織内外）、避難所ランキング、改善された最終スコア計算式を備えた、強化されたランキングシステムです。",

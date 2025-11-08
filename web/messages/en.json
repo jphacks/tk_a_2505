@@ -49,6 +49,8 @@
     "hackFeature6Title": "Robust Backend Architecture",
     "improvementFeature10Description": "Display generated badges as icons on the map, making it easier to identify and collect badges from different shelters.",
     "improvementFeature10Title": "Badge Map Icons",
+    "improvementFeature11Description": "Users who visit shelters can leave authentic ratings and reviews, helping others make informed decisions during emergencies.",
+    "improvementFeature11Title": "Shelter Comments & Ratings",
     "improvementFeature1Description": "Track distance traveled and steps taken during evacuation drills for better fitness integration and progress tracking.",
     "improvementFeature1Title": "Distance & Steps Tracking",
     "improvementFeature3Description": "Enhanced ranking system with national rankings, team rankings (inside & outside organizations), shelter rankings, and improved final score formulas.",
