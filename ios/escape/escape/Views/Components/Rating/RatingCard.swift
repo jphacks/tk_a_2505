@@ -153,7 +153,7 @@ struct RatingEmptyState: View {
 #Preview("Rating Cards") {
     ScrollView {
         VStack(spacing: 0) {
-            ForEach(0..<3) { index in
+            ForEach(0 ..< 3) { index in
                 RatingCard(
                     ratingWithUser: ShelterRatingWithUser(
                         rating: ShelterRating(
@@ -164,8 +164,8 @@ struct RatingEmptyState: View {
                             review: index == 0
                                 ? "This shelter is very well maintained. Equipment is up to date and the facility is clean."
                                 : index == 1
-                                    ? "Good shelter but could use some improvements."
-                                    : nil,
+                                ? "Good shelter but could use some improvements."
+                                : nil,
                             createdAt: Date().addingTimeInterval(-Double(index) * 86400),
                             updatedAt: Date().addingTimeInterval(-Double(index) * 86400)
                         ),
@@ -186,7 +186,7 @@ struct RatingEmptyState: View {
 
 #Preview("Loading State") {
     VStack(spacing: 0) {
-        ForEach(0..<3) { _ in
+        ForEach(0 ..< 3) { _ in
             RatingCardSkeleton()
                 .padding(.horizontal)
         }

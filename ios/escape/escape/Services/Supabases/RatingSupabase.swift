@@ -155,8 +155,7 @@ class RatingSupabase {
     /// Gets rating summaries for multiple shelters at once (for map display)
     /// - Parameter shelterIds: Array of shelter UUIDs
     /// - Returns: Dictionary mapping shelter ID to rating summary
-    func getRatingSummariesForShelters(shelterIds: [UUID]) async throws -> [UUID: ShelterRatingSummary]
-    {
+    func getRatingSummariesForShelters(shelterIds: [UUID]) async throws -> [UUID: ShelterRatingSummary] {
         var summaries: [UUID: ShelterRatingSummary] = [:]
 
         // Fetch summaries for each shelter
@@ -228,7 +227,7 @@ class RatingSupabase {
 
         // Validate the new rating data
         let request = UpsertRatingRequest(
-            shelterId: UUID(),  // Not needed for update, just for validation
+            shelterId: UUID(), // Not needed for update, just for validation
             userId: currentUser.id,
             rating: rating,
             review: review
@@ -409,7 +408,7 @@ extension RatingSupabase {
                 return String(
                     localized: "rating.error.cannot_rate",
                     defaultValue:
-                        "You must visit this shelter and collect its badge before rating",
+                    "You must visit this shelter and collect its badge before rating",
                     table: "Localizable"
                 )
             case .invalidRating:

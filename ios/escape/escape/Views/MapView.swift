@@ -242,7 +242,7 @@ struct MapView: View {
         }
 
         // Check if user has reached any shelter
-        // TODO: CHANGE THE NUMBER FOR RADIUS
+        // Use developer-configurable radius for shelter proximity detection
         print("HERE!!")
         if let mission = missionStateService.currentMission,
            mission.status == .active || mission.status == .inProgress
@@ -250,7 +250,7 @@ struct MapView: View {
             if let shelter = mapViewModel.checkShelterProximity(
                 userLatitude: location.coordinate.latitude,
                 userLongitude: location.coordinate.longitude,
-                radiusMeters: 100
+                radiusMeters: DeveloperSettings.shared.shelterProximityRadius
             ) {
                 Task {
                     await mapViewModel.handleShelterReached(
@@ -287,8 +287,8 @@ struct MapView: View {
             return
         }
 
-        // Find nearest shelter within 100 meters (increased for easier testing)
-        let detectionRadius = 100.0
+        // Find nearest shelter within developer-configurable radius
+        let detectionRadius = DeveloperSettings.shared.shelterProximityRadius
         let nearbyShelters = mapViewModel.filteredShelters.filter { shelter in
             let shelterLocation = CLLocation(latitude: shelter.latitude, longitude: shelter.longitude)
             let distance = userLocation.distance(from: shelterLocation)
@@ -550,6 +550,18 @@ struct MapView: View {
                                     .shadow(color: .black.opacity(0.3), radius: 1)
                             }
                         }
+                    }
+
+                    // Display user proximity radius circle if enabled
+                    if DeveloperSettings.shared.showRadiusArea,
+                       let userLocation = locationManager.location
+                    {
+                        MapCircle(
+                            center: userLocation.coordinate,
+                            radius: DeveloperSettings.shared.shelterProximityRadius
+                        )
+                        .foregroundStyle(Color.brandOrange.opacity(0.1))
+                        .stroke(Color.brandOrange, style: StrokeStyle(lineWidth: 1.5))
                     }
                 }
                 .mapStyle(.standard(elevation: .realistic))

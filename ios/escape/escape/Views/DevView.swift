@@ -9,6 +9,7 @@ import Supabase
 import SwiftUI
 
 struct DevView: View {
+    @Environment(\.dismiss) var dismiss
     @Environment(\.missionStateService) var missionStateService
     @State private var badgeViewModel = BadgeViewModel()
     @State private var missionGeneratorViewModel = MissionGeneratorViewModel()
@@ -20,6 +21,17 @@ struct DevView: View {
     @State private var realShelters: [Shelter] = []
     @State private var realBadges: [Badge] = []
     @State private var selectedShelter: Shelter?
+
+    // Developer Settings
+    @State private var shelterProximityRadius: Double = DeveloperSettings.shared
+        .shelterProximityRadius
+    @State private var showRadiusArea: Bool = DeveloperSettings.shared.showRadiusArea
+
+    // Mission Status Management
+    @State private var selectedMissionStatus: MissionState = .active
+    @State private var isUpdatingMissionStatus = false
+    @State private var latestMission: Mission?
+    @State private var isLoadingLatestMission = false
 
     var body: some View {
         NavigationStack {
@@ -114,6 +126,9 @@ struct DevView: View {
                     Text("dev.presets")
                 }
 
+                // Developer Settings Section
+                developerSettingsSection
+
                 missionParametersSection
 
                 realDataSection
@@ -171,8 +186,36 @@ struct DevView: View {
                     Text("Mission Generator")
                 }
 
-                // Current Mission Details
-                if let mission = missionStateService.currentMission {
+                // Mission Status Management
+                missionStatusSection
+
+                // Refresh Latest Mission Button
+                Section {
+                    Button("Refresh Latest Mission") {
+                        Task {
+                            await loadLatestMission()
+                        }
+                    }
+                    .disabled(isLoadingLatestMission)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .background(isLoadingLatestMission ? Color.gray.opacity(0.3) : Color.green.opacity(0.8))
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    .overlay {
+                        if isLoadingLatestMission {
+                            ProgressView()
+                                .tint(.white)
+                        }
+                    }
+                } footer: {
+                    Text("Reloads your most recent mission from the database")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                // Latest Mission Details
+                if let mission = latestMission {
                     Section {
                         VStack(alignment: .leading, spacing: 12) {
                             // Title
@@ -272,11 +315,21 @@ struct DevView: View {
                             }
                         }
                     } header: {
-                        Text("Current Mission Details")
+                        Text("Latest Mission Details")
                     }
                 }
             }
             .navigationTitle("dev.title")
+            .onAppear {
+                // Initialize developer settings from UserDefaults
+                shelterProximityRadius = DeveloperSettings.shared.shelterProximityRadius
+                showRadiusArea = DeveloperSettings.shared.showRadiusArea
+
+                // Load latest mission from database
+                Task {
+                    await loadLatestMission()
+                }
+            }
             .sheet(isPresented: $showImagePreview) {
                 if let imageUrl = badgeViewModel.generatedBadgeUrl {
                     ImagePreviewView(imageUrl: imageUrl)
@@ -288,6 +341,84 @@ struct DevView: View {
                     shelter: selectedShelter ?? sampleShelter
                 )
             }
+        }
+    }
+
+    private var missionStatusSection: some View {
+        Section {
+            if isLoadingLatestMission {
+                VStack(spacing: 8) {
+                    ProgressView()
+                        .tint(.blue)
+                    Text("Loading latest mission...")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical)
+            } else if let mission = latestMission {
+                VStack(spacing: 12) {
+                    HStack {
+                        Text("Latest Mission Status:")
+                            .font(.body)
+                        Spacer()
+                        Text(mission.status.rawValue)
+                            .font(.body)
+                            .fontWeight(.medium)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(stateColor(for: mission.status))
+                            .cornerRadius(6)
+                    }
+
+                    Picker("Update Status To", selection: $selectedMissionStatus) {
+                        Text("have (active)").tag(MissionState.active)
+                        Text("done (completed)").tag(MissionState.completed)
+                        Text("creating (in progress)").tag(MissionState.inProgress)
+                        Text("none (no mission)").tag(MissionState.noMission)
+                    }
+                    .pickerStyle(MenuPickerStyle())
+
+                    Button("Update Mission Status in Supabase") {
+                        Task {
+                            await updateLatestMissionStatus()
+                        }
+                    }
+                    .disabled(isUpdatingMissionStatus)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .background(isUpdatingMissionStatus ? Color.gray.opacity(0.3) : Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    .overlay {
+                        if isUpdatingMissionStatus {
+                            ProgressView()
+                                .tint(.white)
+                        }
+                    }
+                }
+            } else {
+                VStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.title2)
+                        .foregroundColor(.orange)
+                    Text("No missions found")
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                    Text("Generate a mission first to manage its status")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.vertical)
+            }
+        } header: {
+            Text("Latest Mission Status Management")
+        } footer: {
+            Text(
+                "Updates the mission status in Supabase database. Shows your most recent mission regardless of date."
+            )
+            .font(.caption)
+            .foregroundColor(.secondary)
         }
     }
 
@@ -339,6 +470,57 @@ struct DevView: View {
             .fontWeight(.semibold)
         } header: {
             Text("dev.ui_components")
+        }
+    }
+
+    private var developerSettingsSection: some View {
+        Section {
+            VStack(spacing: 8) {
+                Stepper(
+                    value: $shelterProximityRadius,
+                    in: 1 ... 100,
+                    step: 1
+                ) {
+                    Text("Radius: \(Int(shelterProximityRadius)) m")
+                        .font(.body)
+                }
+                .onChange(of: shelterProximityRadius) { _, newValue in
+                    DeveloperSettings.shared.shelterProximityRadius = newValue
+                }
+
+                Text("Controls how close you need to be to a shelter to trigger detection.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            // Show Radius Area Toggle
+            Toggle(isOn: $showRadiusArea) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Show Radius Area on Map")
+                        .font(.body)
+                    Text("Displays a blue circle around your location showing the detection radius")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .onChange(of: showRadiusArea) { _, newValue in
+                DeveloperSettings.shared.showRadiusArea = newValue
+            }
+
+            Button("Reset to Default") {
+                shelterProximityRadius = 10.0
+                showRadiusArea = false
+                DeveloperSettings.shared.shelterProximityRadius = 10.0
+                DeveloperSettings.shared.showRadiusArea = false
+            }
+            .foregroundColor(.red)
+        } header: {
+            Text("Map Settings")
+        } footer: {
+            Text("These settings persist across app launches and affect shelter detection behavior.")
+                .font(.caption)
+                .foregroundColor(.secondary)
         }
     }
 
@@ -400,11 +582,70 @@ struct DevView: View {
                 disasterTypeHint: selectedDisasterType
             )
 
-            // If successful, update the mission state manager
+            // If successful, update the mission state manager and reload latest mission
             if let mission = missionGeneratorViewModel.generatedMission {
                 missionStateService.updateMission(mission)
+                // Reload latest mission to show the newly generated one
+                await loadLatestMission()
             }
         }
+    }
+
+    private func updateLatestMissionStatus() async {
+        guard let mission = latestMission else {
+            print("❌ No latest mission to update")
+            return
+        }
+
+        isUpdatingMissionStatus = true
+
+        do {
+            // Update status in Supabase database
+            let missionViewModel = MissionViewModel()
+            try await missionViewModel.updateMissionStatus(
+                missionId: mission.id,
+                status: selectedMissionStatus
+            )
+
+            // Update local latest mission state
+            latestMission = Mission(
+                id: mission.id,
+                userId: mission.userId,
+                title: mission.title,
+                overview: mission.overview,
+                disasterType: mission.disasterType,
+                status: selectedMissionStatus,
+                createdAt: mission.createdAt
+            )
+
+            print("✅ Latest mission status updated to: \(selectedMissionStatus.rawValue)")
+
+        } catch {
+            print("❌ Failed to update latest mission status: \(error)")
+        }
+
+        isUpdatingMissionStatus = false
+    }
+
+    private func loadLatestMission() async {
+        guard let currentUser = supabase.auth.currentUser else {
+            print("⚠️ User not authenticated")
+            return
+        }
+
+        isLoadingLatestMission = true
+
+        let missionViewModel = MissionViewModel()
+        await missionViewModel.fetchLatestMission(userId: currentUser.id)
+
+        latestMission = missionViewModel.todaysMission
+
+        // Initialize mission status to latest mission status
+        if let mission = latestMission {
+            selectedMissionStatus = mission.status
+        }
+
+        isLoadingLatestMission = false
     }
 
     private func stateColor(for state: MissionState) -> Color {
@@ -423,42 +664,45 @@ struct DevView: View {
     private func loadRealShelters() async {
         do {
             // Load shelter badges with their associated shelter information
-            let shelterBadges: [ShelterBadgeWithDetails] = try await supabase
-                .from("shelter_badges")
-                .select("""
-                    id,
-                    badge_name,
-                    shelter_id,
-                    first_user_id,
-                    created_at,
-                    shelter:shelters(
-                        id,
-                        number,
-                        common_id,
-                        name,
-                        address,
-                        municipality,
-                        is_shelter,
-                        is_flood,
-                        is_landslide,
-                        is_storm_surge,
-                        is_earthquake,
-                        is_tsunami,
-                        is_fire,
-                        is_inland_flood,
-                        is_volcano,
-                        is_same_address_as_shelter,
-                        other_municipal_notes,
-                        accepted_people,
-                        latitude,
-                        longitude,
-                        remarks,
-                        last_updated
+            let shelterBadges: [ShelterBadgeWithDetails] =
+                try await supabase
+                    .from("shelter_badges")
+                    .select(
+                        """
+                            id,
+                            badge_name,
+                            shelter_id,
+                            first_user_id,
+                            created_at,
+                            shelter:shelters(
+                                id,
+                                number,
+                                common_id,
+                                name,
+                                address,
+                                municipality,
+                                is_shelter,
+                                is_flood,
+                                is_landslide,
+                                is_storm_surge,
+                                is_earthquake,
+                                is_tsunami,
+                                is_fire,
+                                is_inland_flood,
+                                is_volcano,
+                                is_same_address_as_shelter,
+                                other_municipal_notes,
+                                accepted_people,
+                                latitude,
+                                longitude,
+                                remarks,
+                                last_updated
+                            )
+                        """
                     )
-                """)
-                .limit(5)
-                .execute()
-                .value
+                    .limit(5)
+                    .execute()
+                    .value
 
             await MainActor.run {
                 // Extract shelters and convert shelter badges to UI badges
@@ -523,8 +767,8 @@ struct DevView: View {
             return Color("brandOrange")
         } else if lowerName.contains("earthquake") || lowerName.contains("地震") {
             return Color("brandOrange")
-        } else if lowerName.contains("flood") || lowerName.contains("tsunami") ||
-            lowerName.contains("洪水") || lowerName.contains("津波")
+        } else if lowerName.contains("flood") || lowerName.contains("tsunami")
+            || lowerName.contains("洪水") || lowerName.contains("津波")
         {
             return Color("brandDarkBlue")
         } else if lowerName.contains("fire") || lowerName.contains("火災") {
@@ -557,12 +801,13 @@ struct DevView: View {
     private func loadDirectShelters() async {
         do {
             // Load shelters directly from shelters table
-            let shelters: [Shelter] = try await supabase
-                .from("shelters")
-                .select()
-                .limit(10)
-                .execute()
-                .value
+            let shelters: [Shelter] =
+                try await supabase
+                    .from("shelters")
+                    .select()
+                    .limit(10)
+                    .execute()
+                    .value
 
             await MainActor.run {
                 realShelters = shelters
@@ -586,13 +831,14 @@ struct DevView: View {
                 return
             }
 
-            let shelter: Shelter = try await supabase
-                .from("shelters")
-                .select()
-                .eq("id", value: shelterUUID)
-                .single()
-                .execute()
-                .value
+            let shelter: Shelter =
+                try await supabase
+                    .from("shelters")
+                    .select()
+                    .eq("id", value: shelterUUID)
+                    .single()
+                    .execute()
+                    .value
 
             await MainActor.run {
                 selectedShelter = shelter
