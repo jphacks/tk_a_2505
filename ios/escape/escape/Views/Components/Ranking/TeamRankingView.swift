@@ -7,13 +7,18 @@
 
 import SwiftUI
 
+// Wrapper to make UUID work with .sheet(item:)
+private struct IdentifiableUUID: Identifiable {
+    let id: UUID
+}
+
 struct TeamRankingView: View {
     let pointViewModel: PointViewModel
     let groupViewModel: GroupViewModel
     @State private var animateEntries = false
     @State private var currentUserId: UUID?
     @State private var isLoadingTeam = false
-    @State private var selectedUserId: UUID?
+    @State private var selectedUserId: IdentifiableUUID?
 
     var body: some View {
         ZStack {
@@ -81,8 +86,8 @@ struct TeamRankingView: View {
                 }
             }
         }
-        .sheet(item: $selectedUserId) { userId in
-            UserProfileBottomSheetView(userId: userId)
+        .sheet(item: $selectedUserId) { identifiableUserId in
+            UserProfileBottomSheetView(userId: identifiableUserId.id)
                 .presentationDetents([.medium, .large])
         }
         .task {
@@ -92,7 +97,7 @@ struct TeamRankingView: View {
     }
 
     private func handleUserTap(userId: UUID) {
-        selectedUserId = userId
+        selectedUserId = IdentifiableUUID(id: userId)
     }
 
     private func loadTeamRankings() async {
