@@ -48,7 +48,7 @@ struct ActivityHeatmapView: View {
                     // Tooltip overlay
                     if showTooltip, let selectedDate = selectedDate {
                         tooltipView(for: selectedDate)
-                            .offset(x: tooltipFrame.minX - 40, y: tooltipFrame.minY - 70)
+                            .offset(x: tooltipFrame.minX, y: tooltipFrame.minY)
                             .transition(.opacity)
                             .zIndex(100)
                     }
