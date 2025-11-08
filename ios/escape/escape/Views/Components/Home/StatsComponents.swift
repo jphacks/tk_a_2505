@@ -51,6 +51,7 @@ struct StatsView: View {
                 .cornerRadius(12)
             } else {
                 Button(action: {
+                    HapticFeedback.shared.lightImpact()
                     showingStatsDetail = true
                 }) {
                     HStack(spacing: 12) {
@@ -90,6 +91,12 @@ struct StatsView: View {
         }
         .sheet(isPresented: $showingStatsDetail) {
             StatsDetailView(missionResults: statsViewModel.recentMissionResults)
+        }
+        .onChange(of: showingStatsDetail) { oldValue, newValue in
+            // Haptic feedback when sheet is dismissed
+            if oldValue && !newValue {
+                HapticFeedback.shared.lightImpact()
+            }
         }
         .onAppear {
             loadRecentMissions()

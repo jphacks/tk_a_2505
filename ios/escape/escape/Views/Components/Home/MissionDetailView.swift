@@ -125,6 +125,7 @@ struct MissionDetailView: View {
                                     VStack(spacing: 12) {
                                         ForEach([GameMode.default, GameMode.mapless], id: \.self) { mode in
                                             Button(action: {
+                                                HapticFeedback.shared.selection()
                                                 selectedGameMode = mode
                                             }) {
                                                 HStack(alignment: .top, spacing: 12) {
@@ -265,6 +266,9 @@ struct MissionDetailView: View {
 
     private func startMission() {
         guard let mission = mission else { return }
+
+        // Haptic feedback for mission start
+        HapticFeedback.shared.mediumImpact()
 
         // Update global mission state
         missionStateService.updateMission(mission)
