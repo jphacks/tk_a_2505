@@ -20,6 +20,9 @@ struct RankingCardView: View {
 
     var body: some View {
         Button {
+            // Haptic feedback for opening sheet
+            HapticFeedback.shared.lightImpact()
+
             // Pre-load data before showing sheet to avoid empty state
             Task {
                 if selectedTab == .team && groupViewModel.hasAnyGroup {
@@ -102,6 +105,12 @@ struct RankingCardView: View {
             RankingView(
                 selectedTab: selectedTab, pointViewModel: pointViewModel, groupViewModel: groupViewModel
             )
+        }
+        .onChange(of: showingRankingDetail) { oldValue, newValue in
+            // Haptic feedback when sheet is dismissed
+            if oldValue && !newValue {
+                HapticFeedback.shared.lightImpact()
+            }
         }
         .task {
             // Pre-load all ranking data

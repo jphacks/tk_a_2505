@@ -80,6 +80,12 @@ struct MapView: View {
             pinDetailsSheet
                 .presentationDetents([.medium, .large])
         }
+        .onChange(of: showPinDetailsSheet) { oldValue, newValue in
+            // Haptic feedback when pin details sheet is dismissed
+            if oldValue && !newValue {
+                HapticFeedback.shared.lightImpact()
+            }
+        }
         .sheet(isPresented: $showShelterInfo) {
             // Show info for either selected shelter (from tap) or nearest shelter (from proximity)
             if let shelter = selectedShelter ?? nearestShelter {
@@ -435,6 +441,7 @@ struct MapView: View {
                             Button(action: {
                                 // Only allow tapping in Zen mode (no active mission)
                                 if missionStateService.currentGameMode == .zen {
+                                    HapticFeedback.shared.lightImpact()
                                     selectedShelter = shelter
                                     showShelterInfo = true
                                 }
@@ -666,6 +673,7 @@ struct MapView: View {
 
     private var pinDetailsButton: some View {
         Button(action: {
+            HapticFeedback.shared.lightImpact()
             showPinDetailsSheet = true
         }) {
             Image(systemName: "info.circle.fill")

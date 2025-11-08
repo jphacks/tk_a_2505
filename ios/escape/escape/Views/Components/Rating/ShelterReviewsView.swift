@@ -99,6 +99,7 @@ struct ShelterReviewsView: View {
 
                         // Edit button
                         Button(action: {
+                            HapticFeedback.shared.lightImpact()
                             viewModel.startEditingRating()
                             showEditSheet = true
                         }) {
