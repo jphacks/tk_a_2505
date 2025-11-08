@@ -7,12 +7,18 @@
 
 import SwiftUI
 
+// Wrapper to make UUID work with .sheet(item:)
+private struct IdentifiableUUID: Identifiable {
+    let id: UUID
+}
+
 struct NationalRankingView: View {
     let pointViewModel: PointViewModel
     @State private var animateEntries = false
     @State private var showSparkles = false
     @State private var currentUserId: UUID?
     @State private var isLoadingNational = false
+    @State private var selectedUserId: IdentifiableUUID?
 
     var body: some View {
         ZStack {
@@ -44,7 +50,7 @@ struct NationalRankingView: View {
                         // Top 3 Podium (only if they're in the ranking)
                         let topThree = pointViewModel.nationalRanking.filter { $0.rank >= 1 && $0.rank <= 3 }
                         if !topThree.isEmpty {
-                            TopThreePodium(rankings: topThree)
+                            TopThreePodium(rankings: topThree, onTap: handleUserTap)
                                 .padding(.top, 8)
                                 .padding(.horizontal)
                         }
@@ -60,7 +66,8 @@ struct NationalRankingView: View {
                                 RankingRow(
                                     entry: entry,
                                     currentUserId: currentUserId,
-                                    delay: Double(index) * 0.05
+                                    delay: Double(index) * 0.05,
+                                    onTap: handleUserTap
                                 )
                                 .padding(.horizontal)
                                 .opacity(animateEntries ? 1 : 0)
@@ -78,10 +85,18 @@ struct NationalRankingView: View {
                 }
             }
         }
+        .sheet(item: $selectedUserId) { identifiableUserId in
+            UserProfileBottomSheetView(userId: identifiableUserId.id)
+                .presentationDetents([.medium, .large])
+        }
         .task {
             await loadRankings()
             startAnimations()
         }
+    }
+
+    private func handleUserTap(userId: UUID) {
+        selectedUserId = IdentifiableUUID(id: userId)
     }
 
     private func loadRankings() async {
@@ -126,6 +141,7 @@ struct NationalRankingView: View {
 
 private struct TopThreePodium: View {
     let rankings: [RankingEntry]
+    let onTap: (UUID) -> Void
     @State private var animateRanks = [false, false, false]
     @State private var showCrowns = [false, false, false]
 
@@ -133,7 +149,7 @@ private struct TopThreePodium: View {
         VStack(spacing: 20) {
             // Winner Banner
             if let first = rankings.first {
-                WinnerBanner(entry: first, animate: animateRanks[0])
+                WinnerBanner(entry: first, animate: animateRanks[0], onTap: onTap)
             }
 
             // Podium
@@ -146,7 +162,8 @@ private struct TopThreePodium: View {
                         color: Color.gray,
                         crownColor: .silver,
                         animate: animateRanks[1],
-                        showCrown: showCrowns[1]
+                        showCrown: showCrowns[1],
+                        onTap: onTap
                     )
                 }
 
@@ -158,7 +175,8 @@ private struct TopThreePodium: View {
                         color: Color.yellow,
                         crownColor: .gold,
                         animate: animateRanks[0],
-                        showCrown: showCrowns[0]
+                        showCrown: showCrowns[0],
+                        onTap: onTap
                     )
                 }
 
@@ -170,7 +188,8 @@ private struct TopThreePodium: View {
                         color: Color.orange,
                         crownColor: .bronze,
                         animate: animateRanks[2],
-                        showCrown: showCrowns[2]
+                        showCrown: showCrowns[2],
+                        onTap: onTap
                     )
                 }
             }
@@ -197,6 +216,7 @@ private struct TopThreePodium: View {
 private struct WinnerBanner: View {
     let entry: RankingEntry
     let animate: Bool
+    let onTap: (UUID) -> Void
     @State private var shimmer = false
 
     var body: some View {
@@ -266,6 +286,9 @@ private struct WinnerBanner: View {
         .shadow(color: Color.yellow.opacity(0.3), radius: 20, x: 0, y: 10)
         .scaleEffect(animate ? 1 : 0.8)
         .opacity(animate ? 1 : 0)
+        .onTapGesture {
+            onTap(entry.userId)
+        }
     }
 }
 
@@ -278,6 +301,7 @@ private struct PodiumPosition: View {
     let crownColor: Color
     let animate: Bool
     let showCrown: Bool
+    let onTap: (UUID) -> Void
 
     var body: some View {
         VStack(spacing: 8) {
@@ -332,6 +356,9 @@ private struct PodiumPosition: View {
                 )
         }
         .frame(maxWidth: .infinity)
+        .onTapGesture {
+            onTap(entry.userId)
+        }
     }
 }
 
@@ -341,6 +368,7 @@ private struct RankingRow: View {
     let entry: RankingEntry
     let currentUserId: UUID?
     let delay: Double
+    let onTap: (UUID) -> Void
     @State private var isPressed = false
     @State private var pulseAnimation = false
 
@@ -458,6 +486,9 @@ private struct RankingRow: View {
                     pulseAnimation = true
                 }
             }
+        }
+        .onTapGesture {
+            onTap(entry.userId)
         }
     }
 

@@ -7,12 +7,18 @@
 
 import SwiftUI
 
+// Wrapper to make UUID work with .sheet(item:)
+private struct IdentifiableUUID: Identifiable {
+    let id: UUID
+}
+
 struct TeamRankingView: View {
     let pointViewModel: PointViewModel
     let groupViewModel: GroupViewModel
     @State private var animateEntries = false
     @State private var currentUserId: UUID?
     @State private var isLoadingTeam = false
+    @State private var selectedUserId: IdentifiableUUID?
 
     var body: some View {
         ZStack {
@@ -61,7 +67,8 @@ struct TeamRankingView: View {
                                 TeamRankingRow(
                                     entry: entry,
                                     currentUserId: currentUserId,
-                                    delay: Double(index) * 0.05
+                                    delay: Double(index) * 0.05,
+                                    onTap: handleUserTap
                                 )
                                 .padding(.horizontal)
                                 .opacity(animateEntries ? 1 : 0)
@@ -79,10 +86,18 @@ struct TeamRankingView: View {
                 }
             }
         }
+        .sheet(item: $selectedUserId) { identifiableUserId in
+            UserProfileBottomSheetView(userId: identifiableUserId.id)
+                .presentationDetents([.medium, .large])
+        }
         .task {
             await loadTeamRankings()
             startAnimations()
         }
+    }
+
+    private func handleUserTap(userId: UUID) {
+        selectedUserId = IdentifiableUUID(id: userId)
     }
 
     private func loadTeamRankings() async {
@@ -223,6 +238,7 @@ private struct TeamRankingRow: View {
     let entry: RankingEntry
     let currentUserId: UUID?
     let delay: Double
+    let onTap: (UUID) -> Void
     @State private var isPressed = false
     @State private var pulseAnimation = false
 
@@ -314,6 +330,9 @@ private struct TeamRankingRow: View {
                     pulseAnimation = true
                 }
             }
+        }
+        .onTapGesture {
+            onTap(entry.userId)
         }
     }
 
