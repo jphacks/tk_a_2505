@@ -13,7 +13,7 @@ import SwiftUI
 final class UserProfileViewModel {
     // MARK: - Properties
 
-    var isLoading = false
+    var isLoading = true
     var errorMessage: String?
     var user: User?
     var missionResults: [MissionResult] = []
