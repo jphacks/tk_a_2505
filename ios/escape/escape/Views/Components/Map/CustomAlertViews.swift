@@ -149,6 +149,7 @@ struct ShelterInfoSheet: View {
     @State private var shelterBadge: ShelterBadge?
     @State private var hasUserBadge = false
     @State private var isLoadingBadge = false
+    @State private var ratingViewModel = RatingViewModel()
 
     var body: some View {
         NavigationStack {
@@ -174,6 +175,51 @@ struct ShelterInfoSheet: View {
                             Text(shelter.address)
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
+
+                            // Rating summary - always show (displays empty state if no ratings)
+                            if !ratingViewModel.isLoadingRatings {
+                                if let summary = ratingViewModel.ratingSummary, summary.hasRatings {
+                                    RatingSummaryCard(summary: summary, style: .compact)
+                                        .padding(.top, 4)
+                                } else {
+                                    // Empty state - no ratings yet
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "star")
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                        Text("rating.empty.no_ratings_yet", bundle: .main)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding(.top, 4)
+                                }
+                            }
+                        }
+                    }
+
+                    // Navigation to reviews - always show so users can rate
+                    if !ratingViewModel.isLoadingRatings {
+                        NavigationLink {
+                            ShelterReviewsView(shelter: shelter, viewModel: ratingViewModel)
+                        } label: {
+                            HStack {
+                                if let summary = ratingViewModel.ratingSummary, summary.hasRatings {
+                                    Text("rating.action.see_all_reviews", bundle: .main)
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                } else {
+                                    Text("rating.action.rate_this_shelter", bundle: .main)
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                }
+
+                                Spacer()
+
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                            }
+                            .foregroundColor(.blue)
+                            .padding(.vertical, 8)
                         }
                     }
 
@@ -336,6 +382,7 @@ struct ShelterInfoSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .task {
                 await fetchBadgeInfo()
+                await loadRatingData()
             }
         }
     }
@@ -344,32 +391,32 @@ struct ShelterInfoSheet: View {
         isLoadingBadge = true
         defer { isLoadingBadge = false }
 
-        // Check if shelter.id can be converted to UUID
         guard let shelterUUID = UUID(uuidString: shelter.id) else {
-            print("⚠️ Shelter ID is not a valid UUID: \(shelter.id)")
             return
         }
 
         do {
             let badgeService = BadgeSupabase()
 
-            // Fetch the badge for this shelter
             if let badge = try await badgeService.getBadgeForShelter(shelterId: shelterUUID) {
                 shelterBadge = badge
-
-                // Check if the current user has unlocked this badge
                 hasUserBadge = try await badgeService.hasUnlockedBadge(badgeId: badge.id)
             } else {
-                // No badge exists for this shelter yet
-                print("ℹ️ No badge found for shelter: \(shelter.name)")
                 shelterBadge = nil
                 hasUserBadge = false
             }
         } catch {
-            print("❌ Failed to fetch badge info: \(error)")
             shelterBadge = nil
             hasUserBadge = false
         }
+    }
+
+    private func loadRatingData() async {
+        guard let shelterUUID = UUID(uuidString: shelter.id) else {
+            return
+        }
+
+        await ratingViewModel.loadAllData(for: shelterUUID)
     }
 }
 
