@@ -31,7 +31,7 @@ struct MissionSection: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
-                    Button("Retry") {
+                    Button(String(localized: "common.retry", table: "Localizable")) {
                         loadCurrentMission()
                     }
                     .buttonStyle(.bordered)

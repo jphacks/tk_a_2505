@@ -24,11 +24,11 @@ struct CompleteView: View {
                             .font(.system(size: 80))
                             .foregroundColor(.green)
 
-                        Text("Mission Complete!")
+                        Text("mission.complete.title", tableName: "Localizable")
                             .font(.title)
                             .fontWeight(.bold)
 
-                        Text("You've reached the shelter safely")
+                        Text("mission.complete.subtitle", tableName: "Localizable")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -37,7 +37,7 @@ struct CompleteView: View {
 
                     // Shelter Information Card
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Shelter Information")
+                        Text("mission.complete.shelter_info", tableName: "Localizable")
                             .font(.headline)
                             .fontWeight(.semibold)
 
@@ -109,7 +109,7 @@ struct CompleteView: View {
                     // Mission Stats (if available)
                     if let mission = missionStateService.currentMission {
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Mission Summary")
+                            Text("mission.complete.mission_summary", tableName: "Localizable")
                                 .font(.headline)
                                 .fontWeight(.semibold)
 
@@ -118,7 +118,7 @@ struct CompleteView: View {
                                     HStack {
                                         Image(systemName: disasterType.emergencyIcon)
                                             .foregroundColor(disasterType.color)
-                                        Text("Disaster Type")
+                                        Text("mission.complete.disaster_type", tableName: "Localizable")
                                             .foregroundColor(.secondary)
                                         Spacer()
                                         Text(disasterType.localizedName)
@@ -131,7 +131,7 @@ struct CompleteView: View {
                                         HStack {
                                             Image(systemName: "figure.walk")
                                                 .foregroundColor(.orange)
-                                            Text("Steps")
+                                            Text("mission.complete.steps", tableName: "Localizable")
                                                 .foregroundColor(.secondary)
                                             Spacer()
                                             Text("\(steps)")
@@ -143,7 +143,7 @@ struct CompleteView: View {
                                         HStack {
                                             Image(systemName: "map")
                                                 .foregroundColor(.blue)
-                                            Text("Distance")
+                                            Text("mission.complete.distance", tableName: "Localizable")
                                                 .foregroundColor(.secondary)
                                             Spacer()
                                             Text(String(format: "%.2f km", distance / 1000))
@@ -155,7 +155,7 @@ struct CompleteView: View {
                                         HStack {
                                             Image(systemName: "star.fill")
                                                 .foregroundColor(.yellow)
-                                            Text("Points Earned")
+                                            Text("mission.complete.points_earned", tableName: "Localizable")
                                                 .foregroundColor(.secondary)
                                             Spacer()
                                             Text("\(points)")
@@ -177,7 +177,7 @@ struct CompleteView: View {
                         Button(action: {
                             dismiss()
                         }) {
-                            Text("Return to Map")
+                            Text("mission.complete.return_to_map", tableName: "Localizable")
                                 .font(.headline)
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
@@ -190,7 +190,7 @@ struct CompleteView: View {
                             // TODO: Share or save mission report
                             print("Share mission report")
                         }) {
-                            Text("Share Results")
+                            Text("mission.complete.share_results", tableName: "Localizable")
                                 .font(.headline)
                                 .foregroundColor(.blue)
                                 .frame(maxWidth: .infinity)

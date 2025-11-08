@@ -23,7 +23,7 @@ struct ActivityHeatmapView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Activity in the last 30 days")
+            Text("activity.title", tableName: "Localizable")
                 .font(.headline)
                 .foregroundColor(.primary)
 
@@ -57,18 +57,18 @@ struct ActivityHeatmapView: View {
 
             // Color legend
             HStack(spacing: 4) {
-                Text("Less")
+                Text("activity.legend.less", tableName: "Localizable")
                     .font(.caption2)
                     .foregroundColor(.secondary)
 
-                ForEach(0..<5) { index in
+                ForEach(0 ..< 5) { index in
                     Rectangle()
                         .fill(getColor(for: index, max: 4))
                         .frame(width: 12, height: 12)
                         .cornerRadius(2)
                 }
 
-                Text("More")
+                Text("activity.legend.more", tableName: "Localizable")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -82,7 +82,7 @@ struct ActivityHeatmapView: View {
 
     private var weekdayLabels: some View {
         LazyVGrid(columns: columns, spacing: 4) {
-            ForEach(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], id: \.self) { day in
+            ForEach([String(localized: "weekday.mon", table: "Localizable"), String(localized: "weekday.tue", table: "Localizable"), String(localized: "weekday.wed", table: "Localizable"), String(localized: "weekday.thu", table: "Localizable"), String(localized: "weekday.fri", table: "Localizable"), String(localized: "weekday.sat", table: "Localizable"), String(localized: "weekday.sun", table: "Localizable")], id: \.self) { day in
                 Text(day)
                     .font(.caption2)
                     .foregroundColor(.secondary)
@@ -93,7 +93,7 @@ struct ActivityHeatmapView: View {
 
     // MARK: - Day Cell View
 
-    private func dayCellView(for date: Date, index: Int) -> some View {
+    private func dayCellView(for date: Date, index _: Int) -> some View {
         let dateString = formatDate(date)
         let points = dailyPoints[dateString] ?? 0
         let color = getColorForPoints(points)
@@ -143,7 +143,7 @@ struct ActivityHeatmapView: View {
 
     // MARK: - Helper Methods
 
-    private func handleDayTap(date: String, points: Int, frame: CGRect) {
+    private func handleDayTap(date: String, points _: Int, frame: CGRect) {
         selectedDate = date
         tooltipFrame = frame
 
@@ -187,7 +187,7 @@ struct ActivityHeatmapView: View {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
 
-        return (0..<30).reversed().compactMap { daysAgo in
+        return (0 ..< 30).reversed().compactMap { daysAgo in
             calendar.date(byAdding: .day, value: -daysAgo, to: today)
         }
     }
@@ -253,7 +253,7 @@ extension Color {
             .sRGB,
             red: Double(r) / 255,
             green: Double(g) / 255,
-            blue:  Double(b) / 255,
+            blue: Double(b) / 255,
             opacity: Double(a) / 255
         )
     }
@@ -270,7 +270,7 @@ extension Color {
         "2025-10-25": 100,
         "2025-11-01": 220,
         "2025-11-05": 160,
-        "2025-11-08": 190
+        "2025-11-08": 190,
     ]
 
     return ActivityHeatmapView(dailyPoints: sampleData)

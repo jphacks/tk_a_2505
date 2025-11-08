@@ -41,7 +41,7 @@ struct StatsView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
-                    Button("Retry") {
+                    Button(String(localized: "common.retry", table: "Localizable")) {
                         loadRecentMissions()
                     }
                     .buttonStyle(.bordered)
@@ -534,7 +534,7 @@ struct MissionHistoryRow: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Mission Completed")
+                Text("home.stats.mission_completed", tableName: "Localizable")
                     .font(.subheadline)
                     .fontWeight(.medium)
 

@@ -28,7 +28,7 @@ struct UserProfileBottomSheetView: View {
                 }
                 .padding()
             }
-            .navigationTitle("User Profile")
+            .navigationTitle(String(localized: "userprofile.title", table: "Localizable"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -53,12 +53,12 @@ struct UserProfileBottomSheetView: View {
         // Header Section - Avatar & Username
         VStack(spacing: 16) {
             UserAvatarView.profile(
-                username: user.name ?? "Anonymous",
+                username: user.name ?? String(localized: "common.anonymous", table: "Localizable"),
                 badgeImageUrl: viewModel.getProfileBadge()?.imageUrl,
                 size: .large
             )
 
-            Text(user.name ?? "Anonymous")
+            Text(user.name ?? String(localized: "common.anonymous", table: "Localizable"))
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(.primary)
@@ -81,7 +81,7 @@ struct UserProfileBottomSheetView: View {
 
     private var badgeCollectionSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Badge Collection")
+            Text("userprofile.badge_collection", tableName: "Localizable")
                 .font(.headline)
                 .foregroundColor(.primary)
 
@@ -119,7 +119,7 @@ struct UserProfileBottomSheetView: View {
                 Image(systemName: "tray")
                     .font(.largeTitle)
                     .foregroundColor(.secondary)
-                Text("No badges collected yet")
+                Text("userprofile.no_badges", tableName: "Localizable")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -134,7 +134,7 @@ struct UserProfileBottomSheetView: View {
         VStack(spacing: 16) {
             ProgressView()
                 .scaleEffect(1.5)
-            Text("Loading profile...")
+            Text("userprofile.loading", tableName: "Localizable")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
@@ -146,13 +146,13 @@ struct UserProfileBottomSheetView: View {
             Image(systemName: "exclamationmark.triangle")
                 .font(.largeTitle)
                 .foregroundColor(.red)
-            Text("Error Loading Profile")
+            Text("userprofile.error_title", tableName: "Localizable")
                 .font(.headline)
             Text(message)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-            Button("Try Again") {
+            Button(String(localized: "Try Again", table: "Localizable")) {
                 Task {
                     await viewModel.fetchUserProfile(userId: userId)
                 }
@@ -168,9 +168,9 @@ struct UserProfileBottomSheetView: View {
             Image(systemName: "person.crop.circle.badge.questionmark")
                 .font(.largeTitle)
                 .foregroundColor(.secondary)
-            Text("User Not Found")
+            Text("userprofile.user_not_found", tableName: "Localizable")
                 .font(.headline)
-            Text("This user profile could not be loaded.")
+            Text("userprofile.user_not_found_description", tableName: "Localizable")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }

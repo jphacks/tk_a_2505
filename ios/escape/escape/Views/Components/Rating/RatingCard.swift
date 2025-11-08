@@ -53,7 +53,7 @@ struct RatingCard: View {
                         StarRatingView.compact(rating: Double(ratingWithUser.rating.rating))
 
                         if ratingWithUser.rating.wasEdited {
-                            Text("(edited)")
+                            Text("common.edited", tableName: "Localizable")
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                         }
@@ -128,7 +128,7 @@ struct RatingCardSkeleton: View {
 struct RatingEmptyState: View {
     let message: String
 
-    init(message: String = "No reviews yet. Be the first to review this shelter!") {
+    init(message: String = String(localized: "rating.no_reviews_be_first", table: "Localizable")) {
         self.message = message
     }
 
