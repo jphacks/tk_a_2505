@@ -110,6 +110,46 @@ class BadgeSupabase {
         return badges.first
     }
 
+    /// Batch fetches badge image URLs for multiple badge IDs
+    /// - Parameter badgeIds: Array of badge UUIDs to fetch URLs for
+    /// - Returns: Dictionary mapping badge ID (as String) to image URL
+    /// - Note: Uses efficient batch query to prevent N+1 problem
+    func getBadgeUrls(badgeIds: [UUID]) async throws -> [String: String] {
+        guard !badgeIds.isEmpty else {
+            return [:]
+        }
+
+        // Convert UUIDs to strings for query
+        let badgeIdStrings = badgeIds.map { $0.uuidString.lowercased() }
+
+        // Batch fetch badge names using .in() query
+        struct BadgeQuery: Decodable {
+            let id: String
+            let badgeName: String
+
+            enum CodingKeys: String, CodingKey {
+                case id
+                case badgeName = "badge_name"
+            }
+        }
+
+        let badges: [BadgeQuery] = try await supabase
+            .from("shelter_badges")
+            .select("id,badge_name")
+            .in("id", values: badgeIdStrings)
+            .execute()
+            .value
+
+        // Build badge URL dictionary
+        var badgeUrlDict: [String: String] = [:]
+        let baseUrl = "https://wmmddehrriniwxsgnwqy.supabase.co/storage/v1/object/public/shelter_badges"
+        for badge in badges {
+            badgeUrlDict[badge.id] = "\(baseUrl)/\(badge.badgeName)"
+        }
+
+        return badgeUrlDict
+    }
+
     // MARK: - Create Badges
 
     /// Creates a new shelter badge (typically when first user visits a shelter)

@@ -14,12 +14,14 @@ class GroupViewModel {
 
     private let groupSupabase: TeamSupabase
     private let userSupabase: UserSupabase
+    private let badgeSupabase: BadgeSupabase
 
     // MARK: - Published State
 
     var userGroups: [TeamWithDetails] = []
     var selectedGroup: TeamWithDetails?
     var groupMembers: [TeamMemberWithUser] = []
+    var memberBadgeUrls: [UUID: String] = [:]
     var isLoading = false
     var isCreatingGroup = false
     var isJoiningGroup = false
@@ -33,9 +35,14 @@ class GroupViewModel {
 
     // MARK: - Initialization
 
-    init(groupSupabase: TeamSupabase = TeamSupabase(), userSupabase: UserSupabase = UserSupabase()) {
+    init(
+        groupSupabase: TeamSupabase = TeamSupabase(),
+        userSupabase: UserSupabase = UserSupabase(),
+        badgeSupabase: BadgeSupabase = BadgeSupabase()
+    ) {
         self.groupSupabase = groupSupabase
         self.userSupabase = userSupabase
+        self.badgeSupabase = badgeSupabase
     }
 
     // MARK: - Group Management
@@ -134,6 +141,9 @@ class GroupViewModel {
 
         do {
             groupMembers = try await groupSupabase.fetchTeamMembers(groupId: groupId)
+
+            // Load badge URLs for all members
+            await loadMemberBadgeUrls()
         } catch {
             errorMessage = "メンバーの読み込みに失敗しました: \(error.localizedDescription)"
             print("❌ Failed to load group members: \(error)")
@@ -264,6 +274,40 @@ class GroupViewModel {
         }
 
         isLoading = false
+    }
+
+    // MARK: - Badge Management
+
+    /// Loads badge URLs for all current group members
+    private func loadMemberBadgeUrls() async {
+        // Extract all badge IDs from members who have profile badges
+        let badgeIds = groupMembers.compactMap { $0.user.profileBadgeId }
+
+        guard !badgeIds.isEmpty else {
+            memberBadgeUrls = [:]
+            return
+        }
+
+        do {
+            // Batch fetch badge URLs from service
+            let badgeUrlDict = try await badgeSupabase.getBadgeUrls(badgeIds: badgeIds)
+
+            // Map badge URLs to user IDs for easy lookup in the view
+            var userBadgeUrls: [UUID: String] = [:]
+            for member in groupMembers {
+                if let badgeId = member.user.profileBadgeId,
+                   let badgeUrl = badgeUrlDict[badgeId.uuidString.lowercased()]
+                {
+                    userBadgeUrls[member.user.id] = badgeUrl
+                }
+            }
+
+            memberBadgeUrls = userBadgeUrls
+            print("✅ Loaded badge URLs for \(userBadgeUrls.count) members")
+        } catch {
+            print("❌ Failed to load member badge URLs: \(error)")
+            memberBadgeUrls = [:]
+        }
     }
 
     // MARK: - Helper Methods

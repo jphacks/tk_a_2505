@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Supabase
 
 struct GroupDetailView: View {
     @Bindable var groupViewModel: GroupViewModel
@@ -276,14 +275,13 @@ struct MemberRowView: View {
     let member: TeamMemberWithUser
     @Bindable var groupViewModel: GroupViewModel
     @State private var showingRoleMenu = false
-    @State private var badgeImageUrl: String? = nil
 
     var body: some View {
         HStack(spacing: 12) {
             // Member Avatar
             UserAvatarView(
                 username: member.user.displayName,
-                badgeImageUrl: badgeImageUrl,
+                badgeImageUrl: groupViewModel.memberBadgeUrls[member.user.id],
                 size: .small
             )
 
@@ -350,42 +348,6 @@ struct MemberRowView: View {
         .padding(.vertical, 8)
         .background(Color(.systemBackground))
         .cornerRadius(20)
-        .task {
-            await fetchBadgeImageUrl()
-        }
-    }
-
-    /// Fetches the badge image URL from the user's profile badge ID
-    private func fetchBadgeImageUrl() async {
-        guard let badgeId = member.user.profileBadgeId else {
-            badgeImageUrl = nil
-            return
-        }
-
-        do {
-            struct BadgeQuery: Decodable {
-                let badgeName: String
-
-                enum CodingKeys: String, CodingKey {
-                    case badgeName = "badge_name"
-                }
-            }
-
-            let badge: BadgeQuery = try await supabase
-                .from("shelter_badges")
-                .select("badge_name")
-                .eq("id", value: badgeId)
-                .single()
-                .execute()
-                .value
-
-            // Construct the badge image URL
-            let baseUrl = "https://wmmddehrriniwxsgnwqy.supabase.co/storage/v1/object/public/shelter_badges"
-            badgeImageUrl = "\(baseUrl)/\(badge.badgeName)"
-        } catch {
-            print("❌ Failed to fetch badge image URL: \(error)")
-            badgeImageUrl = nil
-        }
     }
 }
 
