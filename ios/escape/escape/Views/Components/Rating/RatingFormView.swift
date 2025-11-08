@@ -26,12 +26,12 @@ struct RatingFormView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             // Section header
-            Text(isEditing ? "Edit Your Rating" : "Rate This Shelter")
+            Text(isEditing ? String(localized: "rating.edit_your_rating", table: "Localizable") : String(localized: "rating.rate_this_shelter", table: "Localizable"))
                 .font(.headline)
 
             // Star rating picker
             VStack(alignment: .leading, spacing: 8) {
-                Text("Rating")
+                Text("rating.rating_label", tableName: "Localizable")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
 
@@ -43,7 +43,7 @@ struct RatingFormView: View {
                 )
 
                 if viewModel.formState.rating == 0 {
-                    Text("Tap a star to rate")
+                    Text("rating.tap_star_to_rate", tableName: "Localizable")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -51,7 +51,7 @@ struct RatingFormView: View {
 
             // Review text field
             VStack(alignment: .leading, spacing: 8) {
-                Text("Review (Optional)")
+                Text("rating.review_optional", tableName: "Localizable")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
 
@@ -79,7 +79,7 @@ struct RatingFormView: View {
                 }
 
                 if viewModel.formState.isReviewTooLong {
-                    Text("Review must be 500 characters or less")
+                    Text("rating.review_too_long", tableName: "Localizable")
                         .font(.caption)
                         .foregroundColor(.red)
                 }
@@ -121,7 +121,7 @@ struct RatingFormView: View {
                                 .progressViewStyle(CircularProgressViewStyle(tint: .red))
                         }
 
-                        Text("Delete Rating")
+                        Text("rating.delete_rating", tableName: "Localizable")
                             .fontWeight(.semibold)
                     }
                     .frame(maxWidth: .infinity)

@@ -55,7 +55,7 @@ struct RatingSummaryCard: View {
     private func fullView(summary: ShelterRatingSummary) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Ratings & Reviews")
+                Text("rating.ratings_and_reviews", tableName: "Localizable")
                     .font(.headline)
                 Spacer()
             }
@@ -79,7 +79,7 @@ struct RatingSummaryCard: View {
                         .font(.title2)
                         .fontWeight(.semibold)
 
-                    Text(summary.totalRatings == 1 ? "Review" : "Reviews")
+                    Text(summary.totalRatings == 1 ? String(localized: "rating.review_singular", table: "Localizable") : String(localized: "rating.review_plural", table: "Localizable"))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -101,7 +101,7 @@ struct RatingSummaryCard: View {
 
             StarRatingView.compact(rating: summary.averageRating)
 
-            Text("(\(summary.totalRatings) \(summary.totalRatings == 1 ? "review" : "reviews"))")
+            Text("(\(summary.totalRatings) \(summary.totalRatings == 1 ? String(localized: "rating.review_lowercase_singular", table: "Localizable") : String(localized: "rating.review_lowercase_plural", table: "Localizable")))")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
@@ -114,11 +114,11 @@ struct RatingSummaryCard: View {
                 .font(.title2)
                 .foregroundColor(.secondary)
 
-            Text("No reviews yet")
+            Text("rating.no_reviews_yet", tableName: "Localizable")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
 
-            Text("Be the first to review this shelter")
+            Text("rating.be_first_to_review", tableName: "Localizable")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }

@@ -31,7 +31,7 @@ struct ShelterReviewsView: View {
             }
             .padding()
         }
-        .navigationTitle("Reviews")
+        .navigationTitle(String(localized: "rating.review_plural", table: "Localizable"))
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showEditSheet) {
             EditRatingSheet(viewModel: viewModel)
@@ -71,7 +71,7 @@ struct ShelterReviewsView: View {
                 if viewModel.hasExistingRating {
                     // Show user's existing rating with edit option
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Your Rating")
+                        Text("rating.your_rating", tableName: "Localizable")
                             .font(.headline)
 
                         if let userRating = viewModel.userRating {
@@ -103,7 +103,7 @@ struct ShelterReviewsView: View {
                             viewModel.startEditingRating()
                             showEditSheet = true
                         }) {
-                            Text("Edit Your Rating")
+                            Text("rating.edit_your_rating", tableName: "Localizable")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
                         }
@@ -139,7 +139,7 @@ struct ShelterReviewsView: View {
     @ViewBuilder
     private var allReviewsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("All Reviews")
+            Text("rating.all_reviews", tableName: "Localizable")
                 .font(.headline)
 
             if viewModel.isLoadingRatings {
@@ -183,11 +183,11 @@ struct EditRatingSheet: View {
                 RatingFormView(viewModel: viewModel, isEditing: true)
                     .padding()
             }
-            .navigationTitle("Edit Rating")
+            .navigationTitle(String(localized: "rating.edit_rating", table: "Localizable"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button(String(localized: "common.cancel", table: "Localizable")) {
                         dismiss()
                     }
                 }
