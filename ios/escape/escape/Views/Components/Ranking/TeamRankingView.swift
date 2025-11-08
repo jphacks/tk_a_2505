@@ -439,9 +439,3 @@ private struct ErrorView: View {
         .padding()
     }
 }
-
-// MARK: - UUID Extension
-
-extension UUID: Identifiable {
-    public var id: UUID { self }
-}

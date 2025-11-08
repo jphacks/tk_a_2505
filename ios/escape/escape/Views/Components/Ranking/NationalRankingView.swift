@@ -628,9 +628,3 @@ extension Color {
     static let silver = Color(red: 0.75, green: 0.75, blue: 0.75)
     static let bronze = Color(red: 0.8, green: 0.5, blue: 0.2)
 }
-
-// MARK: - UUID Extension
-
-extension UUID: Identifiable {
-    public var id: UUID { self }
-}
