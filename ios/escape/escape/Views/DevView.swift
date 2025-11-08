@@ -9,6 +9,7 @@ import Supabase
 import SwiftUI
 
 struct DevView: View {
+    @Environment(\.dismiss) var dismiss
     @Environment(\.missionStateService) var missionStateService
     @State private var badgeViewModel = BadgeViewModel()
     @State private var missionGeneratorViewModel = MissionGeneratorViewModel()
@@ -20,6 +21,11 @@ struct DevView: View {
     @State private var realShelters: [Shelter] = []
     @State private var realBadges: [Badge] = []
     @State private var selectedShelter: Shelter?
+
+    // Developer Settings
+    @State private var shelterProximityRadius: Double = DeveloperSettings.shared
+        .shelterProximityRadius
+    @State private var showRadiusArea: Bool = DeveloperSettings.shared.showRadiusArea
 
     var body: some View {
         NavigationStack {
@@ -113,6 +119,9 @@ struct DevView: View {
                 } header: {
                     Text("dev.presets")
                 }
+
+                // Developer Settings Section
+                developerSettingsSection
 
                 missionParametersSection
 
@@ -277,6 +286,11 @@ struct DevView: View {
                 }
             }
             .navigationTitle("dev.title")
+            .onAppear {
+                // Initialize developer settings from UserDefaults
+                shelterProximityRadius = DeveloperSettings.shared.shelterProximityRadius
+                showRadiusArea = DeveloperSettings.shared.showRadiusArea
+            }
             .sheet(isPresented: $showImagePreview) {
                 if let imageUrl = badgeViewModel.generatedBadgeUrl {
                     ImagePreviewView(imageUrl: imageUrl)
@@ -339,6 +353,67 @@ struct DevView: View {
             .fontWeight(.semibold)
         } header: {
             Text("dev.ui_components")
+        }
+    }
+
+    private var developerSettingsSection: some View {
+        Section {
+            // Shelter Proximity Radius Setting
+            HStack {
+                Text("Shelter Proximity Radius")
+                    .font(.body)
+                Spacer()
+                Text("\(Int(shelterProximityRadius)) m")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+            }
+
+            VStack(spacing: 8) {
+                Stepper(
+                    value: $shelterProximityRadius,
+                    in: 1 ... 100,
+                    step: 1
+                ) {
+                    Text("Shelter Proximity Radius: \(Int(shelterProximityRadius)) m")
+                        .font(.body)
+                }
+                .onChange(of: shelterProximityRadius) { _, newValue in
+                    DeveloperSettings.shared.shelterProximityRadius = newValue
+                }
+
+                Text("Controls how close you need to be to a shelter to trigger detection.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            // Show Radius Area Toggle
+            Toggle(isOn: $showRadiusArea) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Show Radius Area on Map")
+                        .font(.body)
+                    Text("Displays a blue circle around your location showing the detection radius")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .onChange(of: showRadiusArea) { _, newValue in
+                DeveloperSettings.shared.showRadiusArea = newValue
+            }
+
+            Button("Reset to Default") {
+                shelterProximityRadius = 10.0
+                showRadiusArea = false
+                DeveloperSettings.shared.shelterProximityRadius = 10.0
+                DeveloperSettings.shared.showRadiusArea = false
+            }
+            .foregroundColor(.red)
+        } header: {
+            Text("Map Settings")
+        } footer: {
+            Text("These settings persist across app launches and affect shelter detection behavior.")
+                .font(.caption)
+                .foregroundColor(.secondary)
         }
     }
 
@@ -423,42 +498,45 @@ struct DevView: View {
     private func loadRealShelters() async {
         do {
             // Load shelter badges with their associated shelter information
-            let shelterBadges: [ShelterBadgeWithDetails] = try await supabase
-                .from("shelter_badges")
-                .select("""
-                    id,
-                    badge_name,
-                    shelter_id,
-                    first_user_id,
-                    created_at,
-                    shelter:shelters(
-                        id,
-                        number,
-                        common_id,
-                        name,
-                        address,
-                        municipality,
-                        is_shelter,
-                        is_flood,
-                        is_landslide,
-                        is_storm_surge,
-                        is_earthquake,
-                        is_tsunami,
-                        is_fire,
-                        is_inland_flood,
-                        is_volcano,
-                        is_same_address_as_shelter,
-                        other_municipal_notes,
-                        accepted_people,
-                        latitude,
-                        longitude,
-                        remarks,
-                        last_updated
+            let shelterBadges: [ShelterBadgeWithDetails] =
+                try await supabase
+                    .from("shelter_badges")
+                    .select(
+                        """
+                            id,
+                            badge_name,
+                            shelter_id,
+                            first_user_id,
+                            created_at,
+                            shelter:shelters(
+                                id,
+                                number,
+                                common_id,
+                                name,
+                                address,
+                                municipality,
+                                is_shelter,
+                                is_flood,
+                                is_landslide,
+                                is_storm_surge,
+                                is_earthquake,
+                                is_tsunami,
+                                is_fire,
+                                is_inland_flood,
+                                is_volcano,
+                                is_same_address_as_shelter,
+                                other_municipal_notes,
+                                accepted_people,
+                                latitude,
+                                longitude,
+                                remarks,
+                                last_updated
+                            )
+                        """
                     )
-                """)
-                .limit(5)
-                .execute()
-                .value
+                    .limit(5)
+                    .execute()
+                    .value
 
             await MainActor.run {
                 // Extract shelters and convert shelter badges to UI badges
@@ -523,8 +601,8 @@ struct DevView: View {
             return Color("brandOrange")
         } else if lowerName.contains("earthquake") || lowerName.contains("地震") {
             return Color("brandOrange")
-        } else if lowerName.contains("flood") || lowerName.contains("tsunami") ||
-            lowerName.contains("洪水") || lowerName.contains("津波")
+        } else if lowerName.contains("flood") || lowerName.contains("tsunami")
+            || lowerName.contains("洪水") || lowerName.contains("津波")
         {
             return Color("brandDarkBlue")
         } else if lowerName.contains("fire") || lowerName.contains("火災") {
@@ -557,12 +635,13 @@ struct DevView: View {
     private func loadDirectShelters() async {
         do {
             // Load shelters directly from shelters table
-            let shelters: [Shelter] = try await supabase
-                .from("shelters")
-                .select()
-                .limit(10)
-                .execute()
-                .value
+            let shelters: [Shelter] =
+                try await supabase
+                    .from("shelters")
+                    .select()
+                    .limit(10)
+                    .execute()
+                    .value
 
             await MainActor.run {
                 realShelters = shelters
@@ -586,13 +665,14 @@ struct DevView: View {
                 return
             }
 
-            let shelter: Shelter = try await supabase
-                .from("shelters")
-                .select()
-                .eq("id", value: shelterUUID)
-                .single()
-                .execute()
-                .value
+            let shelter: Shelter =
+                try await supabase
+                    .from("shelters")
+                    .select()
+                    .eq("id", value: shelterUUID)
+                    .single()
+                    .execute()
+                    .value
 
             await MainActor.run {
                 selectedShelter = shelter
