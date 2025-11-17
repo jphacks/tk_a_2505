@@ -5,6 +5,8 @@
 
 **東京会場A Hack Day Sponsor Award** - 川田テクノシステム株式会社
 
+**Award Day Sponsor Awards** - ソフトバンク株式会社、ミーク株式会社
+
 ## 製品概要
 
 ### HiNan!
